@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yalmil.tv</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0a0a;
+      color: #b8ffd8;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #0f0f0f;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #3fffa8;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #3fffa8;
+      text-shadow: 0 0 10px #3fffa8;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .subpage {
+      background-color: #1a1a1a;
+      padding: 1.5rem;
+      border: 2px solid #3fffa8;
+      border-radius: 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: #b8ffd8;
+      box-shadow: 0 0 10px #3fffa8;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .subpage:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px #3fffa8;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Yalmil web</h1>
+    <h3>Bienvenido de nuevo -usuario!</h3>
+    <H3>En esta página podrás explorar todos los textos creados por mi (Yalmil).<h3/>
+    <h3>Diviértete y disfruta. :D<H3/>
+  </header>
+  <main>
+    <h2>Subpáginas</h2>
+    <div class="subpage-list">
+      <a class="subpage" href="suggest">Sugerencias</a>
+      <a class="subpage" href="games">Juegos</a>
+      <a class="subpage" href="/Noticias">Noticias</a>
+      <a class="subpage" href="/Proyectos">Proyectos</a>
+    </div>
+  </main>
+  <footer>
+    &copy; 2025 Yalmil.tv – Todos los derechos reservados.
+  </footer>
+</body>
+</html>
