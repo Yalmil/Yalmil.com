@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IP Reveal</title>
+  <title>IP Reveal Troll</title>
   <style>
     body {
       background-color: #111;
@@ -26,7 +26,7 @@
     }
 
     input {
-      width: 200px;
+      width: 220px;
     }
 
     button {
@@ -39,37 +39,70 @@
       margin-top: 20px;
       font-size: 20px;
     }
-    .back-link {
-      margin-bottom: 2rem;
-      color: #3fffa8;
-      text-decoration: none;
-      font-size: 0.9rem;
+
+    .cargando {
+      font-size: 16px;
+      margin-top: 15px;
+      height: 20px;
     }
   </style>
 </head>
 <body>
 
   <h1>Busca la IP de alguien</h1>
-  <a class="back-link" href="games.html">← Volver a los juegos</a>
 
   <input type="text" id="nombre" placeholder="Escribe un nombre...">
-  <button onclick="generarIP()">Enviar</button>
+  <button id="btn" onclick="iniciarBusqueda()">Enviar</button>
 
+  <div class="cargando" id="cargando"></div>
   <div class="resultado" id="resultado"></div>
 
   <script>
+    const frases = [
+      "Contactando a la Guardia Española...",
+      "Hackeando el FBI... no, espera, era la OXXO Net.",
+      "Pidiendo ayuda a Anonymous...",
+      "Intercambiando datos con Google por una Coca-Cola.",
+      "Siguiendo el WiFi del vecino...",
+      "Rastreando por satélite... o por tortuga mensajera.",
+      "Analizando memes filtrados..."
+    ];
+
     function generarIP() {
+      return Array(4).fill(0).map(() => Math.floor(Math.random() * 256)).join(".");
+    }
+
+    function iniciarBusqueda() {
       const nombre = document.getElementById('nombre').value.trim();
+      const resultado = document.getElementById('resultado');
+      const cargando = document.getElementById('cargando');
+      const boton = document.getElementById('btn');
+
       if (!nombre) {
-        document.getElementById('resultado').innerText = "Por favor, escribe un nombre.";
+        resultado.innerText = "Por favor, escribe un nombre.";
         return;
       }
 
-      // Generar IP aleatoria
-      const ip = Array(4).fill(0).map(() => Math.floor(Math.random() * 256)).join(".");
-      
-      // Mostrar resultado
-      document.getElementById('resultado').innerText = `La IP de ${nombre} es: ${ip}`;
+      // Preparar estado inicial
+      resultado.innerText = "";
+      cargando.innerText = "";
+      boton.disabled = true;
+      let index = 0;
+
+      // Cambiar frases cada segundo
+      const intervalo = setInterval(() => {
+        cargando.innerText = frases[index % frases.length];
+        index++;
+      }, 1000);
+
+      // Mostrar IP después de 4 segundos
+      setTimeout(() => {
+        clearInterval(intervalo);
+        const ip = generarIP();
+        cargando.innerText = "";
+        resultado.innerText = `La IP de ${nombre} es: ${ip}`;
+        boton.disabled = false;
+      }, 4000);
     }
   </script>
 
