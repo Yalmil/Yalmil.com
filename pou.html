@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pou by Yalmil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(to bottom, #202020, #101010);
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1rem;
+    }
+    h1 { color: #00ffaa; margin-bottom: 1rem; }
+
+    #pou {
+      width: 150px;
+      height: 150px;
+      margin: 1rem auto;
+      background: radial-gradient(circle, #b56e30, #804000);
+      border-radius: 50% 50% 40% 40%;
+    }
+
+    .bar-container {
+      margin: 1rem auto;
+      width: 80%;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 20px;
+      background: limegreen;
+      width: 100%;
+      transition: width 0.3s;
+    }
+    button {
+      background: #00ffaa;
+      border: none;
+      padding: 10px 15px;
+      margin: 0.5rem;
+      border-radius: 10px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00cc88;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐣 Tu Pou</h1>
+  <div id="pou"></div>
+
+  <div>
+    <p>Hambre 🍗</p>
+    <div class="bar-container"><div id="hungerBar" class="bar"></div></div>
+    <p>Energía 😴</p>
+    <div class="bar-container"><div id="energyBar" class="bar"></div></div>
+    <p>Diversión 🎮</p>
+    <div class="bar-container"><div id="funBar" class="bar"></div></div>
+  </div>
+
+  <div>
+    <button onclick="feed()">Alimentar</button>
+    <button onclick="sleep()">Dormir</button>
+    <button onclick="play()">Jugar</button>
+  </div>
+
+  <script>
+    let stats = {
+      hunger: 100,
+      energy: 100,
+      fun: 100
+    };
+
+    function loadStats() {
+      const saved = localStorage.getItem("pouStats");
+      if (saved) {
+        stats = JSON.parse(saved);
+      }
+      updateBars();
+    }
+
+    function saveStats() {
+      localStorage.setItem("pouStats", JSON.stringify(stats));
+    }
+
+    function updateBars() {
+      document.getElementById("hungerBar").style.width = stats.hunger + "%";
+      document.getElementById("energyBar").style.width = stats.energy + "%";
+      document.getElementById("funBar").style.width = stats.fun + "%";
+
+      // Cambiar color según valor
+      document.querySelectorAll(".bar").forEach(bar => {
+        const value = parseFloat(bar.style.width);
+        bar.style.background = value < 30 ? "red" : value < 60 ? "orange" : "limegreen";
+      });
+    }
+
+    function feed() {
+      stats.hunger = Math.min(stats.hunger + 20, 100);
+      updateBars();
+      saveStats();
+    }
+
+    function sleep() {
+      stats.energy = Math.min(stats.energy + 20, 100);
+      updateBars();
+      saveStats();
+    }
+
+    function play() {
+      stats.fun = Math.min(stats.fun + 20, 100);
+      updateBars();
+      saveStats();
+    }
+
+    function decreaseStats() {
+      stats.hunger = Math.max(stats.hunger - 1, 0);
+      stats.energy = Math.max(stats.energy - 1, 0);
+      stats.fun = Math.max(stats.fun - 1, 0);
+      updateBars();
+      saveStats();
+    }
+
+    loadStats();
+    setInterval(decreaseStats, 10000); // Cada 10 segundos baja un punto
+  </script>
+</body>
+</html>
