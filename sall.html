@@ -4,188 +4,143 @@
   <meta charset="UTF-8" />
   <title>Sobrevive a las Letras</title>
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: sans-serif;
-      background-color: black;
-      color: white;
-      overflow: hidden;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    #game-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: url('https://i.imgur.com/ZkK6yz3.png') center/cover no-repeat; /* Fondo oficina */
-    }
-
-    #office {
-      position: absolute;
-      bottom: 0;
+    html, body {
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+      color: white;
     }
 
-    .enemy {
+    canvas {
+      display: block;
+    }
+
+    #ui {
       position: absolute;
-      bottom: 0;
-      width: 100px;
-      height: 100px;
-      background: red;
-      color: black;
-      font-weight: bold;
-      text-align: center;
-      line-height: 100px;
-      border-radius: 10px;
-    }
-
-    #enemy-left {
-      left: -100px;
-    }
-
-    #enemy-right {
-      right: -100px;
-    }
-
-    /* Puertas visuales */
-    .left-door-closed::before,
-    .right-door-closed::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      height: 100%;
-      width: 60px;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 10;
-    }
-
-    .left-door-closed::before {
-      left: 0;
-    }
-
-    .right-door-closed::after {
-      right: 0;
-    }
-
-    /* Botones */
-    #controls {
-      position: absolute;
-      top: 10px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 20;
-    }
-
-    button {
-      margin: 0 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      background: #222;
-      color: white;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background: #555;
-    }
-
-    #game-over {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 48px;
-      color: red;
-      display: none;
-      z-index: 99;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 24px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      font-size: 1.2em;
+      color: #00ffcc;
+      z-index: 10;
+      box-shadow: 0 0 10px #00ffcc66;
     }
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <div id="office"></div>
-    <div id="enemy-left" class="enemy">Ñ</div>
-    <div id="enemy-right" class="enemy">Z</div>
-
-    <div id="controls">
-      <button id="left-door-btn">Puerta Izquierda</button>
-      <button id="right-door-btn">Puerta Derecha</button>
-    </div>
-
-    <div id="game-over">¡Game Over!</div>
-  </div>
+  <div id="ui">🕒 Tiempo sobrevivido: <span id="time">0</span>s</div>
+  <canvas id="game"></canvas>
 
   <script>
-    const enemyLeft = document.getElementById("enemy-left");
-    const enemyRight = document.getElementById("enemy-right");
-    const office = document.getElementById("office");
-    const gameOver = document.getElementById("game-over");
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    let leftDoorClosed = false;
-    let rightDoorClosed = false;
-
-    document.getElementById("left-door-btn").onclick = () => {
-      leftDoorClosed = !leftDoorClosed;
-      updateDoorVisual("left", leftDoorClosed);
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      size: 20
     };
 
-    document.getElementById("right-door-btn").onclick = () => {
-      rightDoorClosed = !rightDoorClosed;
-      updateDoorVisual("right", rightDoorClosed);
-    };
+    const enemies = [];
+    const letters = ["Ñ", "X", "Y", "Z", "W", "K"];
+    let timeSurvived = 0;
+    let lastEnemySpawn = 0;
 
-    function updateDoorVisual(side, closed) {
-      if (closed) {
-        office.classList.add(`${side}-door-closed`);
-      } else {
-        office.classList.remove(`${side}-door-closed`);
+    function drawPlayer() {
+      const gradient = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 30);
+      gradient.addColorStop(0, "#00fff7");
+      gradient.addColorStop(1, "#007788");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = "#00ffff";
+      ctx.shadowBlur = 20;
+    }
+
+    function spawnEnemy() {
+      const letter = letters[Math.floor(Math.random() * letters.length)];
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = Math.max(canvas.width, canvas.height);
+      const x = player.x + radius * Math.cos(angle);
+      const y = player.y + radius * Math.sin(angle);
+      enemies.push({ x, y, size: 28, speed: 1.4 + Math.random(), letter });
+    }
+
+    function drawEnemies() {
+      ctx.font = "bold 32px 'Courier New'";
+      ctx.fillStyle = "#ff0044";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      enemies.forEach(e => {
+        ctx.shadowColor = "#ff0044";
+        ctx.shadowBlur = 15;
+        ctx.fillText(e.letter, e.x, e.y);
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function updateEnemies() {
+      enemies.forEach(e => {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        e.x += (dx / dist) * e.speed;
+        e.y += (dy / dist) * e.speed;
+      });
+    }
+
+    function checkCollision() {
+      for (let e of enemies) {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        if (Math.sqrt(dx * dx + dy * dy) < player.size + e.size / 2) {
+          alert("💀 Has perdido. Tiempo sobrevivido: " + timeSurvived + "s");
+          location.reload();
+        }
       }
     }
 
-    function moveEnemy(enemy, direction, onReach) {
-      let position = -100;
-      const interval = setInterval(() => {
-        if (gameOver.style.display === "block") {
-          clearInterval(interval);
-          return;
-        }
+    function gameLoop(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlayer();
+      drawEnemies();
+      updateEnemies();
+      checkCollision();
 
-        position += 5;
-        enemy.style[direction] = position + "px";
+      if (timestamp - lastEnemySpawn > 2500) {
+        spawnEnemy();
+        lastEnemySpawn = timestamp;
+      }
 
-        if (position >= window.innerWidth / 2 - 100) {
-          clearInterval(interval);
-          onReach();
-        }
-      }, 100);
+      requestAnimationFrame(gameLoop);
     }
 
-    function triggerGameOver() {
-      gameOver.style.display = "block";
-    }
+    setInterval(() => {
+      timeSurvived++;
+      document.getElementById('time').textContent = timeSurvived;
+    }, 1000);
 
-    function enemyApproachFrom(side) {
-      if (side === "left" && leftDoorClosed) return;
-      if (side === "right" && rightDoorClosed) return;
+    window.addEventListener("mousemove", e => {
+      player.x = e.clientX;
+      player.y = e.clientY;
+    });
 
-      triggerGameOver();
-    }
-
-    function startAttackLoop() {
-      setInterval(() => {
-        const side = Math.random() > 0.5 ? "left" : "right";
-        if (side === "left") {
-          moveEnemy(enemyLeft, "left", () => enemyApproachFrom("left"));
-        } else {
-          moveEnemy(enemyRight, "right", () => enemyApproachFrom("right"));
-        }
-      }, 6000); // Ataque cada 6 segundos
-    }
-
-    startAttackLoop();
+    gameLoop();
   </script>
 </body>
 </html>
