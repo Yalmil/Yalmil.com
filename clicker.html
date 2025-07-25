@@ -75,12 +75,12 @@
       cursor: pointer;
     }
 
-        .back-link {
+    .back-link {
       margin-bottom: 2rem;
       color: #3fffa8;
       text-decoration: none;
       font-size: 0.9rem;
-        }
+    }
 
     @media (max-width: 600px) {
       h1 {
@@ -95,7 +95,7 @@
 </head>
 <body>
   <h1>Yalmil Clicker</h1>
-   <a class="back-link" href="games.html">← Volver a los Juegos</a>
+  <a class="back-link" href="games.html">← Volver a los Juegos</a>
   <div id="counter">Clicks: 0</div>
   <button id="click-btn">¡Click!</button>
 
@@ -118,16 +118,41 @@
     let cost2 = 20;
 
     const counter = document.getElementById("counter");
-    const clickBtn = document.getElementById("click-btn");
 
-    clickBtn.onclick = () => {
-      clicks += clickPower;
-      updateCounter();
-    };
+    function saveGame() {
+      const data = {
+        clicks,
+        autoClickers,
+        clickPower,
+        cost1,
+        cost2
+      };
+      localStorage.setItem("clickerSave", JSON.stringify(data));
+    }
+
+    function loadGame() {
+      const data = JSON.parse(localStorage.getItem("clickerSave"));
+      if (data) {
+        clicks = data.clicks || 0;
+        autoClickers = data.autoClickers || 0;
+        clickPower = data.clickPower || 1;
+        cost1 = data.cost1 || 10;
+        cost2 = data.cost2 || 20;
+        updateCounter();
+        document.getElementById("cost1").textContent = cost1;
+        document.getElementById("cost2").textContent = cost2;
+      }
+    }
 
     function updateCounter() {
       counter.textContent = `Clicks: ${clicks}`;
     }
+
+    document.getElementById("click-btn").onclick = () => {
+      clicks += clickPower;
+      updateCounter();
+      saveGame();
+    };
 
     function buyUpgrade(id) {
       if (id === 1 && clicks >= cost1) {
@@ -142,12 +167,16 @@
         document.getElementById("cost2").textContent = cost2;
       }
       updateCounter();
+      saveGame();
     }
 
     setInterval(() => {
       clicks += autoClickers;
       updateCounter();
+      saveGame();
     }, 1000);
+
+    loadGame();
   </script>
 </body>
 </html>
