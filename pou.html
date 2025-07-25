@@ -152,7 +152,7 @@
     }
 
     function generateCoins() {
-      stats.coins += 1000;
+      stats.coins += 30;
       updateUI();
       saveStats();
     }
@@ -160,7 +160,7 @@
     // Inicialización
     loadStats();
     setInterval(decreaseStats, 10000);   // Cada 10s baja 1 punto
-    setInterval(generateCoins, 1000);   // Cada 10s gana 30 monedas
+    setInterval(generateCoins, 10000);   // Cada 10s gana 30 monedas
   </script>
 </body>
 </html>
