@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sobrevive a las letras</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #000; color: #fff; overflow: hidden; }
+    canvas { display: block; }
+    #ui {
+      position: absolute; top: 10px; left: 10px; z-index: 10;
+      background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">Tiempo sobrevivido: <span id="time">0</span>s</div>
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const player = { x: canvas.width / 2, y: canvas.height / 2, size: 20 };
+    const enemies = [];
+    const letters = ["Ñ", "X", "Y", "Z"];
+    let timeSurvived = 0;
+    let lastEnemySpawn = 0;
+
+    function drawPlayer() {
+      ctx.fillStyle = "cyan";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function spawnEnemy() {
+      const letter = letters[Math.floor(Math.random() * letters.length)];
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = Math.max(canvas.width, canvas.height);
+      const x = player.x + radius * Math.cos(angle);
+      const y = player.y + radius * Math.sin(angle);
+      enemies.push({ x, y, size: 30, speed: 1.2, letter });
+    }
+
+    function drawEnemies() {
+      ctx.fillStyle = "red";
+      ctx.font = "30px Arial";
+      enemies.forEach(e => {
+        ctx.fillText(e.letter, e.x, e.y);
+      });
+    }
+
+    function updateEnemies() {
+      enemies.forEach(e => {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        e.x += (dx / dist) * e.speed;
+        e.y += (dy / dist) * e.speed;
+      });
+    }
+
+    function checkCollision() {
+      for (let e of enemies) {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        if (Math.sqrt(dx*dx + dy*dy) < player.size + e.size) {
+          alert("¡Has perdido! Tiempo sobrevivido: " + timeSurvived + "s");
+          window.location.reload();
+        }
+      }
+    }
+
+    function gameLoop(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlayer();
+      drawEnemies();
+      updateEnemies();
+      checkCollision();
+
+      if (timestamp - lastEnemySpawn > 3000) {
+        spawnEnemy();
+        lastEnemySpawn = timestamp;
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    setInterval(() => {
+      timeSurvived++;
+      document.getElementById('time').textContent = timeSurvived;
+    }, 1000);
+
+    window.addEventListener("mousemove", e => {
+      player.x = e.clientX;
+      player.y = e.clientY;
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
