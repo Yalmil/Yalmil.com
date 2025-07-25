@@ -87,8 +87,8 @@
     <h1>Juegos</h1>
   </header>
   <main>
-    <a class="back-link" href="index.html">← Volver al inicio</a>
-    <h2>Juegos</h2>
+    <a class="back-link" href="inicio.html">← Volver al inicio</a>
+    <h2 id="welcome">¿Qué vas a jugar hoy, usuario?</h2>
     <div class="game-list">
       <a class="game" href="diamante.html">Encuentra el diamante 💎</a>
       <a class="game" href="clicker.html">Clicker 🖱️</a>
@@ -102,5 +102,15 @@
   <footer>
     &copy; 2025 Yalmil.tv – Juegos
   </footer>
+
+  <script>
+    const user = localStorage.getItem("usuarioLogueado");
+    if (user) {
+      document.getElementById("welcome").innerText = `¿Qué vas a jugar hoy, ${user}?`;
+    } else {
+      // Si no hay usuario, redirige a login
+      window.location.href = "login.html";
+    }
+  </script>
 </body>
 </html>
