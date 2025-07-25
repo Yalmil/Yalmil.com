@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crear cuenta</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    .message {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Crear cuenta</h1>
+  <input id="username" placeholder="Nombre de usuario" /><br/>
+  <input id="password" type="password" placeholder="Contraseña" /><br/>
+  <button onclick="crearCuenta()">Registrarse</button>
+  <div class="message" id="mensaje"></div>
+
+  <script>
+    function crearCuenta() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const mensaje = document.getElementById("mensaje");
+
+      if (!username || !password) {
+        mensaje.textContent = "Completa ambos campos.";
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+      if (users[username]) {
+        mensaje.textContent = "Ese nombre ya está registrado.";
+        return;
+      }
+
+      users[username] = password;
+      localStorage.setItem("users", JSON.stringify(users));
+      mensaje.style.color = "lightgreen";
+      mensaje.textContent = "Cuenta creada correctamente. Ahora puedes iniciar sesión.";
+    }
+  </script>
+</body>
+</html>
