@@ -1,90 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login SEP</title>
+  <title>Iniciar sesión</title>
   <style>
     body {
+      background: #121212;
+      color: #fff;
       font-family: sans-serif;
-      background: linear-gradient(to bottom, #006400, #90ee90);
-      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
     }
-    .login, .sugerencias {
-      background: rgba(0,0,0,0.3);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #00000099;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      width: 90%;
-      max-width: 400px;
-    }
-    .login.active, .sugerencias.active {
-      display: flex;
-    }
-    input, textarea, button {
+    input, button {
       padding: 10px;
-      border-radius: 10px;
-      border: none;
-      width: 100%;
+      margin: 10px;
+      font-size: 16px;
     }
-    button {
-      background-color: #00c37e;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+    .message {
+      color: red;
     }
   </style>
 </head>
 <body>
-  <h1>Zona privada</h1>
-
-  <div class="login active">
-    <input type="text" id="user" placeholder="Usuario">
-    <input type="password" id="pass" placeholder="Contraseña">
-    <button onclick="login()">Entrar</button>
-    <p id="error" style="color: pink; display: none;">Credenciales incorrectas</p>
-  </div>
-
-  <div class="sugerencias">
-    <h2>Sugerencias recibidas</h2>
-    <textarea id="sugerencias" rows="10" readonly></textarea>
-    <button onclick="logout()">Cerrar sesión</button>
-  </div>
+  <h1>Iniciar sesión</h1>
+  <input id="username" placeholder="Nombre de usuario" /><br/>
+  <input id="password" type="password" placeholder="Contraseña" /><br/>
+  <button onclick="login()">Entrar</button>
+  <div class="message" id="mensaje"></div>
 
   <script>
-    const userCorrecto = "Yalmil";
-    const passCorrecta = "sep2025";
-
     function login() {
-      const u = document.getElementById("user").value;
-      const p = document.getElementById("pass").value;
-      if (u === userCorrecto && p === passCorrecta) {
-        document.querySelector(".login").classList.remove("active");
-        document.querySelector(".sugerencias").classList.add("active");
-        document.getElementById("error").style.display = "none";
-        cargarSugerencias();
-      } else {
-        document.getElementById("error").style.display = "block";
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const mensaje = document.getElementById("mensaje");
+
+      if (!username || !password) {
+        mensaje.textContent = "Completa ambos campos.";
+        return;
       }
-    }
 
-    function logout() {
-      document.querySelector(".login").classList.add("active");
-      document.querySelector(".sugerencias").classList.remove("active");
-    }
+      const users = JSON.parse(localStorage.getItem("users") || "{}");
 
-    function cargarSugerencias() {
-      const sugerencias = localStorage.getItem("sugerencias") || "Aún no hay sugerencias.";
-      document.getElementById("sugerencias").value = sugerencias;
+      if (!users[username]) {
+        mensaje.textContent = "Usuario no registrado.";
+        return;
+      }
+
+      if (users[username] !== password) {
+        mensaje.textContent = "Contraseña incorrecta.";
+        return;
+      }
+
+      localStorage.setItem("loggedInUser", username);
+      mensaje.style.color = "lightgreen";
+      mensaje.textContent = "Sesión iniciada correctamente.";
+      // Redirigir o mostrar contenido personalizado
+      setTimeout(() => {
+        window.location.href = "pagina-principal.html"; // cambia esto si quieres
+      }, 1000);
     }
   </script>
 </body>
