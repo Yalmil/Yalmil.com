@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IP Reveal</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    input {
+      width: 200px;
+    }
+
+    button {
+      background-color: #0f0;
+      color: #000;
+      cursor: pointer;
+    }
+
+    .resultado {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Busca la IP de alguien</h1>
+
+  <input type="text" id="nombre" placeholder="Escribe un nombre...">
+  <button onclick="generarIP()">Enviar</button>
+
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    function generarIP() {
+      const nombre = document.getElementById('nombre').value.trim();
+      if (!nombre) {
+        document.getElementById('resultado').innerText = "Por favor, escribe un nombre.";
+        return;
+      }
+
+      // Generar IP aleatoria
+      const ip = Array(4).fill(0).map(() => Math.floor(Math.random() * 256)).join(".");
+      
+      // Mostrar resultado
+      document.getElementById('resultado').innerText = `La IP de ${nombre} es: ${ip}`;
+    }
+  </script>
+
+</body>
+</html>
