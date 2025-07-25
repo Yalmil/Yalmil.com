@@ -2,121 +2,190 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sobrevive a las letras</title>
+  <title>Sobrevive a las Letras</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Courier New', monospace;
-      background-color: #111;
-      color: #0f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      font-family: sans-serif;
+      background-color: black;
+      color: white;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100vw;
       height: 100vh;
+      background: url('https://i.imgur.com/ZkK6yz3.png') center/cover no-repeat; /* Fondo oficina */
     }
 
-    h1 {
-      color: #0f0;
-      text-shadow: 0 0 10px #0f0;
-      margin-bottom: 10px;
+    #office {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
     }
 
-    .game-box {
-      border: 2px solid #0f0;
-      padding: 20px;
-      border-radius: 12px;
-      background-color: #000;
-      box-shadow: 0 0 10px #0f0;
-      width: 90%;
-      max-width: 400px;
+    .enemy {
+      position: absolute;
+      bottom: 0;
+      width: 100px;
+      height: 100px;
+      background: red;
+      color: black;
+      font-weight: bold;
       text-align: center;
+      line-height: 100px;
+      border-radius: 10px;
     }
 
-    #status {
-      font-size: 20px;
-      margin: 10px 0;
+    #enemy-left {
+      left: -100px;
     }
 
-    .button {
-      margin-top: 15px;
+    #enemy-right {
+      right: -100px;
+    }
+
+    /* Puertas visuales */
+    .left-door-closed::before,
+    .right-door-closed::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 60px;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10;
+    }
+
+    .left-door-closed::before {
+      left: 0;
+    }
+
+    .right-door-closed::after {
+      right: 0;
+    }
+
+    /* Botones */
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+    }
+
+    button {
+      margin: 0 10px;
       padding: 10px 20px;
       font-size: 16px;
-      background-color: #0f0;
-      color: #000;
+      cursor: pointer;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 0 5px #0f0;
-      transition: background-color 0.2s;
+      background: #222;
+      color: white;
+      transition: background 0.3s;
     }
 
-    .button:hover {
-      background-color: #5f5;
+    button:hover {
+      background: #555;
     }
 
-    #log {
-      margin-top: 20px;
-      text-align: left;
-      font-size: 14px;
-      max-height: 100px;
-      overflow-y: auto;
-      border-top: 1px solid #0f0;
-      padding-top: 10px;
-    }
-
-    @keyframes flicker {
-      0% {opacity: 1;}
-      50% {opacity: 0.3;}
-      100% {opacity: 1;}
-    }
-
-    .danger {
+    #game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
       color: red;
-      animation: flicker 0.4s infinite;
+      display: none;
+      z-index: 99;
     }
   </style>
 </head>
 <body>
-  <div class="game-box">
-    <h1>SOBREVIVE A LAS LETRAS</h1>
-    <p id="status">Turno 1</p>
-    <button class="button" onclick="nextTurn()">Verificar Cámaras</button>
-    <div id="log"></div>
+  <div id="game-container">
+    <div id="office"></div>
+    <div id="enemy-left" class="enemy">Ñ</div>
+    <div id="enemy-right" class="enemy">Z</div>
+
+    <div id="controls">
+      <button id="left-door-btn">Puerta Izquierda</button>
+      <button id="right-door-btn">Puerta Derecha</button>
+    </div>
+
+    <div id="game-over">¡Game Over!</div>
   </div>
 
   <script>
-    let turno = 1;
-    let peligro = false;
-    const letras = ["Ñ", "X", "Y", "Z"];
-    const log = document.getElementById("log");
-    const status = document.getElementById("status");
+    const enemyLeft = document.getElementById("enemy-left");
+    const enemyRight = document.getElementById("enemy-right");
+    const office = document.getElementById("office");
+    const gameOver = document.getElementById("game-over");
 
-    function randomLetras() {
-      const atacantes = letras.filter(() => Math.random() < 0.3);
-      return atacantes.length ? atacantes : ["ninguna letra"];
-    }
+    let leftDoorClosed = false;
+    let rightDoorClosed = false;
 
-    function nextTurn() {
-      const atacantes = randomLetras();
-      turno++;
-      peligro = atacantes.length > 0 && atacantes[0] !== "ninguna letra";
+    document.getElementById("left-door-btn").onclick = () => {
+      leftDoorClosed = !leftDoorClosed;
+      updateDoorVisual("left", leftDoorClosed);
+    };
 
-      status.textContent = `Turno ${turno}`;
-      if (peligro) {
-        status.classList.add("danger");
+    document.getElementById("right-door-btn").onclick = () => {
+      rightDoorClosed = !rightDoorClosed;
+      updateDoorVisual("right", rightDoorClosed);
+    };
+
+    function updateDoorVisual(side, closed) {
+      if (closed) {
+        office.classList.add(`${side}-door-closed`);
       } else {
-        status.classList.remove("danger");
+        office.classList.remove(`${side}-door-closed`);
       }
-
-      const mensaje = peligro
-        ? `¡ALERTA! ${atacantes.join(", ")} se están acercando.`
-        : `Todo tranquilo por ahora.`;
-      const p = document.createElement("p");
-      p.textContent = mensaje;
-      log.prepend(p);
     }
+
+    function moveEnemy(enemy, direction, onReach) {
+      let position = -100;
+      const interval = setInterval(() => {
+        if (gameOver.style.display === "block") {
+          clearInterval(interval);
+          return;
+        }
+
+        position += 5;
+        enemy.style[direction] = position + "px";
+
+        if (position >= window.innerWidth / 2 - 100) {
+          clearInterval(interval);
+          onReach();
+        }
+      }, 100);
+    }
+
+    function triggerGameOver() {
+      gameOver.style.display = "block";
+    }
+
+    function enemyApproachFrom(side) {
+      if (side === "left" && leftDoorClosed) return;
+      if (side === "right" && rightDoorClosed) return;
+
+      triggerGameOver();
+    }
+
+    function startAttackLoop() {
+      setInterval(() => {
+        const side = Math.random() > 0.5 ? "left" : "right";
+        if (side === "left") {
+          moveEnemy(enemyLeft, "left", () => enemyApproachFrom("left"));
+        } else {
+          moveEnemy(enemyRight, "right", () => enemyApproachFrom("right"));
+        }
+      }, 6000); // Ataque cada 6 segundos
+    }
+
+    startAttackLoop();
   </script>
 </body>
 </html>
