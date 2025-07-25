@@ -91,14 +91,14 @@
     &copy; 2025 Yalmil.tv – Todos los derechos reservados.
   </footer>
 
-  <script>
-    const user = localStorage.getItem("usuarioLogueado");
-    if (user) {
-      document.getElementById("bienvenida").innerText = `¡Bienvenido de nuevo, ${user}!`;
-    } else {
-      // Si no hay sesión iniciada, redirige al login
-      window.location.href = "login.html";
-    }
-  </script>
+<script>
+  const user = localStorage.getItem("loggedInUser");
+  if (user) {
+    document.getElementById("bienvenida").innerText = `¡Bienvenido de nuevo, ${user}!`;
+  } else {
+    // Si no hay sesión iniciada, redirige al login
+    window.location.href = "login.html";
+  }
+</script>
 </body>
 </html>
