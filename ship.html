@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>💘 Ship Generator</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #ff6ec4, #7873f5);
+      color: white;
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      margin: 5px;
+      width: 80%;
+      max-width: 300px;
+      font-size: 1em;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #ff6ec4;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1em;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ffd6ec;
+    }
+
+    #output {
+      margin-top: 30px;
+      font-size: 1.2em;
+    }
+
+    #loading {
+      margin-top: 20px;
+      font-size: 1em;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>💖 Ship Generator</h1>
+  <p>¡Escribe dos nombres y descubre su amor digital!</p>
+  <input type="text" id="name1" placeholder="Nombre 1">
+  <input type="text" id="name2" placeholder="Nombre 2"><br>
+  <button onclick="ship()">💘 Calcular Amor</button>
+
+  <div id="loading">🔍 Consultando con San Valentín digital...</div>
+  <div id="output"></div>
+
+  <script>
+    function ship() {
+      const name1 = document.getElementById('name1').value.trim();
+      const name2 = document.getElementById('name2').value.trim();
+      const output = document.getElementById('output');
+      const loading = document.getElementById('loading');
+      
+      if (!name1 || !name2) {
+        output.innerHTML = "⚠️ Escribe ambos nombres.";
+        return;
+      }
+
+      output.innerHTML = "";
+      loading.style.display = "block";
+
+      setTimeout(() => {
+        const lovePercent = Math.floor(Math.random() * 101);
+        let message = "";
+
+        if (lovePercent <= 20) {
+          message = "💔 Ni en otra dimensión...";
+        } else if (lovePercent <= 50) {
+          message = "🤔 Podría ser... si apagas el WiFi.";
+        } else if (lovePercent <= 80) {
+          message = "💞 Hay potencial, pero cuidado con la Ñ.";
+        } else {
+          message = "💍 ¡El amor es real! Ya pueden adoptar un ajolote.";
+        }
+
+        loading.style.display = "none";
+        output.innerHTML = `
+          <h2>${name1} 💘 ${name2}</h2>
+          <p>❤️ Compatibilidad: <strong>${lovePercent}%</strong></p>
+          <p>${message}</p>
+        `;
+      }, 2000); // tiempo de "búsqueda"
+    }
+  </script>
+</body>
+</html>
