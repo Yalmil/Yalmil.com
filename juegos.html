@@ -102,15 +102,5 @@
   <footer>
     &copy; 2025 Yalmil.tv – Juegos
   </footer>
-
-  <script>
-    const user = localStorage.getItem("usuarioLogueado");
-    if (user) {
-      document.getElementById("welcome").innerText = `¿Qué vas a jugar hoy, ${user}?`;
-    } else {
-      // Si no hay usuario, redirige a login
-      window.location.href = "juegos.html";
-    }
-  </script>
 </body>
 </html>
