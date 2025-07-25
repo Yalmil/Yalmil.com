@@ -63,8 +63,8 @@
 
     function drawPlayer() {
       const gradient = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 30);
-      gradient.addColorStop(0, "#00fff7");
-      gradient.addColorStop(1, "#007788");
+      gradient.addColorStop(0, "#F5A927");
+      gradient.addColorStop(1, "#F5A928");
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
