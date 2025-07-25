@@ -1,77 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clicker de Yalmil</title>
+  <meta charset="UTF-8">
+  <title>Clicker Yalmil</title>
   <style>
     body {
-      background-color: #0d0d0d;
+      background-color: #0a0a0a;
       color: #00ffaa;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
-      padding: 40px;
+      padding: 30px;
     }
+
     h1 {
-      font-size: 3em;
+      font-size: 40px;
+      margin-bottom: 10px;
     }
+
     #contador {
-      font-size: 2em;
-      margin: 20px;
+      font-size: 36px;
+      margin: 20px 0;
     }
+
     button {
-      padding: 20px 40px;
-      font-size: 1.5em;
-      background-color: #00ffaa;
-      color: #000;
+      font-size: 24px;
+      padding: 10px 30px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
+      background-color: #008080;
+      color: white;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    button:hover {
-      transform: scale(1.05);
-    }
-    #upgrade {
+
+    .upgrade {
       margin-top: 30px;
-      display: none;
+    }
+
+    .upgrade button {
+      background-color: #4caf50;
+      margin-top: 10px;
+    }
+
+    .disabled {
+      background-color: #555 !important;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <h1>💎 Clicker de Yalmil 💎</h1>
-  <div id="contador">Puntos: 0</div>
-  <button onclick="clickear()">Clickear</button>
+  <h1>💎 Clicker Yalmil</h1>
+  <div id="contador">0 clics</div>
+  <button onclick="clic()">Clic</button>
 
-  <div id="upgrade">
-    <p>¡Tienes suficiente para mejorar! (+2 por clic)</p>
-    <button onclick="mejorar()">Comprar Mejora (50 puntos)</button>
+  <div class="upgrade">
+    <h2>Mejoras</h2>
+    <button id="mejora1" onclick="comprarMejora(1)">+1 clic por clic (Costo: 50)</button><br>
+    <button id="mejora2" onclick="comprarMejora(2)">+5 clics por clic (Costo: 200)</button>
   </div>
 
   <script>
-    let puntos = 0;
-    let puntosPorClick = 1;
+    let clics = 0;
+    let clicsPorClic = 1;
 
-    function actualizarContador() {
-      document.getElementById("contador").textContent = "Puntos: " + puntos;
-      if (puntos >= 50 && puntosPorClick === 1) {
-        document.getElementById("upgrade").style.display = "block";
+    function actualizar() {
+      document.getElementById('contador').textContent = `${clics} clics`;
+
+      document.getElementById("mejora1").classList.toggle("disabled", clics < 50);
+      document.getElementById("mejora2").classList.toggle("disabled", clics < 200);
+    }
+
+    function clic() {
+      clics += clicsPorClic;
+      actualizar();
+    }
+
+    function comprarMejora(id) {
+      if (id === 1 && clics >= 50) {
+        clics -= 50;
+        clicsPorClic += 1;
+      } else if (id === 2 && clics >= 200) {
+        clics -= 200;
+        clicsPorClic += 5;
       }
+      actualizar();
     }
 
-    function clickear() {
-      puntos += puntosPorClick;
-      actualizarContador();
-    }
-
-    function mejorar() {
-      if (puntos >= 50 && puntosPorClick === 1) {
-        puntos -= 50;
-        puntosPorClick = 2;
-        document.getElementById("upgrade").style.display = "none";
-        actualizarContador();
-      }
-    }
+    actualizar();
   </script>
 </body>
 </html>
