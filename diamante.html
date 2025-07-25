@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Encuentra el Diamante</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0a0a;
+      color: #b8ffd8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      color: #3fffa8;
+      text-shadow: 0 0 8px #3fffa8;
+    }
+
+    .chest-container {
+      display: flex;
+      gap: 1rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .chest {
+      width: 100px;
+      height: 100px;
+      background-color: #1a1a1a;
+      border: 2px solid #3fffa8;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 0 10px #3fffa8;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .chest:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #3fffa8;
+    }
+
+    .result {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .restart-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #3fffa8;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 0 10px #3fffa8;
+    }
+
+    .back-link {
+      margin-top: 2rem;
+      color: #3fffa8;
+      text-decoration: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>¿Dónde está el diamante?</h1>
+  <p>Elige uno de los 3 cofres</p>
+  <div class="chest-container">
+    <div class="chest" onclick="checkChest(0)">🧰</div>
+    <div class="chest" onclick="checkChest(1)">🧰</div>
+    <div class="chest" onclick="checkChest(2)">🧰</div>
+  </div>
+  <div class="result" id="result"></div>
+  <button class="restart-btn" onclick="startGame()">Intentar de nuevo</button>
+  <a class="back-link" href="/games">← Volver a Juegos</a>
+
+  <script>
+    let correctChest = -1;
+    let revealed = false;
+
+    function startGame() {
+      correctChest = Math.floor(Math.random() * 3);
+      document.getElementById('result').textContent = '';
+      revealed = false;
+    }
+
+    function checkChest(index) {
+      if (revealed) return;
+
+      if (index === correctChest) {
+        document.getElementById('result').textContent = "🎉 ¡Encontraste el diamante!";
+      } else {
+        document.getElementById('result').textContent = "💨 ¡Nada aquí! Inténtalo otra vez.";
+      }
+
+      revealed = true;
+    }
+
+    // Iniciar al cargar
+    startGame();
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yalmil.tv – Juegos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0a0a;
+      color: #b8ffd8;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #0f0f0f;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #3fffa8;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #3fffa8;
+      text-shadow: 0 0 10px #3fffa8;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #3fffa8;
+      text-shadow: 0 0 6px #3fffa8;
+    }
+
+    .game-list {
+      width: 100%;
+      max-width: 800px;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .game {
+      background-color: #1a1a1a;
+      border: 2px solid #3fffa8;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      text-decoration: none;
+      color: #b8ffd8;
+      box-shadow: 0 0 10px #3fffa8;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .game:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px #3fffa8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .back-link {
+      margin-bottom: 2rem;
+      color: #3fffa8;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Yalmil.tv</h1>
+  </header>
+  <main>
+    <a class="back-link" href="/">← Volver al inicio</a>
+    <h2>Juegos</h2>
+    <div class="game-list">
+      <a class="game" href="/games/diamante.html">Juego 1</a>
+      <a class="game" href="/games/game2.html">Juego 2</a>
+      <a class="game" href="/games/game3.html">Juego 3</a>
+      <!-- Agrega más juegos aquí -->
+    </div>
+  </main>
+  <footer>
+    &copy; 2025 Yalmil.tv – Juegos
+  </footer>
+</body>
+</html>
