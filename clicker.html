@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clicker de Yalmil</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #00ffaa;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 3em;
+    }
+    #contador {
+      font-size: 2em;
+      margin: 20px;
+    }
+    button {
+      padding: 20px 40px;
+      font-size: 1.5em;
+      background-color: #00ffaa;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #upgrade {
+      margin-top: 30px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>💎 Clicker de Yalmil 💎</h1>
+  <div id="contador">Puntos: 0</div>
+  <button onclick="clickear()">Clickear</button>
+
+  <div id="upgrade">
+    <p>¡Tienes suficiente para mejorar! (+2 por clic)</p>
+    <button onclick="mejorar()">Comprar Mejora (50 puntos)</button>
+  </div>
+
+  <script>
+    let puntos = 0;
+    let puntosPorClick = 1;
+
+    function actualizarContador() {
+      document.getElementById("contador").textContent = "Puntos: " + puntos;
+      if (puntos >= 50 && puntosPorClick === 1) {
+        document.getElementById("upgrade").style.display = "block";
+      }
+    }
+
+    function clickear() {
+      puntos += puntosPorClick;
+      actualizarContador();
+    }
+
+    function mejorar() {
+      if (puntos >= 50 && puntosPorClick === 1) {
+        puntos -= 50;
+        puntosPorClick = 2;
+        document.getElementById("upgrade").style.display = "none";
+        actualizarContador();
+      }
+    }
+  </script>
+</body>
+</html>
