@@ -2,104 +2,121 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sobrevive a las letras</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #000; color: #fff; overflow: hidden; }
-    canvas { display: block; }
-    #ui {
-      position: absolute; top: 10px; left: 10px; z-index: 10;
-      background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px;
+    body {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      background-color: #111;
+      color: #0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #0f0;
+      text-shadow: 0 0 10px #0f0;
+      margin-bottom: 10px;
+    }
+
+    .game-box {
+      border: 2px solid #0f0;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: #000;
+      box-shadow: 0 0 10px #0f0;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #status {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    .button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 5px #0f0;
+      transition: background-color 0.2s;
+    }
+
+    .button:hover {
+      background-color: #5f5;
+    }
+
+    #log {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 14px;
+      max-height: 100px;
+      overflow-y: auto;
+      border-top: 1px solid #0f0;
+      padding-top: 10px;
+    }
+
+    @keyframes flicker {
+      0% {opacity: 1;}
+      50% {opacity: 0.3;}
+      100% {opacity: 1;}
+    }
+
+    .danger {
+      color: red;
+      animation: flicker 0.4s infinite;
     }
   </style>
 </head>
 <body>
-  <div id="ui">Tiempo sobrevivido: <span id="time">0</span>s</div>
-  <canvas id="game"></canvas>
+  <div class="game-box">
+    <h1>SOBREVIVE A LAS LETRAS</h1>
+    <p id="status">Turno 1</p>
+    <button class="button" onclick="nextTurn()">Verificar Cámaras</button>
+    <div id="log"></div>
+  </div>
 
   <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let turno = 1;
+    let peligro = false;
+    const letras = ["Ñ", "X", "Y", "Z"];
+    const log = document.getElementById("log");
+    const status = document.getElementById("status");
 
-    const player = { x: canvas.width / 2, y: canvas.height / 2, size: 20 };
-    const enemies = [];
-    const letters = ["Ñ", "X", "Y", "Z"];
-    let timeSurvived = 0;
-    let lastEnemySpawn = 0;
-
-    function drawPlayer() {
-      ctx.fillStyle = "cyan";
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
-      ctx.fill();
+    function randomLetras() {
+      const atacantes = letras.filter(() => Math.random() < 0.3);
+      return atacantes.length ? atacantes : ["ninguna letra"];
     }
 
-    function spawnEnemy() {
-      const letter = letters[Math.floor(Math.random() * letters.length)];
-      const angle = Math.random() * 2 * Math.PI;
-      const radius = Math.max(canvas.width, canvas.height);
-      const x = player.x + radius * Math.cos(angle);
-      const y = player.y + radius * Math.sin(angle);
-      enemies.push({ x, y, size: 30, speed: 1.2, letter });
-    }
+    function nextTurn() {
+      const atacantes = randomLetras();
+      turno++;
+      peligro = atacantes.length > 0 && atacantes[0] !== "ninguna letra";
 
-    function drawEnemies() {
-      ctx.fillStyle = "red";
-      ctx.font = "30px Arial";
-      enemies.forEach(e => {
-        ctx.fillText(e.letter, e.x, e.y);
-      });
-    }
-
-    function updateEnemies() {
-      enemies.forEach(e => {
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        e.x += (dx / dist) * e.speed;
-        e.y += (dy / dist) * e.speed;
-      });
-    }
-
-    function checkCollision() {
-      for (let e of enemies) {
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        if (Math.sqrt(dx*dx + dy*dy) < player.size + e.size) {
-          alert("¡Has perdido! Tiempo sobrevivido: " + timeSurvived + "s");
-          window.location.reload();
-        }
-      }
-    }
-
-    function gameLoop(timestamp) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawPlayer();
-      drawEnemies();
-      updateEnemies();
-      checkCollision();
-
-      if (timestamp - lastEnemySpawn > 3000) {
-        spawnEnemy();
-        lastEnemySpawn = timestamp;
+      status.textContent = `Turno ${turno}`;
+      if (peligro) {
+        status.classList.add("danger");
+      } else {
+        status.classList.remove("danger");
       }
 
-      requestAnimationFrame(gameLoop);
+      const mensaje = peligro
+        ? `¡ALERTA! ${atacantes.join(", ")} se están acercando.`
+        : `Todo tranquilo por ahora.`;
+      const p = document.createElement("p");
+      p.textContent = mensaje;
+      log.prepend(p);
     }
-
-    setInterval(() => {
-      timeSurvived++;
-      document.getElementById('time').textContent = timeSurvived;
-    }, 1000);
-
-    window.addEventListener("mousemove", e => {
-      player.x = e.clientX;
-      player.y = e.clientY;
-    });
-
-    gameLoop();
   </script>
 </body>
 </html>
