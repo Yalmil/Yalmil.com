@@ -3,65 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iniciar sesión</title>
-  <style>
-    body {
-      background: #121212;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px;
-      font-size: 16px;
-    }
-    .message {
-      color: red;
-    }
-  </style>
+  <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-  <h1>Iniciar sesión</h1>
-  <input id="username" placeholder="Nombre de usuario" /><br/>
-  <input id="password" type="password" placeholder="Contraseña" /><br/>
+  <h2>Iniciar Sesión</h2>
+  <input type="text" id="username" placeholder="Usuario" /><br>
+  <input type="password" id="contraseña" placeholder="Contraseña" /><br>
   <button onclick="login()">Entrar</button>
-  <div class="message" id="mensaje"></div>
 
   <script>
     function login() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
-      const mensaje = document.getElementById("mensaje");
+      const username = document.getElementById("username").value;
+      const contraseña = document.getElementById("contraseña").value;
 
-      if (!username || !password) {
-        mensaje.textContent = "Completa ambos campos.";
-        return;
+      // Puedes agregar más usuarios aquí
+      const validUsers = {
+        "Yalmil": "tupassword",
+        "otro": "1234"
+      };
+
+      if (validUsers[username] && validUsers[username] === contraseña) {
+        localStorage.setItem("loggedInUser", username);
+
+        Swal.fire({
+          icon: "success",
+          title: "Sesión iniciada correctamente",
+          showConfirmButton: false,
+          timer: 1500
+        });
+
+        setTimeout(() => {
+          const destino = localStorage.getItem("redirectAfterLogin") || "inicio.html";
+          localStorage.removeItem("redirectAfterLogin");
+          window.location.href = destino;
+        }, 1500);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Datos incorrectos",
+          showConfirmButton: false,
+          timer: 1500
+        });
       }
-
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-      if (!users[username]) {
-        mensaje.textContent = "Usuario no registrado.";
-        return;
-      }
-
-      if (users[username] !== password) {
-        mensaje.textContent = "Contraseña incorrecta.";
-        return;
-      }
-
-      localStorage.setItem("loggedInUser", username);
-      mensaje.style.color = "lightgreen";
-      mensaje.textContent = "Sesión iniciada correctamente.";
-      // Redirigir o mostrar contenido personalizado
-      setTimeout(() => {
-        window.location.href = "inicio.html"; // cambia esto si quieres
-      }, 1000);
     }
   </script>
 </body>
