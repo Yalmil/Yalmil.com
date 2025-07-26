@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SEP Minecraft</title>
   <style>
+    /* Estilos iguales a los que ya tenías */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -170,7 +171,7 @@
       <span id="editIcon" class="edit-icon" title="Editar anuncios">✏️</span>
     </h2>
     <ul id="anuncios-lista">
-      <!-- Anuncios cargados por JS -->
+      <!-- Cargados por JS -->
     </ul>
   </div>
 
@@ -178,8 +179,8 @@
   <div class="socials">
     <h2>🌐 Síguenos en redes</h2>
     <div class="social-icons">
-      <a class="btn" href="https://youtube.com/@sep_minecraft" target="_blank" rel="noopener noreferrer">Youtube</a>
-      <a class="btn" href="https://www.instagram.com/sep.comu" target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a class="btn" href="https://youtube.com/@sep_minecraft" target="_blank">Youtube</a>
+      <a class="btn" href="https://www.instagram.com/sep.comu" target="_blank">Instagram</a>
     </div>
   </div>
 
@@ -187,7 +188,7 @@
     © 2025 SEP Minecraft | Página creada por Yalmil
   </div>
 
-  <!-- Firebase SDK + lógica anuncios -->
+  <!-- Firebase SDK + Lógica -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
@@ -197,33 +198,29 @@
       authDomain: "sepmc-2ab3d.firebaseapp.com",
       databaseURL: "https://sepmc-2ab3d-default-rtdb.firebaseio.com",
       projectId: "sepmc-2ab3d",
-      storageBucket: "sepmc-2ab3d.firebasestorage.app",
+      storageBucket: "sepmc-2ab3d.appspot.com",
       messagingSenderId: "1015746236260",
-      appId: "1:1015746236260:web:baf7779cc6fcbb5757b471",
-      measurementId: "G-LBBNN1VKKD"
+      appId: "1:1015746236260:web:baf7779cc6fcbb5757b471"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const anunciosRef = ref(db, 'anuncios/texto');
 
-    const anuncioRef = ref(db, 'anuncios');
     const lista = document.getElementById("anuncios-lista");
     const editIcon = document.getElementById("editIcon");
 
-    // Cargar anuncios en tiempo real
-    onValue(anuncioRef, (snapshot) => {
+    onValue(anunciosRef, (snapshot) => {
       const data = snapshot.val();
       lista.innerHTML = "";
 
-      if (data && Array.isArray(data)) {
+      if (Array.isArray(data)) {
         data.forEach(anuncio => {
           const li = document.createElement("li");
           li.textContent = anuncio;
           lista.appendChild(li);
         });
       } else {
-        // Si no hay datos en Firebase, mostrar anuncios por defecto
         const defaultAnuncios = [
           "🛠 El servidor estará en mantenimiento el 30 de julio a las 10:00 PM.",
           "🎉 Nuevo evento de supervivencia el fin de semana. ¡Premios exclusivos!",
@@ -237,35 +234,28 @@
       }
     });
 
-    // Listener para el icono editar
-    editIcon.addEventListener("click", pedirContraseña);
-
-    function pedirContraseña() {
-      const pass = prompt("🔒 Contraseña para editar:");
-      if (pass === "sepowner") {
-        editarAnuncios();
-      } else {
+    editIcon.addEventListener("click", () => {
+      const password = prompt("🔒 Contraseña para editar:");
+      if (password !== "sepowner") {
         alert("❌ Contraseña incorrecta.");
+        return;
       }
-    }
 
-    function editarAnuncios() {
       const actuales = Array.from(lista.children).map(li => li.textContent).join("\n");
       const nuevos = prompt("📝 Edita los anuncios (uno por línea):", actuales);
 
       if (nuevos !== null) {
         const nuevosArray = nuevos.split("\n").map(line => line.trim()).filter(line => line.length > 0);
 
-        // Guardar en Firebase
-        set(anuncioRef, nuevosArray)
+        set(anunciosRef, nuevosArray)
           .then(() => {
             alert("✅ Anuncios actualizados.");
           })
           .catch(error => {
-            alert("❌ Error al guardar anuncios: " + error.message);
+            alert("❌ Error al guardar anuncios:\n" + error.message);
           });
       }
-    }
+    });
   </script>
 </body>
 </html>
