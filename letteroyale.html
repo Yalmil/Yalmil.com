@@ -2,255 +2,159 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Battle Royale Letras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de Contraseñas de Letras</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; }
-    canvas { background: #222; display: block; margin: 0 auto; }
-    #ui {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center; flex-direction: column;
-      background: rgba(0,0,0,0.8); color: white; z-index: 10;
+    body {
+      margin: 0;
+      background: #111;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background 0.5s;
     }
-    .letter-btn {
-      padding: 10px 20px; margin: 5px; font-size: 18px; background: #444; border: none;
-      color: white; border-radius: 5px; cursor: pointer;
+
+    .pantalla {
+      display: none;
+      text-align: center;
+      padding: 20px;
     }
-    #desc { margin-top: 10px; font-size: 16px; text-align: center; }
-    #joystick {
-      position: absolute; bottom: 30px; left: 30px; width: 100px; height: 100px;
-      background: rgba(255,255,255,0.1); border-radius: 50%;
-      display: none; align-items: center; justify-content: center;
+
+    .pantalla.activa {
+      display: block;
     }
-    #joystick-dot {
-      width: 40px; height: 40px; background: white; border-radius: 50%;
+
+    button {
+      background: black;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
     }
-    #attackBtn {
-      position: absolute; bottom: 40px; right: 30px;
-      width: 80px; height: 80px; background: red; border-radius: 50%; font-size: 20px;
-      border: none; color: white;
+
+    input {
+      background: black;
+      border: 1px solid #0f0;
+      color: #0f0;
+      padding: 8px;
+      margin-top: 10px;
+    }
+
+    .nivel {
+      margin: 30px 0;
+    }
+
+    .mensaje {
+      margin-top: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <h2>Elige tu letra</h2>
-    <div id="letters"></div>
-    <div id="desc"></div>
+
+  <div id="inicio" class="pantalla activa">
+    <h1>🧠 Juego de Contraseñas</h1>
+    <p>Descifra las claves de letras ocultas usando pistas como binario, cifrado y lógica.</p>
+    <button onclick="iniciarJuego()">Comenzar</button>
   </div>
-  <canvas id="game"></canvas>
-  <div id="joystick"><div id="joystick-dot"></div></div>
-  <button id="attackBtn">Atacar</button>
+
+  <div id="nivel" class="pantalla">
+    <h2 id="titulo-nivel">Nivel 1</h2>
+    <div class="nivel" id="pista">Pista aquí...</div>
+    <input id="respuesta" placeholder="Introduce la letra" maxlength="1" />
+    <br />
+    <button onclick="verificarRespuesta()">Enviar</button>
+    <div class="mensaje" id="mensaje"></div>
+  </div>
+
+  <div id="fin" class="pantalla">
+    <h1>¡Felicidades!</h1>
+    <p>Has completado todos los niveles 🎉</p>
+    <button onclick="reiniciarJuego()">Jugar de nuevo</button>
+  </div>
 
   <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    const niveles = [
+      {
+        pista: "01000101 en binario. ¿Qué letra es?",
+        respuesta: "E"
+      },
+      {
+        pista: "Letra después de N",
+        respuesta: "O"
+      },
+      {
+        pista: "Cifrado César +1: D => ?",
+        respuesta: "E"
+      },
+      {
+        pista: "Letra que está entre H y J",
+        respuesta: "I"
+      },
+      {
+        pista: "Ñ - 1 (alfabéticamente, sin contar la Ñ)",
+        respuesta: "N"
+      },
+      {
+        pista: "Letra del medio del abecedario",
+        respuesta: "M"
+      },
+      {
+        pista: "Z al revés del alfabeto (posición 1)",
+        respuesta: "A"
+      },
+      {
+        pista: "Cifra: G = J, H = K. Entonces F = ?",
+        respuesta: "I"
+      },
+    ];
 
-    const letras = {
-      A: "Ataca más rápido",
-      B: "Empuja enemigos",
-      C: "Recarga más vida",
-      D: "Defensa alta",
-      E: "Más velocidad",
-      F: "Lanza fuego",
-      G: "Ralentiza enemigos",
-      H: "Rebota en paredes",
-      I: "Invisible al moverse",
-      J: "Salta lejos",
-      K: "Daño crítico a veces",
-      L: "Golpe doble",
-      M: "Atrae enemigos",
-      N: "Pone trampas",
-      Ñ: "Invoca confusión",
-      O: "Forma escudo",
-      P: "Cura al atacar",
-      Q: "Golpe en área",
-      R: "Recarga energía",
-      S: "Rápido ataque cuerpo a cuerpo",
-      T: "Empuje al atacar",
-      U: "Regenera salud lentamente",
-      V: "Velocidad y daño medio",
-      W: "Dispara 3 direcciones",
-      X: "Se teletransporta corto",
-      Y: "Al matar se cura",
-      Z: "Ataque en zigzag"
-    };
+    let nivelActual = 0;
 
-    let players = [], enemies = [], bullets = [];
-    let myLetter = '', myPlayer = null;
-    let joystick = { active: false, dx: 0, dy: 0 };
-    let protectionTime = 3000;
-    let attackCooldown = 1000;
-
-    const ui = document.getElementById('ui');
-    const lettersDiv = document.getElementById('letters');
-    const descDiv = document.getElementById('desc');
-    const attackBtn = document.getElementById('attackBtn');
-    const joystickEl = document.getElementById('joystick');
-    const joyDot = document.getElementById('joystick-dot');
-
-    for (let l in letras) {
-      const btn = document.createElement('button');
-      btn.textContent = l;
-      btn.className = 'letter-btn';
-      btn.onclick = () => {
-        myLetter = l;
-        descDiv.textContent = letras[l];
-        setTimeout(() => {
-          ui.style.display = 'none';
-          startGame();
-        }, 1000);
-      };
-      lettersDiv.appendChild(btn);
+    function iniciarJuego() {
+      document.getElementById("inicio").classList.remove("activa");
+      document.getElementById("nivel").classList.add("activa");
+      cargarNivel();
     }
 
-    class Player {
-      constructor(x, y, letter, isAI=false) {
-        this.x = x;
-        this.y = y;
-        this.letter = letter;
-        this.ai = isAI;
-        this.radius = 20;
-        this.color = isAI ? 'gray' : 'lime';
-        this.speed = (letter === 'E' ? 3.5 : 2) + (Math.random()*0.5);
-        this.life = 100;
-        this.dirX = 0;
-        this.dirY = 0;
-        this.cooldown = 0;
-        this.protected = true;
-        setTimeout(() => this.protected = false, protectionTime);
-      }
-      move() {
-        this.x += this.dirX * this.speed;
-        this.y += this.dirY * this.speed;
-        this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
-        this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
-      }
-      draw() {
-        ctx.fillStyle = this.protected ? 'yellow' : this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = 'black';
-        ctx.font = "16px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(this.letter, this.x, this.y + 6);
-      }
-      attack() {
-        if (this.cooldown > 0) return;
-        bullets.push({
-          x: this.x,
-          y: this.y,
-          dx: this.dirX || 1,
-          dy: this.dirY || 0,
-          owner: this
-        });
-        this.cooldown = attackCooldown;
-      }
+    function cargarNivel() {
+      const nivel = niveles[nivelActual];
+      document.getElementById("titulo-nivel").textContent = `Nivel ${nivelActual + 1}`;
+      document.getElementById("pista").textContent = nivel.pista;
+      document.getElementById("respuesta").value = "";
+      document.getElementById("mensaje").textContent = "";
     }
 
-    function startGame() {
-      players = [];
-      enemies = [];
-      bullets = [];
-
-      myPlayer = new Player(Math.random()*canvas.width, Math.random()*canvas.height, myLetter, false);
-      players.push(myPlayer);
-
-      for (let i = 0; i < 15; i++) {
-        const letterKeys = Object.keys(letras);
-        const randomLetter = letterKeys[Math.floor(Math.random()*letterKeys.length)];
-        const enemy = new Player(Math.random()*canvas.width, Math.random()*canvas.height, randomLetter, true);
-        enemies.push(enemy);
-        players.push(enemy);
-      }
-
-      joystickEl.style.display = /Android|iPhone/i.test(navigator.userAgent) ? 'flex' : 'none';
-    }
-
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      players.forEach(p => {
-        if (p.ai) {
-          let dx = myPlayer.x - p.x;
-          let dy = myPlayer.y - p.y;
-          let dist = Math.hypot(dx, dy);
-          p.dirX = dx / dist;
-          p.dirY = dy / dist;
+    function verificarRespuesta() {
+      const input = document.getElementById("respuesta").value.toUpperCase();
+      if (input === niveles[nivelActual].respuesta.toUpperCase()) {
+        nivelActual++;
+        if (nivelActual < niveles.length) {
+          cargarNivel();
+        } else {
+          mostrarFinal();
         }
-        p.move();
-        p.draw();
-        if (p.cooldown > 0) p.cooldown -= 16;
-      });
-
-      bullets.forEach((b, i) => {
-        b.x += b.dx * 5;
-        b.y += b.dy * 5;
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 5, 0, Math.PI*2);
-        ctx.fill();
-
-        players.forEach(p => {
-          if (p !== b.owner && !p.protected) {
-            let dist = Math.hypot(p.x - b.x, p.y - b.y);
-            if (dist < p.radius) {
-              p.life -= 25;
-              bullets.splice(i, 1);
-              if (p.life <= 0) {
-                if (!p.ai) ui.style.display = 'flex';
-                players = players.filter(pl => pl !== p);
-              }
-            }
-          }
-        });
-      });
-
-      requestAnimationFrame(update);
+      } else {
+        document.getElementById("mensaje").textContent = "❌ Incorrecto. Intenta otra vez.";
+      }
     }
 
-    document.addEventListener('keydown', e => {
-      if (!myPlayer) return;
-      if (e.key === 'w') myPlayer.dirY = -1;
-      if (e.key === 's') myPlayer.dirY = 1;
-      if (e.key === 'a') myPlayer.dirX = -1;
-      if (e.key === 'd') myPlayer.dirX = 1;
-      if (e.key === ' ') myPlayer.attack();
-    });
+    function mostrarFinal() {
+      document.getElementById("nivel").classList.remove("activa");
+      document.getElementById("fin").classList.add("activa");
+    }
 
-    document.addEventListener('keyup', e => {
-      if (!myPlayer) return;
-      if (['w','s'].includes(e.key)) myPlayer.dirY = 0;
-      if (['a','d'].includes(e.key)) myPlayer.dirX = 0;
-    });
-
-    attackBtn.onclick = () => myPlayer?.attack();
-
-    // Joystick móvil
-    joystickEl.addEventListener('touchstart', e => joystick.active = true);
-    joystickEl.addEventListener('touchmove', e => {
-      const touch = e.touches[0];
-      const rect = joystickEl.getBoundingClientRect();
-      const dx = touch.clientX - (rect.left + 50);
-      const dy = touch.clientY - (rect.top + 50);
-      const dist = Math.hypot(dx, dy);
-      joystick.dx = dx / dist;
-      joystick.dy = dy / dist;
-      joyDot.style.transform = `translate(${dx}px, ${dy}px)`;
-      myPlayer.dirX = joystick.dx;
-      myPlayer.dirY = joystick.dy;
-    });
-    joystickEl.addEventListener('touchend', () => {
-      joystick.active = false;
-      joyDot.style.transform = 'translate(0, 0)';
-      myPlayer.dirX = 0;
-      myPlayer.dirY = 0;
-    });
-
-    update();
+    function reiniciarJuego() {
+      nivelActual = 0;
+      document.getElementById("fin").classList.remove("activa");
+      document.getElementById("inicio").classList.add("activa");
+    }
   </script>
+
 </body>
 </html>
