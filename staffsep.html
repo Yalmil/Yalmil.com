@@ -2,128 +2,130 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Staff | SEP Minecraft</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff - SEP Minecraft</title>
   <style>
     body {
-      background-color: #0d1117;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 20px;
     }
 
     h1 {
-      text-align: center;
       color: #00ffcc;
-      margin-bottom: 40px;
-    }
-
-    .staff-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: #161b22;
-      border: 2px solid #00ffcc40;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 0 10px #00ffcc55;
+      margin-bottom: 30px;
       text-align: center;
-      transition: transform 0.3s;
     }
 
-    .card:hover {
-      transform: scale(1.03);
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
     }
 
-    .avatar {
+    .staff-card {
+      background: #1a1a1a;
+      border: 2px solid #00ffcc50;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .staff-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 15px #00ffccaa;
+    }
+
+    .staff-avatar {
       width: 100px;
       height: 100px;
       border-radius: 50%;
-      object-fit: cover;
       border: 3px solid #00ffcc;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
+      object-fit: cover;
     }
 
-    .name {
-      font-size: 1.2em;
+    .staff-name {
+      font-size: 1.3em;
+      color: #ffffff;
+      margin: 5px 0;
+    }
+
+    .staff-role {
       font-weight: bold;
       color: #00ffcc;
+      margin: 5px 0;
     }
 
-    .role {
-      color: #ff00ff;
-      font-weight: 600;
-      margin: 4px 0;
-    }
-
-    .country {
+    .staff-country {
       font-size: 0.9em;
-      margin-bottom: 8px;
+      margin: 5px 0;
+      color: #cccccc;
     }
 
-    .desc {
-      font-size: 0.9em;
-      color: #ccc;
+    .staff-description {
+      font-size: 0.95em;
+      color: #aaaaaa;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+  <h1>👥 Staff Oficial - SEP Minecraft</h1>
 
-<h1>👥 Panel del Staff de SEP</h1>
+  <div class="staff-grid">
+    <!-- Dear ash -->
+    <div class="staff-card">
+      <img class="staff-avatar" src="https://cdn.discordapp.com/avatars/936668072150978592/42de698ae87376d11912af6fcac55036.png?size=1024" alt="Dear ash" />
+      <div class="staff-name">Dear ash</div>
+      <div class="staff-role">Owner</div>
+      <div class="staff-country">🇲🇽 / MX</div>
+      <div class="staff-description">No sé cómo consigo owner porque estaba durmiendo, pero en resumen se desvela.</div>
+    </div>
 
-<div class="staff-container" id="staff"></div>
+    <!-- Yalmil -->
+    <div class="staff-card">
+      <img class="staff-avatar" src="https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024" alt="Yalmil" />
+      <div class="staff-name">Yalmil</div>
+      <div class="staff-role">Owner</div>
+      <div class="staff-country">🇵🇪 / PE</div>
+      <div class="staff-description">Eh, tampoco me acuerdo de cómo consigo owner, pero estoy creando esta página web.</div>
+    </div>
 
-<script>
-  const staffData = [
-    {
-      name: "Dear ash",
-      role: "Owner",
-      country: "🇲🇽 / MX",
-      avatar: "https://cdn.discordapp.com/avatars/936668072150978592/42de698ae87376d11912af6fcac55036.png?size=1024",
-      desc: "No se como consigo owner porque estaba durmiendo, pero en resumen se desvela"
-    },
-    {
-      name: "Yalmil",
-      role: "Owner",
-      country: "🇵🇪 / PE",
-      avatar: "https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024",
-      desc: "Eh, tampoco me acuerdo de como consigo owner, pero estoy creando esta página web"
-    },
-    {
-      name: "Eron2o23",
-      role: "Fundador",
-      country: "🇨🇷 / CR",
-      avatar: "https://cdn.discordapp.com/avatars/1310095645276901399/f682a6371354dbdb94d9b35171d7621a.png?size=2048",
-      desc: "Agradezcan a el de que Sep existe, el creo todo.\nNo se como lo hizo pero es simp desde hace 1 mes"
-    },
-    {
-      name: "Omicron",
-      role: "Manager",
-      country: "🇺🇸 / US",
-      avatar: "https://cdn.discordapp.com/avatars/1276916158200545290/b6e05f36ca59160723f5372bb64bfc09.png?size=1024",
-      desc: "Revive cada siglo y solo los veteranos lo conocen"
-    }
-  ];
+    <!-- Eron2o23 -->
+    <div class="staff-card">
+      <img class="staff-avatar" src="https://cdn.discordapp.com/avatars/1310095645276901399/f682a6371354dbdb94d9b35171d7621a.png?size=2048" alt="Eron2o23" />
+      <div class="staff-name">Eron2o23</div>
+      <div class="staff-role">Fundador</div>
+      <div class="staff-country">🇨🇷 / CR</div>
+      <div class="staff-description">Agradezcan a él de que SEP existe, él creó todo. No sé cómo lo hizo pero es simp desde hace 1 mes.</div>
+    </div>
 
-  const container = document.getElementById('staff');
+    <!-- Omicron -->
+    <div class="staff-card">
+      <img class="staff-avatar" src="https://cdn.discordapp.com/avatars/1276916158200545290/b6e05f36ca59160723f5372bb64bfc09.png?size=1024" alt="Omicron" />
+      <div class="staff-name">Omicron</div>
+      <div class="staff-role">Manager</div>
+      <div class="staff-country">🇺🇸 / US</div>
+      <div class="staff-description">Revive cada siglo y solo los veteranos lo conocen.</div>
+    </div>
 
-  staffData.forEach(member => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <img src="${member.avatar}" alt="${member.name}" class="avatar">
-      <div class="name">${member.name}</div>
-      <div class="role">${member.role}</div>
-      <div class="country">${member.country}</div>
-      <div class="desc">${member.desc.replace(/\n/g, '<br>')}</div>
-    `;
-    container.appendChild(card);
-  });
-</script>
-
+    <!-- Ben10 -->
+    <div class="staff-card">
+      <img class="staff-avatar" src="https://cdn.discordapp.com/avatars/1145920615480565904/eaf1416d0b15b01b773d046bf074970c.png?size=1024" alt="Ben10" />
+      <div class="staff-name">Ben10</div>
+      <div class="staff-role">Mod</div>
+      <div class="staff-country">🏳️ / ??</div>
+      <div class="staff-description">No sé, hablo muy poco con él.</div>
+    </div>
+  </div>
 </body>
 </html>
