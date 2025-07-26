@@ -1,108 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Registro</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #1a1a40, #2b5876);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .register-box {
-      background: rgba(0, 0, 0, 0.75);
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0, 255, 200, 0.5);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #00ffee;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 5px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #00ffee;
-      border: none;
-      color: black;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #00ccbb;
-    }
-
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .success {
-      text-align: center;
-      color: #00ff88;
-      margin-top: 10px;
-    }
-  </style>
 </head>
 <body>
-  <div class="register-box">
-    <h2>Registrarse</h2>
-    <input type="text" id="newUser" placeholder="Nuevo usuario" />
-    <input type="password" id="newPass" placeholder="Nueva contraseña" />
-    <button onclick="register()">Registrar</button>
-    <div id="message"></div>
-  </div>
+  <h2>Registro</h2>
+  <form id="registerForm">
+    <input type="text" id="username" placeholder="Nombre de usuario" required><br>
+    <input type="email" id="email" placeholder="Correo electrónico" required><br>
+    <input type="password" id="password" placeholder="Contraseña" required><br>
+    <button type="submit">Registrarse</button>
+  </form>
 
-  <script>
-    function register() {
-      const user = document.getElementById("newUser").value.trim();
-      const pass = document.getElementById("newPass").value.trim();
-      const msg = document.getElementById("message");
+  <p id="message"></p>
 
-      if (user === "" || pass === "") {
-        msg.innerHTML = "<p class='error'>Todos los campos son obligatorios</p>";
-        return;
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      projectId: "databaseloginweb",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      storageBucket: "databaseloginweb.appspot.com",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Registro
+    const form = document.getElementById('registerForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Guardar datos extra en Realtime Database
+        await set(ref(db, 'users/' + user.uid), {
+          username: username,
+          email: email,
+          createdAt: new Date().toISOString()
+        });
+
+        message.textContent = "¡Registro exitoso! Ahora puedes iniciar sesión.";
+        form.reset();
+      } catch (error) {
+        message.textContent = "Error: " + error.message;
       }
-
-      // Guardar en localStorage
-      localStorage.setItem("username", user);
-      localStorage.setItem("password", pass);
-
-      msg.innerHTML = "<p class='success'>¡Usuario registrado con éxito!</p>";
-
-      setTimeout(() => {
-        window.location.href = "login.html"; // Ir al login luego de registrar
-      }, 1500);
-    }
+    });
   </script>
 </body>
 </html>
