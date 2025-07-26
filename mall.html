@@ -60,26 +60,6 @@
     .invisible {
       visibility: hidden;
     }
-
-    #fireBtn {
-      position: absolute;
-      bottom: 100px;
-      right: 20px;
-      width: 70px;
-      height: 70px;
-      background: #f90;
-      border: none;
-      border-radius: 50%;
-      color: #000;
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 2;
-      touch-action: none;
-    }
-
-    #fireBtn:active {
-      background: #fc0;
-    }
   </style>
 </head>
 <body>
@@ -94,8 +74,6 @@
     <button class="btn" id="btnDown">↓</button>
     <button class="btn" id="btnRight">→</button>
   </div>
-
-  <button id="fireBtn">FIRE</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -114,8 +92,7 @@
       y: canvas.height / 2,
       r: 25,
       speed: 4,
-      letra: "Ñ",
-      lastDir: { x: 0, y: -1 }
+      letra: "Ñ"
     };
 
     let keys = {};
@@ -125,15 +102,10 @@
     let vidas = 3;
     let score = 0;
 
-    document.addEventListener("keydown", e => {
-      const k = e.key.toLowerCase();
-      keys[k] = true;
-      if (k === " ") shoot();
-    });
-
+    document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
     document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-    // Botones móviles
+    // 📱 Control móvil
     function addTouchControl(id, dir) {
       const btn = document.getElementById(id);
       btn.addEventListener("touchstart", (e) => {
@@ -151,20 +123,34 @@
     addTouchControl("btnLeft", "left");
     addTouchControl("btnRight", "right");
 
-    document.getElementById("fireBtn").addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      shoot();
+    // 🖱️ Disparo por mouse
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      shootTowards(mouseX, mouseY);
     });
 
-    function shoot() {
-      const dir = player.lastDir;
-      if (dir.x === 0 && dir.y === 0) return;
+    // 📱 Disparo por toque
+    canvas.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const touchX = touch.clientX - rect.left;
+      const touchY = touch.clientY - rect.top;
+      shootTowards(touchX, touchY);
+    });
+
+    function shootTowards(x, y) {
+      const dx = x - player.x;
+      const dy = y - player.y;
+      const dist = Math.hypot(dx, dy);
+      const speed = 8;
 
       balas.push({
         x: player.x,
         y: player.y,
-        dx: dir.x * 8,
-        dy: dir.y * 8,
+        dx: (dx / dist) * speed,
+        dy: (dy / dist) * speed,
         r: 5
       });
     }
@@ -198,7 +184,6 @@
         const len = Math.hypot(dx, dy);
         player.x += (dx / len) * player.speed;
         player.y += (dy / len) * player.speed;
-        player.lastDir = { x: dx / len, y: dy / len };
       }
 
       player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
@@ -223,16 +208,13 @@
         }
       });
 
-      // Balas
       balas.forEach((b, i) => {
         b.x += b.dx;
         b.y += b.dy;
 
-        // Fuera de pantalla
         if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
           balas.splice(i, 1);
         } else {
-          // Colisión con enemigos
           enemigos.forEach((e, j) => {
             const dist = Math.hypot(b.x - e.x, b.y - e.y);
             if (dist < b.r + e.r) {
