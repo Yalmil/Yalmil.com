@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sobrevive a las Letras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    canvas {
+      display: block;
+      background: linear-gradient(135deg, #222, #111);
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0f0;
+      font-size: 18px;
+      z-index: 2;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(2, 60px);
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .btn {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 50%;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .btn:active {
+      background: #6f6;
+    }
+
+    .invisible {
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">❤️ Vidas: <span id="vidas">3</span> | 🕹️ Score: <span id="score">0</span></div>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Controles táctiles -->
+  <div class="controls">
+    <div class="invisible"></div>
+    <button class="btn" id="btnUp">↑</button>
+    <div class="invisible"></div>
+    <button class="btn" id="btnLeft">←</button>
+    <button class="btn" id="btnDown">↓</button>
+    <button class="btn" id="btnRight">→</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    let player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      r: 25,
+      speed: 4,
+      letra: "Ñ"
+    };
+
+    let keys = {};
+    let enemigos = [];
+    let vidas = 3;
+    let score = 0;
+
+    document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+    document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+    // Botones móviles
+    const touchKeys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    function addTouchControl(id, key) {
+      const btn = document.getElementById(id);
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        touchKeys[key] = true;
+      });
+      btn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        touchKeys[key] = false;
+      });
+    }
+
+    addTouchControl("btnUp", "up");
+    addTouchControl("btnDown", "down");
+    addTouchControl("btnLeft", "left");
+    addTouchControl("btnRight", "right");
+
+    function spawnEnemigo() {
+      const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+      const side = Math.floor(Math.random() * 4);
+      let x, y;
+
+      if (side === 0) { x = Math.random() * canvas.width; y = -30; }
+      else if (side === 1) { x = canvas.width + 30; y = Math.random() * canvas.height; }
+      else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 30; }
+      else { x = -30; y = Math.random() * canvas.height; }
+
+      enemigos.push({
+        x, y,
+        r: 20,
+        letra: letras[Math.floor(Math.random() * letras.length)]
+      });
+    }
+
+    function update() {
+      // Movimiento teclado o móvil
+      if (keys["w"] || keys["arrowup"] || touchKeys.up) player.y -= player.speed;
+      if (keys["s"] || keys["arrowdown"] || touchKeys.down) player.y += player.speed;
+      if (keys["a"] || keys["arrowleft"] || touchKeys.left) player.x -= player.speed;
+      if (keys["d"] || keys["arrowright"] || touchKeys.right) player.x += player.speed;
+
+      // Limitar movimiento a pantalla
+      player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
+      player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+
+      enemigos.forEach((e, i) => {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.hypot(dx, dy);
+
+        e.x += (dx / dist) * 1.5;
+        e.y += (dy / dist) * 1.5;
+
+        if (dist < player.r + e.r) {
+          enemigos.splice(i, 1);
+          vidas--;
+          document.getElementById("vidas").textContent = vidas;
+          if (vidas <= 0) {
+            alert("¡Game Over! Score: " + score);
+            location.reload();
+          }
+        }
+      });
+
+      score++;
+      document.getElementById("score").textContent = score;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Jugador
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#0f0";
+      ctx.fill();
+      ctx.closePath();
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 22px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(player.letra, player.x, player.y);
+
+      // Enemigos
+      enemigos.forEach(e => {
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#f00";
+        ctx.fill();
+        ctx.closePath();
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(e.letra, e.x, e.y);
+      });
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    setInterval(spawnEnemigo, 1000);
+    gameLoop();
+  </script>
+</body>
+  </html>
