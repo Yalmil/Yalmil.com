@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Enviar sugerencia</title>
+</head>
+<body>
+  <h2>Formulario de sugerencias</h2>
+  <form id="suggForm">
+    <input type="text" id="suggText" placeholder="Tu sugerencia" required><br>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <script>
+    const user = localStorage.getItem("loggedUser");
+    if (!user) {
+      window.location.href = "login.html";
+    } else if (user === "Yalmil") {
+      window.location.href = "suggests.html";
+    }
+
+    document.getElementById("suggForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const texto = document.getElementById("suggText").value;
+      const sugerencias = JSON.parse(localStorage.getItem("sugerencias")) || [];
+      sugerencias.push({ usuario: user, texto });
+      localStorage.setItem("sugerencias", JSON.stringify(sugerencias));
+      alert("Sugerencia enviada");
+    });
+  </script>
+</body>
+</html>
