@@ -1,224 +1,243 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Battle Royale de Letras</title>
   <style>
-    html, body {
-      margin: 0;
-      overflow: hidden;
-      background: #111;
-      color: white;
-      font-family: sans-serif;
+    body { margin: 0; overflow: hidden; font-family: sans-serif; background: #111; color: white; }
+    canvas { display: block; background: radial-gradient(#333, #000); }
+    #menu {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(0, 0, 0, 0.9); z-index: 5;
     }
-    canvas {
-      display: block;
-      background: radial-gradient(circle, #222, #000);
+    .btn {
+      margin: 10px; padding: 10px 20px;
+      background: #4caf50; color: white; border: none;
+      font-size: 1.2em; border-radius: 10px;
+      cursor: pointer;
     }
+    .btn:hover { background: #66bb6a; }
+
     #selector {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 90%;
+    }
+
+    .letter-btn {
+      padding: 10px; border: 2px solid #fff;
+      border-radius: 5px; background: #222; color: white;
+      cursor: pointer;
+      width: 50px; text-align: center;
+    }
+    .letter-btn:hover { background: #555; }
+
+    #description {
+      margin-top: 20px; text-align: center;
+    }
+
+    #joystick {
+      position: absolute; bottom: 20px; left: 20px;
+      width: 100px; height: 100px;
+      border: 2px solid white; border-radius: 50%;
+      touch-action: none;
+    }
+    #stick {
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    #selector select, #selector button {
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-    }
-    #mobile-controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 20px;
-    }
-    #mobile-controls button {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 10px;
-      font-size: 20px;
+      width: 40px; height: 40px;
+      background: white; border-radius: 50%;
+      top: 30px; left: 30px;
     }
   </style>
 </head>
 <body>
-<canvas id="game"></canvas>
+  <div id="menu">
+    <h1>Elige tu Letra</h1>
+    <div id="selector"></div>
+    <div id="description">Selecciona una letra para ver su habilidad</div>
+    <button class="btn" id="startBtn" disabled>Jugar</button>
+  </div>
+  <canvas></canvas>
+  <div id="joystick" style="display:none;"><div id="stick"></div></div>
+  <script>
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-<div id="selector">
-  <h2>Selecciona tu letra</h2>
-  <select id="letraSelect">
-    <!-- Generado por JS -->
-  </select>
-  <button onclick="iniciarJuego()">Jugar</button>
-</div>
+    const abilities = {
+      A: "Salto más alto",
+      B: "Golpea más fuerte",
+      C: "Disparo curvo",
+      D: "Defensa temporal",
+      E: "Velocidad aumentada",
+      F: "Congela enemigos",
+      G: "Genera escudo",
+      H: "Empuja enemigos",
+      I: "Invisible al correr",
+      J: "Salto doble",
+      K: "Explosión de área",
+      L: "Vida regenerativa",
+      M: "Multiplicador de daño",
+      N: "Rebote de balas",
+      Ñ: "Invoca confusión",
+      O: "Círculo protector",
+      P: "Lanza proyectiles rápidos",
+      Q: "Atrapa enemigos",
+      R: "Revive una vez",
+      S: "Velocidad media pero constante",
+      T: "Trampa temporal",
+      U: "Empuje turbo",
+      V: "Visión de enemigos",
+      W: "Escudo reflectante",
+      X: "Teletransportación",
+      Y: "Drena energía enemiga",
+      Z: "Ataques en zigzag"
+    };
 
-<div id="mobile-controls" style="display: none;">
-  <button onclick="mov.x=-1">◀️</button>
-  <button onclick="mov.y=-1">🔼</button>
-  <button onclick="mov.y=1">🔽</button>
-  <button onclick="mov.x=1">▶️</button>
-</div>
+    let menu = document.getElementById("menu");
+    let selector = document.getElementById("selector");
+    let desc = document.getElementById("description");
+    let startBtn = document.getElementById("startBtn");
+    let chosenLetter = null;
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let player, letrasIA = [], mov = {x: 0, y: 0};
-const habilidades = {
-  "A": "Salto doble",
-  "B": "Empujón",
-  "C": "Corte lateral",
-  "D": "Carga directa",
-  "E": "Velocidad",
-  "F": "Furia temporal",
-  "G": "Golpe giratorio",
-  "H": "Escudo",
-  "I": "Invisible un momento",
-  "J": "Salto alto",
-  "K": "Empuje en línea recta",
-  "L": "Lentitud a enemigos",
-  "M": "Mini clones",
-  "N": "Neutraliza ataques",
-  "Ñ": "Confusión a enemigos",
-  "O": "Orbita ataques",
-  "P": "Puño rápido",
-  "Q": "Quiebra terreno",
-  "R": "Recupera vida",
-  "S": "Sprint",
-  "T": "Torbellino",
-  "U": "Ultrasalto",
-  "V": "Vibra al atacar",
-  "W": "Whirlwind",
-  "X": "X2 velocidad un rato",
-  "Y": "Yoyo (rebote)",
-  "Z": "Zigzag ataque"
-};
-
-function crearSelector() {
-  const sel = document.getElementById("letraSelect");
-  for (let letra in habilidades) {
-    let opt = document.createElement("option");
-    opt.value = letra;
-    opt.innerText = `${letra} - ${habilidades[letra]}`;
-    sel.appendChild(opt);
-  }
-}
-crearSelector();
-
-function iniciarJuego() {
-  document.getElementById("selector").style.display = "none";
-  document.getElementById("mobile-controls").style.display = "flex";
-  const letraElegida = document.getElementById("letraSelect").value;
-  player = crearLetra(letraElegida, canvas.width/2, canvas.height/2, true);
-
-  // Crear 10 letras IA
-  for (let i = 0; i < 10; i++) {
-    const letras = Object.keys(habilidades);
-    const l = letras[Math.floor(Math.random() * letras.length)];
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    letrasIA.push(crearLetra(l, x, y, false));
-  }
-
-  gameLoop();
-}
-
-function crearLetra(letra, x, y, esJugador) {
-  const color = `hsl(${Math.random()*360}, 100%, 60%)`;
-  return {
-    letra, x, y, color, size: 30, esJugador,
-    velocidad: letra === "E" ? 5 : 3,
-    zigzag: letra === "Z",
-    confuse: letra === "Ñ",
-    dx: 0, dy: 0
-  };
-}
-
-function moverIA(letra) {
-  if (letra.confuse && Math.random() < 0.01) {
-    letra.dx = (Math.random() - 0.5) * 6;
-    letra.dy = (Math.random() - 0.5) * 6;
-    return;
-  }
-  let dx = player.x - letra.x;
-  let dy = player.y - letra.y;
-  let dist = Math.sqrt(dx*dx + dy*dy);
-  letra.dx = dx / dist * letra.velocidad;
-  letra.dy = dy / dist * letra.velocidad;
-  if (letra.zigzag) {
-    letra.dx += Math.sin(Date.now() / 100) * 2;
-    letra.dy += Math.cos(Date.now() / 100) * 2;
-  }
-}
-
-function colision(a, b) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-  return Math.sqrt(dx*dx + dy*dy) < a.size;
-}
-
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Fondo aleatorio
-  document.body.style.background = `radial-gradient(circle, hsl(${Date.now()/20 % 360}, 60%, 20%), black)`;
-
-  // Mover jugador
-  player.x += mov.x * player.velocidad;
-  player.y += mov.y * player.velocidad;
-
-  // Dibujar jugador
-  ctx.fillStyle = player.color;
-  ctx.beginPath();
-  ctx.arc(player.x, player.y, player.size, 0, Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "20px Arial";
-  ctx.fillText(player.letra, player.x - 7, player.y + 7);
-
-  // Mover y dibujar letras IA
-  for (let i = letrasIA.length - 1; i >= 0; i--) {
-    const l = letrasIA[i];
-    moverIA(l);
-    l.x += l.dx;
-    l.y += l.dy;
-    ctx.fillStyle = l.color;
-    ctx.beginPath();
-    ctx.arc(l.x, l.y, l.size, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.fillText(l.letra, l.x - 7, l.y + 7);
-
-    if (colision(l, player)) {
-      alert("¡Perdiste! Te atrapó la letra " + l.letra);
-      location.reload();
-      return;
+    for (let letter in abilities) {
+      let btn = document.createElement("div");
+      btn.className = "letter-btn";
+      btn.textContent = letter;
+      btn.onclick = () => {
+        chosenLetter = letter;
+        desc.innerHTML = `<b>${letter}</b>: ${abilities[letter]}`;
+        startBtn.disabled = false;
+      };
+      selector.appendChild(btn);
     }
-  }
 
-  requestAnimationFrame(gameLoop);
-}
+    startBtn.onclick = () => {
+      menu.style.display = "none";
+      startGame();
+    };
 
-// Controles PC
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft") mov.x = -1;
-  if (e.key === "ArrowRight") mov.x = 1;
-  if (e.key === "ArrowUp") mov.y = -1;
-  if (e.key === "ArrowDown") mov.y = 1;
-});
-document.addEventListener("keyup", e => {
-  if (["ArrowLeft", "ArrowRight"].includes(e.key)) mov.x = 0;
-  if (["ArrowUp", "ArrowDown"].includes(e.key)) mov.y = 0;
-});
-</script>
+    let player = { x: 400, y: 300, r: 20, color: "lime", speed: 4, name: "", protectTime: 150, isPlayer: true };
+    let enemies = [];
+    let keys = {};
+    let mobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    let stick = { active: false, dx: 0, dy: 0 };
+
+    const joystick = document.getElementById("joystick");
+    const stickDiv = document.getElementById("stick");
+
+    if (mobile) {
+      joystick.style.display = "block";
+      joystick.addEventListener("touchstart", e => stick.active = true);
+      joystick.addEventListener("touchmove", e => {
+        e.preventDefault();
+        let touch = e.touches[0];
+        let rect = joystick.getBoundingClientRect();
+        stick.dx = (touch.clientX - rect.left - 50) / 50;
+        stick.dy = (touch.clientY - rect.top - 50) / 50;
+        stick.dx = Math.max(-1, Math.min(1, stick.dx));
+        stick.dy = Math.max(-1, Math.min(1, stick.dy));
+        stickDiv.style.left = `${30 + stick.dx * 20}px`;
+        stickDiv.style.top = `${30 + stick.dy * 20}px`;
+      }, { passive: false });
+      joystick.addEventListener("touchend", () => {
+        stick.active = false;
+        stick.dx = 0;
+        stick.dy = 0;
+        stickDiv.style.left = `30px`;
+        stickDiv.style.top = `30px`;
+      });
+    }
+
+    function startGame() {
+      player.name = chosenLetter;
+      enemies = [];
+      for (let i = 0; i < 25; i++) {
+        let l = String.fromCharCode(65 + i);
+        if (l === chosenLetter) continue;
+        enemies.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: 20, color: "red", name: l, speed: 1 + Math.random()*2, protectTime: 100 });
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawPlayer(player);
+      enemies.forEach(e => drawPlayer(e));
+
+      movePlayer(player);
+      enemies.forEach(e => moveEnemy(e));
+
+      checkCollisions();
+
+      requestAnimationFrame(update);
+    }
+
+    function drawPlayer(p) {
+      ctx.beginPath();
+      ctx.fillStyle = p.protectTime > 0 ? "cyan" : p.color;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "black";
+      ctx.font = "bold 18px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(p.name, p.x, p.y + 6);
+      if (p.protectTime > 0) p.protectTime--;
+    }
+
+    function movePlayer(p) {
+      let dx = 0, dy = 0;
+      if (!mobile) {
+        if (keys["w"] || keys["ArrowUp"]) dy -= 1;
+        if (keys["s"] || keys["ArrowDown"]) dy += 1;
+        if (keys["a"] || keys["ArrowLeft"]) dx -= 1;
+        if (keys["d"] || keys["ArrowRight"]) dx += 1;
+      } else {
+        dx = stick.dx;
+        dy = stick.dy;
+      }
+
+      const len = Math.hypot(dx, dy);
+      if (len > 0) {
+        dx /= len;
+        dy /= len;
+        p.x += dx * p.speed;
+        p.y += dy * p.speed;
+      }
+    }
+
+    function moveEnemy(e) {
+      let dx = player.x - e.x;
+      let dy = player.y - e.y;
+      let dist = Math.hypot(dx, dy);
+      if (dist > 0) {
+        dx /= dist;
+        dy /= dist;
+        e.x += dx * e.speed;
+        e.y += dy * e.speed;
+      }
+    }
+
+    function checkCollisions() {
+      enemies = enemies.filter(e => {
+        let dx = player.x - e.x;
+        let dy = player.y - e.y;
+        let dist = Math.hypot(dx, dy);
+        if (dist < player.r + e.r) {
+          if (player.protectTime > 0 || e.protectTime > 0) return true;
+          alert("¡Perdiste!");
+          location.reload();
+          return false;
+        }
+        return true;
+      });
+    }
+  </script>
 </body>
 </html>
