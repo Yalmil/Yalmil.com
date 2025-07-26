@@ -4,68 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registro</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 15px #000;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    a {
+      color: #bbdefb;
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Registro</h2>
-  <form id="registerForm">
-    <input type="text" id="username" placeholder="Nombre de usuario" required><br>
-    <input type="email" id="email" placeholder="Correo electrónico" required><br>
-    <input type="password" id="password" placeholder="Contraseña" required><br>
-    <button type="submit">Registrarse</button>
-  </form>
+  <div class="container">
+    <h2>Registro</h2>
+    <input type="email" id="email" placeholder="Correo">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="register()">Crear cuenta</button>
+    <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+  </div>
 
-  <p id="message"></p>
-
-  <!-- Firebase SDKs -->
   <script type="module">
-    // Importar Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
       projectId: "databaseloginweb",
-      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
       storageBucket: "databaseloginweb.appspot.com",
       messagingSenderId: "121538864529",
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
 
-    // Registro
-    const form = document.getElementById('registerForm');
-    const message = document.getElementById('message');
+    window.register = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const username = document.getElementById('username').value;
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // Guardar datos extra en Realtime Database
-        await set(ref(db, 'users/' + user.uid), {
-          username: username,
-          email: email,
-          createdAt: new Date().toISOString()
-        });
-
-        message.textContent = "¡Registro exitoso! Ahora puedes iniciar sesión.";
-        form.reset();
-      } catch (error) {
-        message.textContent = "Error: " + error.message;
-      }
-    });
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "inicio.html")
+        .catch(error => alert("Error: " + error.message));
+    };
   </script>
 </body>
 </html>
