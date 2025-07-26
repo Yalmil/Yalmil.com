@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Battle Royale de Letras</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: monospace;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: radial-gradient(circle at center, #222 0%, #000 100%);
+      border: 2px solid white;
+    }
+    #ganador {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="game" width="800" height="600"></canvas>
+<div id="ganador">Sobrevive la mejor letra...</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const poderes = {
+  "E": { velocidad: 2.5 },
+  "Z": { zigzag: true },
+  "Ñ": { confusion: true }, // la añadiremos luego
+};
+
+class Letra {
+  constructor(char) {
+    this.char = char;
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = 24;
+    this.color = `hsl(${Math.random()*360}, 80%, 60%)`;
+    this.vx = Math.random() < 0.5 ? 1 : -1;
+    this.vy = Math.random() < 0.5 ? 1 : -1;
+    this.speed = poderes[char]?.velocidad || 1.5;
+    this.zigzag = poderes[char]?.zigzag || false;
+    this.confusion = poderes[char]?.confusion || false;
+    this.vivo = true;
+    this.timer = 0;
+  }
+
+  mover() {
+    if (!this.vivo) return;
+
+    if (this.zigzag) {
+      this.timer += 1;
+      this.vx = Math.sin(this.timer * 0.1) * 2;
+    }
+
+    if (this.confusion) {
+      if (Math.random() < 0.01) {
+        this.vx *= -1;
+        this.vy *= -1;
+      }
+    }
+
+    this.x += this.vx * this.speed;
+    this.y += this.vy * this.speed;
+
+    // Rebote con bordes
+    if (this.x < 0 || this.x > canvas.width - this.size) this.vx *= -1;
+    if (this.y < 0 || this.y > canvas.height - this.size) this.vy *= -1;
+  }
+
+  dibujar() {
+    if (!this.vivo) return;
+    ctx.fillStyle = this.color;
+    ctx.font = this.size + "px Arial";
+    ctx.fillText(this.char, this.x, this.y);
+  }
+
+  colisionaCon(otra) {
+    if (!this.vivo || !otra.vivo) return false;
+    const dx = this.x - otra.x;
+    const dy = this.y - otra.y;
+    const distancia = Math.sqrt(dx*dx + dy*dy);
+    return distancia < this.size;
+  }
+}
+
+let jugadores = letras.map(l => new Letra(l));
+
+function juego() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Fondo animado
+  canvas.style.background = `radial-gradient(circle at center, hsl(${Date.now() % 360}, 20%, 20%), black)`;
+
+  for (let l of jugadores) {
+    l.mover();
+    l.dibujar();
+  }
+
+  // Colisiones
+  for (let i = 0; i < jugadores.length; i++) {
+    for (let j = i + 1; j < jugadores.length; j++) {
+      if (jugadores[i].colisionaCon(jugadores[j])) {
+        // Pequeña lógica: uno muere aleatoriamente
+        if (Math.random() < 0.5) jugadores[i].vivo = false;
+        else jugadores[j].vivo = false;
+      }
+    }
+  }
+
+  // Mostrar ganador
+  const vivos = jugadores.filter(j => j.vivo);
+  if (vivos.length === 1) {
+    document.getElementById("ganador").innerText = `🏆 Ganador: ${vivos[0].char}`;
+  } else if (vivos.length === 0) {
+    document.getElementById("ganador").innerText = `Empate 😵`;
+  }
+
+  requestAnimationFrame(juego);
+}
+
+juego();
+</script>
+</body>
+</html>
