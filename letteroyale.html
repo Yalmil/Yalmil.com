@@ -2,48 +2,52 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Battle Royale de Letras</title>
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       overflow: hidden;
-      background: linear-gradient(to bottom right, #222, #111);
-      color: white;
       font-family: sans-serif;
-      touch-action: none;
     }
     canvas {
+      background: #111;
       display: block;
     }
-    #selector {
+    #letterSelect {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(20,20,20,0.95);
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #222;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 10;
+      color: white;
     }
-    #letras {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    #letters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90vw;
       gap: 10px;
-      max-width: 400px;
-      margin-top: 20px;
     }
-    .letra-btn {
-      background: #333;
+    .letter-btn {
+      background: #444;
       color: white;
       border: none;
-      font-size: 24px;
       padding: 10px;
+      font-size: 24px;
+      border-radius: 5px;
       cursor: pointer;
-      border-radius: 10px;
+    }
+    .letter-btn:hover {
+      background: #666;
+    }
+    #desc {
+      margin: 20px 0;
+      text-align: center;
     }
     #joystick {
       position: absolute;
@@ -51,208 +55,207 @@
       left: 20px;
       width: 100px;
       height: 100px;
+      background: rgba(255,255,255,0.2);
       border-radius: 50%;
-      background: rgba(255,255,255,0.1);
       touch-action: none;
     }
     #stick {
-      position: absolute;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
+      background: white;
       border-radius: 50%;
-      background: rgba(255,255,255,0.4);
-      top: 30px;
-      left: 30px;
+      position: absolute;
+      top: 25px;
+      left: 25px;
       pointer-events: none;
     }
   </style>
 </head>
 <body>
-<div id="selector">
-  <h1>Elige tu letra</h1>
-  <div id="letras"></div>
-</div>
-<canvas id="game"></canvas>
-<div id="joystick"><div id="stick"></div></div>
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-let width, height;
-let player, letrasIA = [], particles = [];
-let keys = {}, joystick = {dx: 0, dy: 0};
-let last = 0;
-let protectTime = 0;
-const habilidades = {
-  A: {vel: 2, desc: "Normal"}, B: {vel: 2.1, desc: "Robusta"}, C: {vel: 2.2, desc: "Curva"},
-  D: {vel: 2.1}, E: {vel: 3, desc: "Rápida"}, F: {vel: 2}, G: {vel: 2.2},
-  H: {vel: 2.3}, I: {vel: 2.1}, J: {vel: 2.4}, K: {vel: 2.3}, L: {vel: 2.2},
-  M: {vel: 2}, N: {vel: 2.1}, Ñ: {vel: 2, confundir: true, desc: "Confunde"}, O: {vel: 2.2},
-  P: {vel: 2.3}, Q: {vel: 2.2}, R: {vel: 2.4}, S: {vel: 2.5}, T: {vel: 2.3},
-  U: {vel: 2.1}, V: {vel: 2.4}, W: {vel: 2.3}, X: {vel: 2.5}, Y: {vel: 2.6},
-  Z: {vel: 2.2, zigzag: true, desc: "ZigZag"}
-};
+  <div id="letterSelect">
+    <h1>Elige tu letra</h1>
+    <div id="letters"></div>
+    <div id="desc"></div>
+  </div>
+  <canvas id="game"></canvas>
+  <div id="joystick" style="display:none;">
+    <div id="stick"></div>
+  </div>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    let width = innerWidth, height = innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
-function resize() {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
+    const joystick = document.getElementById("joystick");
+    const stick = document.getElementById("stick");
 
-function crearJugador(letra) {
-  return {
-    letra,
-    x: width / 2, y: height / 2,
-    r: 20,
-    dx: 0, dy: 0,
-    vel: habilidades[letra]?.vel || 2,
-    inmunidad: 100
-  };
-}
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ".split("");
+    const letterDesc = {
+      E: "Velocidad aumentada",
+      Z: "Ataques zigzag",
+      Ñ: "Confunde enemigos cercanos",
+      A: "Salto doble",
+      B: "Escudo temporal",
+      C: "Dash hacia adelante",
+      D: "Disparo en línea recta",
+      F: "Empuje de área",
+      G: "Cura pequeña",
+      H: "Invisible por segundos",
+      I: "Veloz en línea recta",
+      J: "Salta enemigos",
+      K: "Ataca en curva",
+      L: "Congela por 1s",
+      M: "Multiplica sombra",
+      N: "Copia aleatoria",
+      O: "Explosión circular",
+      P: "Ralentiza área",
+      Q: "Atrapa a uno",
+      R: "Rebote al impactar",
+      S: "Ataque serpenteante",
+      T: "Cae como trueno",
+      U: "Salta paredes",
+      V: "Absorbe disparos",
+      W: "Dobla dirección",
+      X: "Cruza enemigos",
+      Y: "Vuela un instante",
+      Ñ: "Confunde enemigos"
+    };
 
-function crearIA(letra) {
-  return {
-    letra,
-    x: Math.random() * width,
-    y: Math.random() * height,
-    r: 20,
-    dx: 0, dy: 0,
-    vel: habilidades[letra]?.vel || 2,
-    objetivo: null
-  };
-}
+    let player, enemies = [], keys = {}, immunity = 0;
+    let joystickDir = {x: 0, y: 0};
+    let selectedLetter = null;
+    let bgColor = "#222";
 
-function spawnIA() {
-  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ";
-  letrasIA = [];
-  for (let l of letras) {
-    if (l !== player.letra) {
-      letrasIA.push(crearIA(l));
+    // Pantalla de selección
+    const letterDiv = document.getElementById("letters");
+    const descDiv = document.getElementById("desc");
+    letters.forEach(l => {
+      const btn = document.createElement("button");
+      btn.className = "letter-btn";
+      btn.innerText = l;
+      btn.onclick = () => {
+        selectedLetter = l;
+        bgColor = `hsl(${Math.random()*360}, 50%, 15%)`;
+        document.body.style.background = bgColor;
+        document.getElementById("letterSelect").style.display = "none";
+        joystick.style.display = "block";
+        startGame();
+      };
+      btn.onmouseover = () => {
+        descDiv.innerText = `${l}: ${letterDesc[l] || "Sin habilidad definida"}`;
+      };
+      letterDiv.appendChild(btn);
+    });
+
+    function startGame() {
+      player = {x: width/2, y: height/2, size: 20, color: "white", letter: selectedLetter};
+      immunity = 120;
+      for (let i = 0; i < 20; i++) spawnEnemy();
+      animate();
     }
-  }
-}
 
-function drawCircle(x, y, r, color, letra) {
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 20px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(letra, x, y + 5);
-}
-
-function updatePlayer() {
-  player.dx = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0) + joystick.dx;
-  player.dy = (keys.ArrowDown || keys.s ? 1 : 0) - (keys.ArrowUp || keys.w ? 1 : 0) + joystick.dy;
-  let len = Math.hypot(player.dx, player.dy);
-  if (len > 0) {
-    player.dx = (player.dx / len) * player.vel;
-    player.dy = (player.dy / len) * player.vel;
-    player.x += player.dx;
-    player.y += player.dy;
-    player.x = Math.max(player.r, Math.min(width - player.r, player.x));
-    player.y = Math.max(player.r, Math.min(height - player.r, player.y));
-  }
-  if (player.inmunidad > 0) player.inmunidad--;
-}
-
-function updateIA() {
-  for (let ai of letrasIA) {
-    if (!ai.objetivo || ai.objetivo.inmunidad > 0) {
-      ai.objetivo = [player, ...letrasIA.filter(o => o !== ai)][Math.floor(Math.random() * (letrasIA.length + 1))];
+    function spawnEnemy() {
+      const enemyLetter = letters[Math.floor(Math.random() * letters.length)];
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      enemies.push({x, y, size: 20, color: "red", letter: enemyLetter});
     }
-    let dx = ai.objetivo.x - ai.x;
-    let dy = ai.objetivo.y - ai.y;
-    let len = Math.hypot(dx, dy);
-    if (len > 0) {
-      ai.dx = (dx / len) * ai.vel;
-      ai.dy = (dy / len) * ai.vel;
-      ai.x += ai.dx;
-      ai.y += ai.dy;
+
+    // Joystick (teléfono)
+    let dragging = false;
+    let baseX = 0, baseY = 0;
+    joystick.addEventListener("touchstart", e => {
+      dragging = true;
+      baseX = e.touches[0].clientX;
+      baseY = e.touches[0].clientY;
+    });
+    joystick.addEventListener("touchmove", e => {
+      if (!dragging) return;
+      const dx = e.touches[0].clientX - baseX;
+      const dy = e.touches[0].clientY - baseY;
+      const dist = Math.min(40, Math.sqrt(dx*dx + dy*dy));
+      const angle = Math.atan2(dy, dx);
+      stick.style.left = 25 + dist * Math.cos(angle) + "px";
+      stick.style.top = 25 + dist * Math.sin(angle) + "px";
+      joystickDir.x = Math.cos(angle);
+      joystickDir.y = Math.sin(angle);
+    });
+    joystick.addEventListener("touchend", () => {
+      dragging = false;
+      stick.style.left = "25px";
+      stick.style.top = "25px";
+      joystickDir = {x: 0, y: 0};
+    });
+
+    window.addEventListener("keydown", e => keys[e.key] = true);
+    window.addEventListener("keyup", e => keys[e.key] = false);
+
+    function movePlayer() {
+      let speed = 3;
+      if (player.letter === "E") speed = 6;
+
+      const dx = (keys["ArrowRight"] || keys["d"] ? 1 : 0) - (keys["ArrowLeft"] || keys["a"] ? 1 : 0) + joystickDir.x;
+      const dy = (keys["ArrowDown"] || keys["s"] ? 1 : 0) - (keys["ArrowUp"] || keys["w"] ? 1 : 0) + joystickDir.y;
+
+      player.x += dx * speed;
+      player.y += dy * speed;
+
+      player.x = Math.max(0, Math.min(width, player.x));
+      player.y = Math.max(0, Math.min(height, player.y));
     }
-  }
-}
 
-function checkCollisions() {
-  for (let ai of letrasIA) {
-    let dx = ai.x - player.x;
-    let dy = ai.y - player.y;
-    if (Math.hypot(dx, dy) < player.r + ai.r && player.inmunidad <= 0) {
-      alert("¡Has sido derrotado!");
-      location.reload();
+    function drawPlayer() {
+      ctx.fillStyle = immunity > 0 ? "cyan" : player.color;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "black";
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(player.letter, player.x, player.y + 5);
     }
-  }
-}
 
-function draw() {
-  ctx.fillStyle = "#111";
-  ctx.fillRect(0, 0, width, height);
-  drawCircle(player.x, player.y, player.r, player.inmunidad > 0 ? "#0f0" : "#09f", player.letra);
-  for (let ai of letrasIA) {
-    drawCircle(ai.x, ai.y, ai.r, "#f00", ai.letra);
-  }
-}
-
-function loop(ts) {
-  let dt = ts - last;
-  last = ts;
-  updatePlayer();
-  updateIA();
-  checkCollisions();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
-// Selector de personaje
-const letrasDiv = document.getElementById("letras");
-for (let l in habilidades) {
-  let btn = document.createElement("button");
-  btn.textContent = l;
-  btn.className = "letra-btn";
-  btn.onclick = () => {
-    document.getElementById("selector").style.display = "none";
-    player = crearJugador(l);
-    spawnIA();
-    requestAnimationFrame(loop);
-  };
-  letrasDiv.appendChild(btn);
-}
-
-// Joystick virtual
-const joy = document.getElementById("joystick");
-const stick = document.getElementById("stick");
-let dragging = false;
-joy.addEventListener("touchstart", e => {
-  dragging = true;
-});
-joy.addEventListener("touchend", e => {
-  dragging = false;
-  joystick.dx = joystick.dy = 0;
-  stick.style.left = "30px";
-  stick.style.top = "30px";
-});
-joy.addEventListener("touchmove", e => {
-  if (dragging) {
-    let rect = joy.getBoundingClientRect();
-    let touch = e.touches[0];
-    let x = touch.clientX - rect.left - 50;
-    let y = touch.clientY - rect.top - 50;
-    let len = Math.hypot(x, y);
-    if (len > 40) {
-      x = (x / len) * 40;
-      y = (y / len) * 40;
+    function updateEnemies() {
+      enemies.forEach(enemy => {
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0) {
+          enemy.x += (dx / dist) * 2;
+          enemy.y += (dy / dist) * 2;
+        }
+        if (dist < player.size + enemy.size && immunity <= 0) {
+          alert("¡Perdiste! Recarga la página.");
+          location.reload();
+        }
+      });
     }
-    joystick.dx = x / 40;
-    joystick.dy = y / 40;
-    stick.style.left = `${30 + x}px`;
-    stick.style.top = `${30 + y}px`;
-  }
-});
-</script>
+
+    function drawEnemies() {
+      enemies.forEach(e => {
+        ctx.fillStyle = e.color;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "white";
+        ctx.font = "14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(e.letter, e.x, e.y + 5);
+      });
+    }
+
+    function animate() {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+      movePlayer();
+      drawPlayer();
+      updateEnemies();
+      drawEnemies();
+      if (immunity > 0) immunity--;
+      requestAnimationFrame(animate);
+    }
+  </script>
 </body>
 </html>
