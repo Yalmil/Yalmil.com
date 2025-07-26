@@ -2,237 +2,240 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sobrevive a las Letras</title>
   <style>
     html, body {
       margin: 0;
       overflow: hidden;
       background: #111;
+      font-family: sans-serif;
+      user-select: none;
+      touch-action: none;
     }
     canvas {
       display: block;
-      background: linear-gradient(to right, #111, #222);
+      background: radial-gradient(circle, #222, #000);
     }
     #ui {
       position: absolute;
       top: 10px;
       left: 10px;
       color: white;
-      font-family: monospace;
-      font-size: 16px;
-      z-index: 10;
+      font-size: 18px;
+      z-index: 2;
     }
     #weaponSelect {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.9);
+      background: #222;
       color: white;
       padding: 20px;
-      font-family: sans-serif;
-      z-index: 20;
-      border: 2px solid lime;
       border-radius: 10px;
+      text-align: center;
+      z-index: 3;
     }
     #weaponSelect button {
-      margin: 5px;
-      padding: 10px;
-      background: black;
-      color: white;
-      border: 1px solid lime;
-      border-radius: 5px;
-      cursor: pointer;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="ui">💖 Vidas: <span id="lives">5</span></div>
+  <canvas id="game"></canvas>
+  <div id="ui">Puntaje: 0 | Récord: 0</div>
+  <div id="weaponSelect">
+    <h2>Elige tu arma</h2>
+    <button onclick="startGame('pistola')">🔫 Pistola (normal)</button>
+    <button onclick="startGame('escopeta')">💥 Escopeta (varias balas)</button>
+    <button onclick="startGame('laser')">🔺 Láser (rápido)</button>
+  </div>
 
-<div id="weaponSelect">
-  <h2>Elige tu arma</h2>
-  <button onclick="selectWeapon('normal')">🔫 Normal</button>
-  <button onclick="selectWeapon('triple')">🔱 Triple</button>
-  <button onclick="selectWeapon('sniper')">🎯 Sniper</button>
-</div>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+    const ui = document.getElementById("ui");
+    let score = 0;
+    let record = localStorage.getItem("letraRecord") || 0;
+    ui.textContent = `Puntaje: ${score} | Récord: ${record}`;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    let weaponType = "pistola";
+    let gameStarted = false;
 
-let player = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  radius: 20,
-  color: "#0f0",
-  speed: 4
-};
-
-let bullets = [];
-let letters = [];
-let lives = 5;
-let mouse = { x: 0, y: 0 };
-let keys = {};
-let selectedWeapon = null;
-
-function selectWeapon(type) {
-  selectedWeapon = type;
-  document.getElementById("weaponSelect").style.display = "none";
-}
-
-function shoot(x, y) {
-  if (!selectedWeapon) return;
-
-  const dx = x - player.x;
-  const dy = y - player.y;
-  const angle = Math.atan2(dy, dx);
-  
-  const speed = selectedWeapon === "sniper" ? 12 : 6;
-  const spread = selectedWeapon === "triple" ? [ -0.3, 0, 0.3 ] : [ 0 ];
-
-  for (let s of spread) {
-    bullets.push({
-      x: player.x,
-      y: player.y,
-      dx: Math.cos(angle + s) * speed,
-      dy: Math.sin(angle + s) * speed,
-      radius: 5,
-      color: "white"
-    });
-  }
-}
-
-canvas.addEventListener("mousedown", (e) => {
-  shoot(e.clientX, e.clientY);
-});
-
-canvas.addEventListener("touchstart", (e) => {
-  const touch = e.touches[0];
-  shoot(touch.clientX, touch.clientY);
-});
-
-window.addEventListener("keydown", (e) => keys[e.key] = true);
-window.addEventListener("keyup", (e) => keys[e.key] = false);
-
-function randomLetter() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  return letters[Math.floor(Math.random() * letters.length)];
-}
-
-function spawnLetter() {
-  const l = randomLetter();
-  const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height;
-  const health = l.charCodeAt(0) - 64;
-
-  letters.push({
-    x, y,
-    radius: 20,
-    char: l,
-    color: `hsl(${Math.random() * 360}, 80%, 60%)`,
-    dx: (Math.random() - 0.5) * 1.5,
-    dy: (Math.random() - 0.5) * 1.5,
-    health
-  });
-}
-
-setInterval(spawnLetter, 1500);
-
-function update() {
-  // Movimiento
-  if (keys["ArrowUp"] || keys["w"]) player.y -= player.speed;
-  if (keys["ArrowDown"] || keys["s"]) player.y += player.speed;
-  if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
-  if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
-
-  // Límite del jugador
-  player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
-  player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
-
-  // Actualizar balas
-  bullets = bullets.filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
-  bullets.forEach(b => {
-    b.x += b.dx;
-    b.y += b.dy;
-  });
-
-  // Actualizar letras
-  letters.forEach(l => {
-    l.x += l.dx;
-    l.y += l.dy;
-
-    // Rebote en bordes
-    if (l.x - l.radius < 0 || l.x + l.radius > canvas.width) l.dx *= -1;
-    if (l.y - l.radius < 0 || l.y + l.radius > canvas.height) l.dy *= -1;
-
-    // Colisión con jugador
-    const dist = Math.hypot(player.x - l.x, player.y - l.y);
-    if (dist < player.radius + l.radius) {
-      lives--;
-      document.getElementById("lives").textContent = lives;
-      l.x = Math.random() * canvas.width;
-      l.y = Math.random() * canvas.height;
+    function startGame(type) {
+      weaponType = type;
+      document.getElementById("weaponSelect").style.display = "none";
+      gameStarted = true;
     }
-  });
 
-  // Balas impactando letras
-  for (let i = bullets.length - 1; i >= 0; i--) {
-    const b = bullets[i];
-    for (let j = letters.length - 1; j >= 0; j--) {
-      const l = letters[j];
-      const dist = Math.hypot(b.x - l.x, b.y - l.y);
-      if (dist < l.radius + b.radius) {
-        l.health--;
-        if (l.health <= 0) letters.splice(j, 1);
-        bullets.splice(i, 1);
-        break;
+    const player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      r: 20,
+      speed: 5,
+      color: "#0f0",
+    };
+
+    const bullets = [];
+    const enemies = [];
+    let target = { x: player.x, y: player.y };
+
+    function spawnEnemy() {
+      const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      const hp = letter.charCodeAt(0) - 64;
+      const side = Math.floor(Math.random() * 4);
+      let x, y;
+      if (side === 0) {
+        x = Math.random() * canvas.width;
+        y = -30;
+      } else if (side === 1) {
+        x = canvas.width + 30;
+        y = Math.random() * canvas.height;
+      } else if (side === 2) {
+        x = Math.random() * canvas.width;
+        y = canvas.height + 30;
+      } else {
+        x = -30;
+        y = Math.random() * canvas.height;
+      }
+
+      enemies.push({
+        x,
+        y,
+        r: 20,
+        letter,
+        hp,
+        color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+      });
+    }
+
+    setInterval(() => {
+      if (gameStarted) spawnEnemy();
+    }, 800);
+
+    function shoot(x, y) {
+      if (weaponType === "pistola") {
+        bullets.push({ x: player.x, y: player.y, dx: (x - player.x) / 20, dy: (y - player.y) / 20 });
+      } else if (weaponType === "escopeta") {
+        for (let i = -2; i <= 2; i++) {
+          const angle = Math.atan2(y - player.y, x - player.x) + i * 0.1;
+          bullets.push({
+            x: player.x,
+            y: player.y,
+            dx: Math.cos(angle) * 5,
+            dy: Math.sin(angle) * 5,
+          });
+        }
+      } else if (weaponType === "laser") {
+        bullets.push({ x: player.x, y: player.y, dx: (x - player.x) / 10, dy: (y - player.y) / 10 });
       }
     }
-  }
-}
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    window.addEventListener("mousemove", e => {
+      target.x = e.clientX;
+      target.y = e.clientY;
+    });
 
-  // Jugador
-  ctx.fillStyle = player.color;
-  ctx.beginPath();
-  ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-  ctx.fill();
+    window.addEventListener("touchstart", e => {
+      if (!gameStarted) return;
+      const touch = e.touches[0];
+      target.x = touch.clientX;
+      target.y = touch.clientY;
+      shoot(target.x, target.y);
+    });
 
-  // Letras
-  letters.forEach(l => {
-    ctx.fillStyle = l.color;
-    ctx.beginPath();
-    ctx.arc(l.x, l.y, l.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "black";
-    ctx.font = "20px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(l.char, l.x, l.y + 7);
-  });
+    window.addEventListener("click", e => {
+      if (!gameStarted) return;
+      shoot(e.clientX, e.clientY);
+    });
 
-  // Balas
-  bullets.forEach(b => {
-    ctx.fillStyle = b.color;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
+      // Movimiento del jugador
+      const dx = target.x - player.x;
+      const dy = target.y - player.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > player.speed) {
+        player.x += (dx / dist) * player.speed;
+        player.y += (dy / dist) * player.speed;
+      }
 
-loop();
-</script>
+      // Limitar dentro del mapa
+      player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
+      player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
+
+      // Dibujar jugador
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+      ctx.fillStyle = player.color;
+      ctx.fill();
+
+      // Dibujar y mover balas
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.dx;
+        b.y += b.dy;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+
+        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Dibujar enemigos
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        const angle = Math.atan2(player.y - e.y, player.x - e.x);
+        e.x += Math.cos(angle) * 1.5;
+        e.y += Math.sin(angle) * 1.5;
+
+        // Dibujo
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+        ctx.fillStyle = e.color;
+        ctx.fill();
+
+        ctx.fillStyle = "#000";
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(e.letter, e.x, e.y);
+
+        // Colisión con balas
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          const b = bullets[j];
+          const d = Math.hypot(e.x - b.x, e.y - b.y);
+          if (d < e.r + 5) {
+            e.hp--;
+            bullets.splice(j, 1);
+            if (e.hp <= 0) {
+              enemies.splice(i, 1);
+              score++;
+              if (score > record) {
+                record = score;
+                localStorage.setItem("letraRecord", record);
+              }
+              ui.textContent = `Puntaje: ${score} | Récord: ${record}`;
+            }
+            break;
+          }
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    update();
+  </script>
 </body>
 </html>
