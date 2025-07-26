@@ -1,268 +1,213 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Sobrevive a las Letras</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #111;
       overflow: hidden;
       font-family: sans-serif;
+      background: black;
+      color: white;
     }
-
     canvas {
       display: block;
-      background: linear-gradient(135deg, #222, #111);
+      background: radial-gradient(circle, #222 0%, #000 100%);
     }
-
-    #ui {
+    #startScreen {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #0f0;
-      font-size: 18px;
-      z-index: 2;
-    }
-
-    .controls {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(2, 60px);
-      gap: 10px;
-      z-index: 2;
-    }
-
-    .btn {
-      background: #0f0;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 50%;
-      font-size: 20px;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      user-select: none;
-      touch-action: none;
+      z-index: 10;
     }
-
-    .btn:active {
-      background: #6f6;
+    .weapon-button {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 18px;
+      background: #444;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
     }
-
-    .invisible {
-      visibility: hidden;
+    .weapon-button:hover {
+      background: #666;
     }
   </style>
 </head>
 <body>
-  <div id="ui">❤️ Vidas: <span id="vidas">3</span> | 🕹️ Score: <span id="score">0</span></div>
-  <canvas id="gameCanvas"></canvas>
-
-  <div class="controls">
-    <div class="invisible"></div>
-    <button class="btn" id="btnUp">↑</button>
-    <div class="invisible"></div>
-    <button class="btn" id="btnLeft">←</button>
-    <button class="btn" id="btnDown">↓</button>
-    <button class="btn" id="btnRight">→</button>
+  <div id="startScreen">
+    <h2>Elige tu arma</h2>
+    <button class="weapon-button" onclick="startGame('pistol')">🔫 Pistola</button>
+    <button class="weapon-button" onclick="startGame('shotgun')">🔥 Escopeta</button>
+    <button class="weapon-button" onclick="startGame('ray')">⚡ Rayo</button>
   </div>
-
+  <canvas id="gameCanvas"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
 
-    function resizeCanvas() {
-      canvas.width = innerWidth;
-      canvas.height = innerHeight;
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    let player = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      r: 25,
-      speed: 4,
-      letra: "Ñ"
-    };
+    window.addEventListener("resize", () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
 
     let keys = {};
-    let touchKeys = { up: false, down: false, left: false, right: false };
-    let enemigos = [];
-    let balas = [];
-    let vidas = 3;
-    let score = 0;
+    let bullets = [];
+    let enemies = [];
+    let weapon = "pistol";
+    let mouseX = w/2, mouseY = h/2;
 
-    document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-    document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
 
-    // 📱 Control móvil
-    function addTouchControl(id, dir) {
-      const btn = document.getElementById(id);
-      btn.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        touchKeys[dir] = true;
-      });
-      btn.addEventListener("touchend", (e) => {
-        e.preventDefault();
-        touchKeys[dir] = false;
-      });
+    document.addEventListener("mousemove", e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    document.addEventListener("touchstart", e => {
+      const touch = e.touches[0];
+      mouseX = touch.clientX;
+      mouseY = touch.clientY;
+      shoot();
+    });
+
+    document.addEventListener("click", shoot);
+
+    let player = {
+      x: w/2,
+      y: h/2,
+      size: 30,
+      speed: 4,
+      color: "white"
+    };
+
+    function shoot() {
+      let dx = mouseX - player.x;
+      let dy = mouseY - player.y;
+      let angle = Math.atan2(dy, dx);
+
+      if (weapon === "pistol") {
+        bullets.push(createBullet(angle, 7, "white"));
+      } else if (weapon === "ray") {
+        bullets.push(createBullet(angle, 14, "cyan"));
+      } else if (weapon === "shotgun") {
+        for (let i = -2; i <= 2; i++) {
+          bullets.push(createBullet(angle + i * 0.1, 6, randomColor()));
+        }
+      }
     }
 
-    addTouchControl("btnUp", "up");
-    addTouchControl("btnDown", "down");
-    addTouchControl("btnLeft", "left");
-    addTouchControl("btnRight", "right");
-
-    // 🖱️ Disparo por mouse
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      shootTowards(mouseX, mouseY);
-    });
-
-    // 📱 Disparo por toque
-    canvas.addEventListener("touchstart", (e) => {
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const touchX = touch.clientX - rect.left;
-      const touchY = touch.clientY - rect.top;
-      shootTowards(touchX, touchY);
-    });
-
-    function shootTowards(x, y) {
-      const dx = x - player.x;
-      const dy = y - player.y;
-      const dist = Math.hypot(dx, dy);
-      const speed = 8;
-
-      balas.push({
+    function createBullet(angle, speed, color) {
+      return {
         x: player.x,
         y: player.y,
-        dx: (dx / dist) * speed,
-        dy: (dy / dist) * speed,
-        r: 5
+        size: 6,
+        speed: speed,
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed,
+        color: color
+      };
+    }
+
+    function spawnEnemy() {
+      const size = 25;
+      let side = Math.floor(Math.random() * 4);
+      let x, y;
+      if (side === 0) { x = Math.random() * w; y = -size; }
+      else if (side === 1) { x = w + size; y = Math.random() * h; }
+      else if (side === 2) { x = Math.random() * w; y = h + size; }
+      else { x = -size; y = Math.random() * h; }
+
+      const char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      enemies.push({
+        x, y, size, char,
+        color: randomColor()
       });
     }
 
-    function spawnEnemigo() {
-      const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
-      const side = Math.floor(Math.random() * 4);
-      let x, y;
-
-      if (side === 0) { x = Math.random() * canvas.width; y = -30; }
-      else if (side === 1) { x = canvas.width + 30; y = Math.random() * canvas.height; }
-      else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 30; }
-      else { x = -30; y = Math.random() * canvas.height; }
-
-      enemigos.push({
-        x, y,
-        r: 20,
-        letra: letras[Math.floor(Math.random() * letras.length)]
-      });
+    function randomColor() {
+      const colors = ["red", "green", "yellow", "magenta", "orange", "lime", "aqua"];
+      return colors[Math.floor(Math.random() * colors.length)];
     }
 
     function update() {
-      let dx = 0, dy = 0;
+      // Movimiento
+      if (keys["ArrowUp"] || keys["w"]) player.y -= player.speed;
+      if (keys["ArrowDown"] || keys["s"]) player.y += player.speed;
+      if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
+      if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
 
-      if (keys["w"] || keys["arrowup"] || touchKeys.up) dy -= 1;
-      if (keys["s"] || keys["arrowdown"] || touchKeys.down) dy += 1;
-      if (keys["a"] || keys["arrowleft"] || touchKeys.left) dx -= 1;
-      if (keys["d"] || keys["arrowright"] || touchKeys.right) dx += 1;
+      // Mantener dentro
+      player.x = Math.max(player.size/2, Math.min(w - player.size/2, player.x));
+      player.y = Math.max(player.size/2, Math.min(h - player.size/2, player.y));
 
-      if (dx !== 0 || dy !== 0) {
-        const len = Math.hypot(dx, dy);
-        player.x += (dx / len) * player.speed;
-        player.y += (dy / len) * player.speed;
-      }
-
-      player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
-      player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
-
-      enemigos.forEach((e, i) => {
-        const distX = player.x - e.x;
-        const distY = player.y - e.y;
-        const dist = Math.hypot(distX, distY);
-
-        e.x += (distX / dist) * 1.5;
-        e.y += (distY / dist) * 1.5;
-
-        if (dist < player.r + e.r) {
-          enemigos.splice(i, 1);
-          vidas--;
-          document.getElementById("vidas").textContent = vidas;
-          if (vidas <= 0) {
-            alert("¡Game Over! Score: " + score);
-            location.reload();
-          }
-        }
-      });
-
-      balas.forEach((b, i) => {
+      // Balas
+      bullets.forEach((b, i) => {
         b.x += b.dx;
         b.y += b.dy;
-
-        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
-          balas.splice(i, 1);
-        } else {
-          enemigos.forEach((e, j) => {
-            const dist = Math.hypot(b.x - e.x, b.y - e.y);
-            if (dist < b.r + e.r) {
-              enemigos.splice(j, 1);
-              balas.splice(i, 1);
-              score += 10;
-            }
-          });
-        }
+        if (b.x < 0 || b.x > w || b.y < 0 || b.y > h) bullets.splice(i, 1);
       });
 
-      score++;
-      document.getElementById("score").textContent = score;
+      // Enemigos
+      enemies.forEach((e, i) => {
+        let dx = player.x - e.x;
+        let dy = player.y - e.y;
+        let dist = Math.hypot(dx, dy);
+        e.x += dx / dist * 1.5;
+        e.y += dy / dist * 1.5;
+
+        // Colisión con jugador
+        if (Math.hypot(player.x - e.x, player.y - e.y) < player.size) {
+          alert("¡Perdiste!");
+          location.reload();
+        }
+
+        // Colisión con bala
+        bullets.forEach((b, j) => {
+          if (Math.hypot(b.x - e.x, b.y - e.y) < e.size) {
+            enemies.splice(i, 1);
+            bullets.splice(j, 1);
+          }
+        });
+      });
+
+      // Spawneo enemigo
+      if (Math.random() < 0.02) spawnEnemy();
     }
 
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, w, h);
 
       // Jugador
+      ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-      ctx.fillStyle = "#0f0";
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
       ctx.fill();
-      ctx.closePath();
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 22px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(player.letra, player.x, player.y);
-
-      // Enemigos
-      enemigos.forEach(e => {
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-        ctx.fillStyle = "#f00";
-        ctx.fill();
-        ctx.closePath();
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 18px Arial";
-        ctx.fillText(e.letra, e.x, e.y);
-      });
 
       // Balas
-      ctx.fillStyle = "#0ff";
-      balas.forEach(b => {
+      bullets.forEach(b => {
+        ctx.fillStyle = b.color;
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
         ctx.fill();
+      });
+
+      // Enemigos
+      enemies.forEach(e => {
+        ctx.fillStyle = e.color;
+        ctx.font = e.size + "px Arial";
+        ctx.fillText(e.char, e.x, e.y);
       });
     }
 
@@ -272,8 +217,11 @@
       requestAnimationFrame(gameLoop);
     }
 
-    setInterval(spawnEnemigo, 1000);
-    gameLoop();
+    function startGame(selectedWeapon) {
+      weapon = selectedWeapon;
+      document.getElementById("startScreen").style.display = "none";
+      gameLoop();
+    }
   </script>
 </body>
 </html>
