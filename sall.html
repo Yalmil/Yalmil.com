@@ -14,14 +14,17 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #39C726, #0B6903);
+      overflow: hidden;
+      background: black;
       color: white;
     }
 
-    canvas {
-      display: block;
+    #game {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
 
     #ui {
@@ -29,7 +32,7 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.5);
       padding: 12px 24px;
       border-radius: 12px;
       backdrop-filter: blur(5px);
@@ -47,12 +50,14 @@
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
     const player = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
+      x: width / 2,
+      y: height / 2,
       size: 20
     };
 
@@ -60,6 +65,7 @@
     const letters = ["Ñ", "X", "Y", "Z", "W", "K"];
     let timeSurvived = 0;
     let lastEnemySpawn = 0;
+    let mouse = { x: player.x, y: player.y };
 
     function drawPlayer() {
       const gradient = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 30);
@@ -76,7 +82,7 @@
     function spawnEnemy() {
       const letter = letters[Math.floor(Math.random() * letters.length)];
       const angle = Math.random() * 2 * Math.PI;
-      const radius = Math.max(canvas.width, canvas.height);
+      const radius = Math.max(width, height);
       const x = player.x + radius * Math.cos(angle);
       const y = player.y + radius * Math.sin(angle);
       enemies.push({ x, y, size: 28, speed: 1.4 + Math.random(), letter });
@@ -99,7 +105,7 @@
       enemies.forEach(e => {
         const dx = player.x - e.x;
         const dy = player.y - e.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         e.x += (dx / dist) * e.speed;
         e.y += (dy / dist) * e.speed;
       });
@@ -109,36 +115,54 @@
       for (let e of enemies) {
         const dx = player.x - e.x;
         const dy = player.y - e.y;
-        if (Math.sqrt(dx * dx + dy * dy) < player.size + e.size / 2) {
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < player.size + e.size / 2) {
+          cancelAnimationFrame(gameLoopId);
+          clearInterval(timerInterval);
           alert("💀 Has perdido. Tiempo sobrevivido: " + timeSurvived + "s");
           location.reload();
+          break;
         }
       }
     }
 
+    function updatePlayerPosition() {
+      player.x += (mouse.x - player.x) * 0.2;
+      player.y += (mouse.y - player.y) * 0.2;
+    }
+
+    let gameLoopId;
     function gameLoop(timestamp) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, width, height);
+      updatePlayerPosition();
       drawPlayer();
       drawEnemies();
       updateEnemies();
       checkCollision();
 
-      if (timestamp - lastEnemySpawn > 2500) {
+      if (timestamp - lastEnemySpawn > 2000) {
         spawnEnemy();
         lastEnemySpawn = timestamp;
       }
 
-      requestAnimationFrame(gameLoop);
+      gameLoopId = requestAnimationFrame(gameLoop);
     }
 
-    setInterval(() => {
+    const timerInterval = setInterval(() => {
       timeSurvived++;
       document.getElementById('time').textContent = timeSurvived;
     }, 1000);
 
     window.addEventListener("mousemove", e => {
-      player.x = e.clientX;
-      player.y = e.clientY;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener("resize", () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     });
 
     gameLoop();
