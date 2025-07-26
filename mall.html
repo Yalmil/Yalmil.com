@@ -2,174 +2,237 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sobrevive a las Letras</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    canvas { background: #111; display: block; margin: auto; touch-action: none; }
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+    }
+    canvas {
+      display: block;
+      background: linear-gradient(to right, #111, #222);
+    }
     #ui {
       position: absolute;
       top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 10px;
       color: white;
-      font-family: sans-serif;
-      text-align: center;
+      font-family: monospace;
+      font-size: 16px;
+      z-index: 10;
     }
     #weaponSelect {
-      background: #222; color: white; padding: 8px; border: none; font-size: 16px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 20px;
+      font-family: sans-serif;
+      z-index: 20;
+      border: 2px solid lime;
+      border-radius: 10px;
+    }
+    #weaponSelect button {
+      margin: 5px;
+      padding: 10px;
+      background: black;
+      color: white;
+      border: 1px solid lime;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <label for="weaponSelect">Elige tu arma: </label>
-    <select id="weaponSelect">
-      <option value="normal">Normal</option>
-      <option value="piercing">Perforadora</option>
-      <option value="explosive">Explosiva</option>
-    </select>
-    <div id="score">Puntuación: 0</div>
-  </div>
-  <canvas id="gameCanvas" width="800" height="500"></canvas>
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreEl = document.getElementById("score");
-    const weaponSelect = document.getElementById("weaponSelect");
+<canvas id="game"></canvas>
+<div id="ui">💖 Vidas: <span id="lives">5</span></div>
 
-    const player = { x: 400, y: 250, r: 15, color: "cyan" };
-    let bullets = [];
-    let enemies = [];
-    let score = 0;
-    let weapon = weaponSelect.value;
-    let mouseTarget = { x: player.x, y: player.y };
+<div id="weaponSelect">
+  <h2>Elige tu arma</h2>
+  <button onclick="selectWeapon('normal')">🔫 Normal</button>
+  <button onclick="selectWeapon('triple')">🔱 Triple</button>
+  <button onclick="selectWeapon('sniper')">🎯 Sniper</button>
+</div>
 
-    weaponSelect.onchange = () => {
-      weapon = weaponSelect.value;
-    };
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    function spawnEnemy() {
-      const letter = letters[Math.floor(Math.random() * letters.length)];
-      const angle = Math.random() * 2 * Math.PI;
-      const radius = 300;
-      const x = player.x + Math.cos(angle) * radius;
-      const y = player.y + Math.sin(angle) * radius;
-      const dx = (player.x - x) / 100;
-      const dy = (player.y - y) / 100;
-      const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-      const vida = letters.indexOf(letter) + 1;
-      enemies.push({ x, y, dx, dy, letter, color, vida });
-    }
+let player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  radius: 20,
+  color: "#0f0",
+  speed: 4
+};
 
-    function shoot(x, y) {
-      const angle = Math.atan2(y - player.y, x - player.x);
-      const speed = 7;
-      const dx = Math.cos(angle) * speed;
-      const dy = Math.sin(angle) * speed;
-      bullets.push({ x: player.x, y: player.y, dx, dy, type: weapon });
-    }
+let bullets = [];
+let letters = [];
+let lives = 5;
+let mouse = { x: 0, y: 0 };
+let keys = {};
+let selectedWeapon = null;
 
-    canvas.addEventListener("mousedown", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseTarget = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-      shoot(mouseTarget.x, mouseTarget.y);
+function selectWeapon(type) {
+  selectedWeapon = type;
+  document.getElementById("weaponSelect").style.display = "none";
+}
+
+function shoot(x, y) {
+  if (!selectedWeapon) return;
+
+  const dx = x - player.x;
+  const dy = y - player.y;
+  const angle = Math.atan2(dy, dx);
+  
+  const speed = selectedWeapon === "sniper" ? 12 : 6;
+  const spread = selectedWeapon === "triple" ? [ -0.3, 0, 0.3 ] : [ 0 ];
+
+  for (let s of spread) {
+    bullets.push({
+      x: player.x,
+      y: player.y,
+      dx: Math.cos(angle + s) * speed,
+      dy: Math.sin(angle + s) * speed,
+      radius: 5,
+      color: "white"
     });
+  }
+}
 
-    canvas.addEventListener("touchstart", (e) => {
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      mouseTarget = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-      };
-      shoot(mouseTarget.x, mouseTarget.y);
-    });
+canvas.addEventListener("mousedown", (e) => {
+  shoot(e.clientX, e.clientY);
+});
 
-    function update() {
-      bullets.forEach((b, i) => {
-        b.x += b.dx;
-        b.y += b.dy;
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  shoot(touch.clientX, touch.clientY);
+});
 
-        enemies.forEach((e, j) => {
-          const dx = e.x - b.x;
-          const dy = e.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 15) {
-            if (b.type === "explosive") {
-              enemies = enemies.filter((_, k) => {
-                const ex = enemies[k].x - b.x;
-                const ey = enemies[k].y - b.y;
-                return Math.sqrt(ex * ex + ey * ey) > 40;
-              });
-              bullets.splice(i, 1);
-              score += 10;
-            } else {
-              e.vida -= 1;
-              if (e.vida <= 0) {
-                enemies.splice(j, 1);
-                score += 1;
-              }
-              if (b.type !== "piercing") {
-                bullets.splice(i, 1);
-              }
-            }
-          }
-        });
-      });
+window.addEventListener("keydown", (e) => keys[e.key] = true);
+window.addEventListener("keyup", (e) => keys[e.key] = false);
 
-      enemies.forEach((e) => {
-        e.x += e.dx;
-        e.y += e.dy;
-      });
+function randomLetter() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return letters[Math.floor(Math.random() * letters.length)];
+}
 
-      bullets = bullets.filter(
-        (b) => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height
-      );
+function spawnLetter() {
+  const l = randomLetter();
+  const x = Math.random() * canvas.width;
+  const y = Math.random() * canvas.height;
+  const health = l.charCodeAt(0) - 64;
 
-      if (Math.random() < 0.02) spawnEnemy();
+  letters.push({
+    x, y,
+    radius: 20,
+    char: l,
+    color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+    dx: (Math.random() - 0.5) * 1.5,
+    dy: (Math.random() - 0.5) * 1.5,
+    health
+  });
+}
+
+setInterval(spawnLetter, 1500);
+
+function update() {
+  // Movimiento
+  if (keys["ArrowUp"] || keys["w"]) player.y -= player.speed;
+  if (keys["ArrowDown"] || keys["s"]) player.y += player.speed;
+  if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
+  if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
+
+  // Límite del jugador
+  player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+  player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+  // Actualizar balas
+  bullets = bullets.filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
+  bullets.forEach(b => {
+    b.x += b.dx;
+    b.y += b.dy;
+  });
+
+  // Actualizar letras
+  letters.forEach(l => {
+    l.x += l.dx;
+    l.y += l.dy;
+
+    // Rebote en bordes
+    if (l.x - l.radius < 0 || l.x + l.radius > canvas.width) l.dx *= -1;
+    if (l.y - l.radius < 0 || l.y + l.radius > canvas.height) l.dy *= -1;
+
+    // Colisión con jugador
+    const dist = Math.hypot(player.x - l.x, player.y - l.y);
+    if (dist < player.radius + l.radius) {
+      lives--;
+      document.getElementById("lives").textContent = lives;
+      l.x = Math.random() * canvas.width;
+      l.y = Math.random() * canvas.height;
     }
+  });
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Jugador
-      ctx.fillStyle = player.color;
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Balas
-      bullets.forEach((b) => {
-        ctx.fillStyle = b.type === "explosive" ? "orange" : "white";
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Enemigos
-      enemies.forEach((e) => {
-        ctx.fillStyle = e.color;
-        ctx.font = "20px sans-serif";
-        ctx.fillText(e.letter, e.x, e.y);
-        ctx.fillStyle = "red";
-        ctx.fillRect(e.x - 10, e.y - 25, 20 * (e.vida / 26), 4);
-      });
-
-      scoreEl.innerText = "Puntuación: " + score;
+  // Balas impactando letras
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    for (let j = letters.length - 1; j >= 0; j--) {
+      const l = letters[j];
+      const dist = Math.hypot(b.x - l.x, b.y - l.y);
+      if (dist < l.radius + b.radius) {
+        l.health--;
+        if (l.health <= 0) letters.splice(j, 1);
+        bullets.splice(i, 1);
+        break;
+      }
     }
+  }
+}
 
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    loop();
-  </script>
+  // Jugador
+  ctx.fillStyle = player.color;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Letras
+  letters.forEach(l => {
+    ctx.fillStyle = l.color;
+    ctx.beginPath();
+    ctx.arc(l.x, l.y, l.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.font = "20px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(l.char, l.x, l.y + 7);
+  });
+
+  // Balas
+  bullets.forEach(b => {
+    ctx.fillStyle = b.color;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
 </body>
 </html>
