@@ -60,13 +60,32 @@
     .invisible {
       visibility: hidden;
     }
+
+    #fireBtn {
+      position: absolute;
+      bottom: 100px;
+      right: 20px;
+      width: 70px;
+      height: 70px;
+      background: #f90;
+      border: none;
+      border-radius: 50%;
+      color: #000;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 2;
+      touch-action: none;
+    }
+
+    #fireBtn:active {
+      background: #fc0;
+    }
   </style>
 </head>
 <body>
   <div id="ui">❤️ Vidas: <span id="vidas">3</span> | 🕹️ Score: <span id="score">0</span></div>
   <canvas id="gameCanvas"></canvas>
 
-  <!-- Controles táctiles -->
   <div class="controls">
     <div class="invisible"></div>
     <button class="btn" id="btnUp">↑</button>
@@ -75,6 +94,8 @@
     <button class="btn" id="btnDown">↓</button>
     <button class="btn" id="btnRight">→</button>
   </div>
+
+  <button id="fireBtn">FIRE</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -93,34 +114,35 @@
       y: canvas.height / 2,
       r: 25,
       speed: 4,
-      letra: "Ñ"
+      letra: "Ñ",
+      lastDir: { x: 0, y: -1 }
     };
 
     let keys = {};
+    let touchKeys = { up: false, down: false, left: false, right: false };
     let enemigos = [];
+    let balas = [];
     let vidas = 3;
     let score = 0;
 
-    document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+    document.addEventListener("keydown", e => {
+      const k = e.key.toLowerCase();
+      keys[k] = true;
+      if (k === " ") shoot();
+    });
+
     document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
     // Botones móviles
-    const touchKeys = {
-      up: false,
-      down: false,
-      left: false,
-      right: false
-    };
-
-    function addTouchControl(id, key) {
+    function addTouchControl(id, dir) {
       const btn = document.getElementById(id);
       btn.addEventListener("touchstart", (e) => {
         e.preventDefault();
-        touchKeys[key] = true;
+        touchKeys[dir] = true;
       });
       btn.addEventListener("touchend", (e) => {
         e.preventDefault();
-        touchKeys[key] = false;
+        touchKeys[dir] = false;
       });
     }
 
@@ -128,6 +150,24 @@
     addTouchControl("btnDown", "down");
     addTouchControl("btnLeft", "left");
     addTouchControl("btnRight", "right");
+
+    document.getElementById("fireBtn").addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      shoot();
+    });
+
+    function shoot() {
+      const dir = player.lastDir;
+      if (dir.x === 0 && dir.y === 0) return;
+
+      balas.push({
+        x: player.x,
+        y: player.y,
+        dx: dir.x * 8,
+        dy: dir.y * 8,
+        r: 5
+      });
+    }
 
     function spawnEnemigo() {
       const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
@@ -147,23 +187,30 @@
     }
 
     function update() {
-      // Movimiento teclado o móvil
-      if (keys["w"] || keys["arrowup"] || touchKeys.up) player.y -= player.speed;
-      if (keys["s"] || keys["arrowdown"] || touchKeys.down) player.y += player.speed;
-      if (keys["a"] || keys["arrowleft"] || touchKeys.left) player.x -= player.speed;
-      if (keys["d"] || keys["arrowright"] || touchKeys.right) player.x += player.speed;
+      let dx = 0, dy = 0;
 
-      // Limitar movimiento a pantalla
+      if (keys["w"] || keys["arrowup"] || touchKeys.up) dy -= 1;
+      if (keys["s"] || keys["arrowdown"] || touchKeys.down) dy += 1;
+      if (keys["a"] || keys["arrowleft"] || touchKeys.left) dx -= 1;
+      if (keys["d"] || keys["arrowright"] || touchKeys.right) dx += 1;
+
+      if (dx !== 0 || dy !== 0) {
+        const len = Math.hypot(dx, dy);
+        player.x += (dx / len) * player.speed;
+        player.y += (dy / len) * player.speed;
+        player.lastDir = { x: dx / len, y: dy / len };
+      }
+
       player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
       player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
 
       enemigos.forEach((e, i) => {
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.hypot(dx, dy);
+        const distX = player.x - e.x;
+        const distY = player.y - e.y;
+        const dist = Math.hypot(distX, distY);
 
-        e.x += (dx / dist) * 1.5;
-        e.y += (dy / dist) * 1.5;
+        e.x += (distX / dist) * 1.5;
+        e.y += (distY / dist) * 1.5;
 
         if (dist < player.r + e.r) {
           enemigos.splice(i, 1);
@@ -173,6 +220,27 @@
             alert("¡Game Over! Score: " + score);
             location.reload();
           }
+        }
+      });
+
+      // Balas
+      balas.forEach((b, i) => {
+        b.x += b.dx;
+        b.y += b.dy;
+
+        // Fuera de pantalla
+        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+          balas.splice(i, 1);
+        } else {
+          // Colisión con enemigos
+          enemigos.forEach((e, j) => {
+            const dist = Math.hypot(b.x - e.x, b.y - e.y);
+            if (dist < b.r + e.r) {
+              enemigos.splice(j, 1);
+              balas.splice(i, 1);
+              score += 10;
+            }
+          });
         }
       });
 
@@ -206,6 +274,14 @@
         ctx.font = "bold 18px Arial";
         ctx.fillText(e.letra, e.x, e.y);
       });
+
+      // Balas
+      ctx.fillStyle = "#0ff";
+      balas.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
     function gameLoop() {
@@ -218,4 +294,4 @@
     gameLoop();
   </script>
 </body>
-  </html>
+</html>
