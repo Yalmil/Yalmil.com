@@ -1,140 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Staff Legendario - SEP Minecraft</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff | SEP Minecraft</title>
   <style>
     body {
-      background: #0f0f0f;
-      color: white;
+      background-color: #0d1117;
       font-family: 'Segoe UI', sans-serif;
+      color: white;
       margin: 0;
-      padding: 1rem;
+      padding: 20px;
     }
 
     h1 {
       text-align: center;
-      color: #00ffa5;
+      color: #00ffcc;
+      margin-bottom: 40px;
     }
 
-    .buscador {
-      margin: 1rem auto;
-      max-width: 400px;
+    .staff-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 2px solid #00ffcc40;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 0 10px #00ffcc55;
       text-align: center;
+      transition: transform 0.3s;
     }
 
-    .buscador input {
-      padding: 0.6rem;
-      border-radius: 8px;
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 1rem;
+    .card:hover {
+      transform: scale(1.03);
     }
 
-    .carrusel {
-      display: flex;
-      overflow-x: auto;
-      gap: 1rem;
-      scroll-snap-type: x mandatory;
-      padding: 1rem 0;
-    }
-
-    .tarjeta {
-      min-width: 250px;
-      background: linear-gradient(to bottom, #1a1a1a, #292929);
-      border-radius: 20px;
-      box-shadow: 0 0 10px #00ffa5;
-      padding: 1rem;
-      scroll-snap-align: start;
-      flex-shrink: 0;
-      position: relative;
-      text-align: center;
-    }
-
-    .tarjeta img {
+    .avatar {
       width: 100px;
       height: 100px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #00ffa5;
-      margin-bottom: 0.5rem;
+      border: 3px solid #00ffcc;
+      margin-bottom: 12px;
     }
 
-    .cargo {
+    .name {
+      font-size: 1.2em;
       font-weight: bold;
-      color: #00ffa5;
+      color: #00ffcc;
     }
 
-    .pais {
-      font-size: 0.9rem;
+    .role {
+      color: #ff00ff;
+      font-weight: 600;
+      margin: 4px 0;
+    }
+
+    .country {
+      font-size: 0.9em;
+      margin-bottom: 8px;
+    }
+
+    .desc {
+      font-size: 0.9em;
       color: #ccc;
-    }
-
-    .descripcion {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #bbb;
-    }
-
-    @media (max-width: 600px) {
-      .tarjeta {
-        min-width: 200px;
-      }
     }
   </style>
 </head>
 <body>
 
-<h1>👑 STAFF LEGENDARIO</h1>
+<h1>👥 Panel del Staff de SEP</h1>
 
-<div class="buscador">
-  <input type="text" placeholder="Buscar por nombre, país o cargo..." oninput="filtrarStaff(this.value)">
-</div>
-
-<div class="carrusel" id="staffCarrusel">
-  <!-- Tarjeta 1 -->
-  <div class="tarjeta" data-nombre="dear ash" data-cargo="owner" data-pais="mx">
-    <img src="https://cdn.discordapp.com/avatars/936668072150978592/42de698ae87376d11912af6fcac55036.png?size=1024" alt="Dear Ash">
-    <div class="nombre">Dear Ash</div>
-    <div class="cargo">Owner</div>
-    <div class="pais">🇲🇽 / MX</div>
-    <div class="descripcion">No se como consigo owner porque estaba durmiendo, pero en resumen se desvela</div>
-  </div>
-
-  <!-- Tarjeta 2 -->
-  <div class="tarjeta" data-nombre="yalmil" data-cargo="owner" data-pais="pe">
-    <img src="https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024" alt="Yalmil">
-    <div class="nombre">Yalmil</div>
-    <div class="cargo">Owner</div>
-    <div class="pais">🇵🇪 / PE</div>
-    <div class="descripcion">Eh, tampoco me acuerdo de como consigo owner, pero estoy creando esta página web</div>
-  </div>
-
-  <!-- Aquí puedes seguir añadiendo más tarjetas -->
-</div>
+<div class="staff-container" id="staff"></div>
 
 <script>
-  function filtrarStaff(valor) {
-    const tarjetas = document.querySelectorAll('.tarjeta');
-    const filtro = valor.toLowerCase();
-    tarjetas.forEach(t => {
-      const nombre = t.dataset.nombre;
-      const cargo = t.dataset.cargo;
-      const pais = t.dataset.pais;
-      if (
-        nombre.includes(filtro) ||
-        cargo.includes(filtro) ||
-        pais.includes(filtro)
-      ) {
-        t.style.display = "block";
-      } else {
-        t.style.display = "none";
-      }
-    });
-  }
+  const staffData = [
+    {
+      name: "Dear ash",
+      role: "Owner",
+      country: "🇲🇽 / MX",
+      avatar: "https://cdn.discordapp.com/avatars/936668072150978592/42de698ae87376d11912af6fcac55036.png?size=1024",
+      desc: "No se como consigo owner porque estaba durmiendo, pero en resumen se desvela"
+    },
+    {
+      name: "Yalmil",
+      role: "Owner",
+      country: "🇵🇪 / PE",
+      avatar: "https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024",
+      desc: "Eh, tampoco me acuerdo de como consigo owner, pero estoy creando esta página web"
+    },
+    {
+      name: "Eron2o23",
+      role: "Fundador",
+      country: "🇨🇷 / CR",
+      avatar: "https://cdn.discordapp.com/avatars/1310095645276901399/f682a6371354dbdb94d9b35171d7621a.png?size=2048",
+      desc: "Agradezcan a el de que Sep existe, el creo todo.\nNo se como lo hizo pero es simp desde hace 1 mes"
+    },
+    {
+      name: "Omicron",
+      role: "Manager",
+      country: "🇺🇸 / US",
+      avatar: "https://cdn.discordapp.com/avatars/1276916158200545290/b6e05f36ca59160723f5372bb64bfc09.png?size=1024",
+      desc: "Revive cada siglo y solo los veteranos lo conocen"
+    }
+  ];
+
+  const container = document.getElementById('staff');
+
+  staffData.forEach(member => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${member.avatar}" alt="${member.name}" class="avatar">
+      <div class="name">${member.name}</div>
+      <div class="role">${member.role}</div>
+      <div class="country">${member.country}</div>
+      <div class="desc">${member.desc.replace(/\n/g, '<br>')}</div>
+    `;
+    container.appendChild(card);
+  });
 </script>
 
 </body>
