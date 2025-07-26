@@ -2,105 +2,122 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login con Firebase</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
     body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      font-family: sans-serif;
+      background: #111;
       color: white;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      height: 100vh;
+      gap: 1rem;
     }
-
-    .login-box {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0, 255, 128, 0.5);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #00ffaa;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
+    input, button {
+      padding: 0.6rem;
       border: none;
       border-radius: 5px;
+      font-size: 1rem;
     }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #00ffaa;
-      border: none;
-      color: black;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #00cc88;
-    }
-
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .success {
-      text-align: center;
-      color: #00ff88;
-      margin-top: 10px;
-    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>Iniciar sesión</h2>
-    <input type="text" id="username" placeholder="Usuario" />
-    <input type="password" id="password" placeholder="Contraseña" />
-    <button onclick="login()">Entrar</button>
-    <div id="message"></div>
+  <h1>Login Firebase</h1>
+
+  <div id="login">
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPassword" placeholder="Contraseña"><br>
+    <button onclick="login()">Iniciar sesión</button>
+    <p>¿No tienes cuenta? <a href="#" onclick="toggleForms()">Regístrate</a></p>
   </div>
 
-  <script>
-    function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
-      const msg = document.getElementById("message");
+  <div id="register" class="hidden">
+    <input type="text" id="registerName" placeholder="Tu nombre"><br>
+    <input type="email" id="registerEmail" placeholder="Email"><br>
+    <input type="password" id="registerPassword" placeholder="Contraseña"><br>
+    <button onclick="register()">Registrarse</button>
+    <p>¿Ya tienes cuenta? <a href="#" onclick="toggleForms()">Inicia sesión</a></p>
+  </div>
 
-      // Puedes modificar estos valores
-const USERNAME = localStorage.getItem("username");
-const PASSWORD = localStorage.getItem("password");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-      if (user === USERNAME && pass === PASSWORD) {
-        msg.innerHTML = "<p class='success'>¡Login exitoso!</p>";
-        setTimeout(() => {
-          window.location.href = "inicio.html"; // Redirige si es correcto
-        }, 1500);
-      } else {
-        msg.innerHTML = "<p class='error'>Usuario o contraseña incorrectos</p>";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.appspot.com",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Alternar entre login y registro
+    window.toggleForms = () => {
+      document.getElementById('login').classList.toggle('hidden');
+      document.getElementById('register').classList.toggle('hidden');
+    };
+
+    // Registrar nuevo usuario
+    window.register = async () => {
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        await setDoc(doc(db, "users", uid), {
+          name: name,
+          email: email,
+          createdAt: Date.now()
+        });
+
+        alert("Cuenta creada. Ya puedes iniciar sesión.");
+        toggleForms();
+      } catch (error) {
+        alert("Error: " + error.message);
       }
-    }
+    };
+
+    // Iniciar sesión
+    window.login = async () => {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Bienvenido");
+      } catch (error) {
+        alert("Error al iniciar sesión: " + error.message);
+      }
+    };
+
+    // Detectar si ya está logeado
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        const username = docSnap.exists() ? docSnap.data().name : "Usuario";
+
+        document.body.innerHTML = `
+          <h2>Hola, ${username}</h2>
+          <p>Ya has iniciado sesión. Redirigiendo...</p>
+        `;
+        setTimeout(() => {
+          window.location.href = "home.html"; // Cambia por tu página principal
+        }, 1500);
+      }
+    });
   </script>
 </body>
 </html>
