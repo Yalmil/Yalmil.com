@@ -1,36 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crear cuenta</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #1a1a40, #2b5876);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .register-box {
+      background: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 255, 200, 0.5);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #00ffee;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #00ffee;
+      border: none;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #00ccbb;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .success {
+      text-align: center;
+      color: #00ff88;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Crear cuenta</h2>
-  <form id="registerForm">
-    <input type="text" id="newUsername" placeholder="Usuario" required><br>
-    <input type="password" id="newPassword" placeholder="Contraseña" required><br>
-    <button type="submit">Registrarse</button>
-  </form>
+  <div class="register-box">
+    <h2>Registrarse</h2>
+    <input type="text" id="newUser" placeholder="Nuevo usuario" />
+    <input type="password" id="newPass" placeholder="Nueva contraseña" />
+    <button onclick="register()">Registrar</button>
+    <div id="message"></div>
+  </div>
 
   <script>
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const username = document.getElementById("newUsername").value;
-      const password = document.getElementById("newPassword").value;
+    function register() {
+      const user = document.getElementById("newUser").value.trim();
+      const pass = document.getElementById("newPass").value.trim();
+      const msg = document.getElementById("message");
 
-      const users = JSON.parse(localStorage.getItem("users")) || [];
-
-      if (users.find(u => u.username === username)) {
-        alert("El usuario ya existe");
+      if (user === "" || pass === "") {
+        msg.innerHTML = "<p class='error'>Todos los campos son obligatorios</p>";
         return;
       }
 
-      users.push({ username, password });
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Cuenta creada con éxito");
-      window.location.href = "login.html";
-    });
+      // Guardar en localStorage
+      localStorage.setItem("username", user);
+      localStorage.setItem("password", pass);
+
+      msg.innerHTML = "<p class='success'>¡Usuario registrado con éxito!</p>";
+
+      setTimeout(() => {
+        window.location.href = "login.html"; // Ir al login luego de registrar
+      }, 1500);
+    }
   </script>
 </body>
 </html>
