@@ -167,7 +167,7 @@
   <div class="anuncios">
     <h2>
       📢 Anuncios del servidor
-      <span class="edit-icon" onclick="pedirContraseña()" title="Editar anuncios">✏️</span>
+      <span id="editIcon" class="edit-icon" title="Editar anuncios">✏️</span>
     </h2>
     <ul id="anuncios-lista">
       <!-- Anuncios cargados por JS -->
@@ -209,6 +209,7 @@
 
     const anuncioRef = ref(db, 'anuncios');
     const lista = document.getElementById("anuncios-lista");
+    const editIcon = document.getElementById("editIcon");
 
     // Cargar anuncios en tiempo real
     onValue(anuncioRef, (snapshot) => {
@@ -235,6 +236,9 @@
         });
       }
     });
+
+    // Listener para el icono editar
+    editIcon.addEventListener("click", pedirContraseña);
 
     function pedirContraseña() {
       const pass = prompt("🔒 Contraseña para editar:");
