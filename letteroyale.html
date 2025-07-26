@@ -3,229 +3,254 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Battle Royale de Letras</title>
+  <title>Battle Royale Letras</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #111; color: #fff; font-family: sans-serif; }
-    canvas { display: block; background: #222; }
+    html, body { width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; }
+    canvas { background: #222; display: block; margin: 0 auto; }
     #ui {
-      position: absolute; top: 10px; left: 10px; z-index: 10;
-      background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      background: rgba(0,0,0,0.8); color: white; z-index: 10;
     }
-    #selectScreen {
-      position: absolute; width: 100%; height: 100%;
-      display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-      background: #000; color: white; font-size: 24px;
+    .letter-btn {
+      padding: 10px 20px; margin: 5px; font-size: 18px; background: #444; border: none;
+      color: white; border-radius: 5px; cursor: pointer;
     }
-    .letterOption {
-      margin: 8px; padding: 10px 20px;
-      border: 2px solid white; cursor: pointer; border-radius: 5px;
-      background: #333;
+    #desc { margin-top: 10px; font-size: 16px; text-align: center; }
+    #joystick {
+      position: absolute; bottom: 30px; left: 30px; width: 100px; height: 100px;
+      background: rgba(255,255,255,0.1); border-radius: 50%;
+      display: none; align-items: center; justify-content: center;
     }
-    #joystick { position: absolute; bottom: 20px; left: 20px; width: 100px; height: 100px; border: 2px solid #fff; border-radius: 50%; touch-action: none; }
-    #stick { position: absolute; width: 40px; height: 40px; background: white; border-radius: 50%; top: 30px; left: 30px; }
+    #joystick-dot {
+      width: 40px; height: 40px; background: white; border-radius: 50%;
+    }
+    #attackBtn {
+      position: absolute; bottom: 40px; right: 30px;
+      width: 80px; height: 80px; background: red; border-radius: 50%; font-size: 20px;
+      border: none; color: white;
+    }
   </style>
 </head>
 <body>
-<div id="selectScreen"></div>
-<canvas id="gameCanvas"></canvas>
-<div id="ui" style="display:none;">
-  <div>Letra: <span id="letraNombre">?</span></div>
-  <div>Vida: <span id="vidaBar">100</span></div>
-</div>
-<div id="joystick">
-  <div id="stick"></div>
-</div>
+  <div id="ui">
+    <h2>Elige tu letra</h2>
+    <div id="letters"></div>
+    <div id="desc"></div>
+  </div>
+  <canvas id="game"></canvas>
+  <div id="joystick"><div id="joystick-dot"></div></div>
+  <button id="attackBtn">Atacar</button>
 
-<script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 
-let player = null;
-let letrasIA = [];
-let disparos = [];
-let lastRespawn = 0;
+    const letras = {
+      A: "Ataca más rápido",
+      B: "Empuja enemigos",
+      C: "Recarga más vida",
+      D: "Defensa alta",
+      E: "Más velocidad",
+      F: "Lanza fuego",
+      G: "Ralentiza enemigos",
+      H: "Rebota en paredes",
+      I: "Invisible al moverse",
+      J: "Salta lejos",
+      K: "Daño crítico a veces",
+      L: "Golpe doble",
+      M: "Atrae enemigos",
+      N: "Pone trampas",
+      Ñ: "Invoca confusión",
+      O: "Forma escudo",
+      P: "Cura al atacar",
+      Q: "Golpe en área",
+      R: "Recarga energía",
+      S: "Rápido ataque cuerpo a cuerpo",
+      T: "Empuje al atacar",
+      U: "Regenera salud lentamente",
+      V: "Velocidad y daño medio",
+      W: "Dispara 3 direcciones",
+      X: "Se teletransporta corto",
+      Y: "Al matar se cura",
+      Z: "Ataque en zigzag"
+    };
 
-const habilidades = {
-  A: {color: '#f00', desc: 'Aumenta daño'},
-  B: {color: '#0f0', desc: 'Regenera vida lentamente'},
-  C: {color: '#00f', desc: 'Escudo temporal'},
-  D: {color: '#fa0', desc: 'Dispara más rápido'},
-  E: {color: '#0ff', desc: 'Velocidad extra'},
-  F: {color: '#f0f', desc: 'Invisibilidad breve'},
-  G: {color: '#ff0', desc: 'Área de empuje'},
-  Ñ: {color: '#999', desc: 'Confusión enemiga'},
-  Z: {color: '#ccc', desc: 'Ataque en zigzag'},
-  // Añade más si quieres
-};
+    let players = [], enemies = [], bullets = [];
+    let myLetter = '', myPlayer = null;
+    let joystick = { active: false, dx: 0, dy: 0 };
+    let protectionTime = 3000;
+    let attackCooldown = 1000;
 
-function crearSeleccion() {
-  const screen = document.getElementById('selectScreen');
-  for (const letra in habilidades) {
-    const div = document.createElement('div');
-    div.className = 'letterOption';
-    div.textContent = letra + ' - ' + habilidades[letra].desc;
-    div.style.backgroundColor = habilidades[letra].color;
-    div.onclick = () => iniciarJuego(letra);
-    screen.appendChild(div);
-  }
-}
+    const ui = document.getElementById('ui');
+    const lettersDiv = document.getElementById('letters');
+    const descDiv = document.getElementById('desc');
+    const attackBtn = document.getElementById('attackBtn');
+    const joystickEl = document.getElementById('joystick');
+    const joyDot = document.getElementById('joystick-dot');
 
-function iniciarJuego(letra) {
-  document.getElementById('selectScreen').style.display = 'none';
-  document.getElementById('ui').style.display = 'block';
-  document.getElementById('letraNombre').textContent = letra;
-
-  player = crearLetra(letra, true);
-  for (let i = 0; i < 10; i++) {
-    const rand = Object.keys(habilidades)[Math.floor(Math.random() * Object.keys(habilidades).length)];
-    letrasIA.push(crearLetra(rand, false));
-  }
-
-  gameLoop();
-}
-
-function crearLetra(letra, esJugador) {
-  const size = 40;
-  return {
-    letra,
-    x: Math.random() * (canvas.width - size),
-    y: Math.random() * (canvas.height - size),
-    vx: 0,
-    vy: 0,
-    size,
-    esJugador,
-    vida: 100,
-    inmune: true,
-    tiempoInmune: 100,
-    color: habilidades[letra].color,
-    dispararCooldown: 0
-  };
-}
-
-function moverLetra(letra) {
-  if (letra.esJugador) {
-    letra.x += letra.vx;
-    letra.y += letra.vy;
-  } else {
-    const dx = player.x - letra.x;
-    const dy = player.y - letra.y;
-    const dist = Math.hypot(dx, dy);
-    letra.vx = dx / dist * 1;
-    letra.vy = dy / dist * 1;
-    letra.x += letra.vx;
-    letra.y += letra.vy;
-
-    if (Math.random() < 0.01 && letra.dispararCooldown <= 0) {
-      disparar(letra);
-      letra.dispararCooldown = 60;
+    for (let l in letras) {
+      const btn = document.createElement('button');
+      btn.textContent = l;
+      btn.className = 'letter-btn';
+      btn.onclick = () => {
+        myLetter = l;
+        descDiv.textContent = letras[l];
+        setTimeout(() => {
+          ui.style.display = 'none';
+          startGame();
+        }, 1000);
+      };
+      lettersDiv.appendChild(btn);
     }
-  }
 
-  if (letra.dispararCooldown > 0) letra.dispararCooldown--;
-  if (letra.inmune) letra.tiempoInmune--;
-  if (letra.tiempoInmune <= 0) letra.inmune = false;
-}
-
-function disparar(origen) {
-  disparos.push({
-    x: origen.x + origen.size / 2,
-    y: origen.y + origen.size / 2,
-    vx: origen.esJugador ? origen.vx * 3 : (Math.random() - 0.5) * 10,
-    vy: origen.esJugador ? origen.vy * 3 : (Math.random() - 0.5) * 10,
-    color: origen.color,
-    origen
-  });
-}
-
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (!player || player.vida <= 0) {
-    if (Date.now() - lastRespawn > 2000) {
-      player = crearLetra(player?.letra || 'A', true);
-      lastRespawn = Date.now();
-    }
-    requestAnimationFrame(gameLoop);
-    return;
-  }
-
-  moverLetra(player);
-  letrasIA.forEach(m => moverLetra(m));
-
-  // Dibujar jugador y enemigos
-  function dibujarLetra(obj) {
-    ctx.fillStyle = obj.inmune ? 'gray' : obj.color;
-    ctx.beginPath();
-    ctx.arc(obj.x, obj.y, obj.size / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#000";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(obj.letra, obj.x, obj.y + 5);
-  }
-
-  dibujarLetra(player);
-  letrasIA.forEach(m => dibujarLetra(m));
-
-  // Vida
-  document.getElementById('vidaBar').textContent = player.vida;
-
-  // Dibujar disparos y colisiones
-  disparos.forEach((bala, i) => {
-    bala.x += bala.vx;
-    bala.y += bala.vy;
-    ctx.fillStyle = bala.color;
-    ctx.beginPath();
-    ctx.arc(bala.x, bala.y, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    [player, ...letrasIA].forEach(l => {
-      if (bala.origen !== l && !l.inmune && Math.hypot(bala.x - l.x, bala.y - l.y) < l.size / 2) {
-        l.vida -= 10;
-        disparos.splice(i, 1);
+    class Player {
+      constructor(x, y, letter, isAI=false) {
+        this.x = x;
+        this.y = y;
+        this.letter = letter;
+        this.ai = isAI;
+        this.radius = 20;
+        this.color = isAI ? 'gray' : 'lime';
+        this.speed = (letter === 'E' ? 3.5 : 2) + (Math.random()*0.5);
+        this.life = 100;
+        this.dirX = 0;
+        this.dirY = 0;
+        this.cooldown = 0;
+        this.protected = true;
+        setTimeout(() => this.protected = false, protectionTime);
       }
+      move() {
+        this.x += this.dirX * this.speed;
+        this.y += this.dirY * this.speed;
+        this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+        this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+      }
+      draw() {
+        ctx.fillStyle = this.protected ? 'yellow' : this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(this.letter, this.x, this.y + 6);
+      }
+      attack() {
+        if (this.cooldown > 0) return;
+        bullets.push({
+          x: this.x,
+          y: this.y,
+          dx: this.dirX || 1,
+          dy: this.dirY || 0,
+          owner: this
+        });
+        this.cooldown = attackCooldown;
+      }
+    }
+
+    function startGame() {
+      players = [];
+      enemies = [];
+      bullets = [];
+
+      myPlayer = new Player(Math.random()*canvas.width, Math.random()*canvas.height, myLetter, false);
+      players.push(myPlayer);
+
+      for (let i = 0; i < 15; i++) {
+        const letterKeys = Object.keys(letras);
+        const randomLetter = letterKeys[Math.floor(Math.random()*letterKeys.length)];
+        const enemy = new Player(Math.random()*canvas.width, Math.random()*canvas.height, randomLetter, true);
+        enemies.push(enemy);
+        players.push(enemy);
+      }
+
+      joystickEl.style.display = /Android|iPhone/i.test(navigator.userAgent) ? 'flex' : 'none';
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      players.forEach(p => {
+        if (p.ai) {
+          let dx = myPlayer.x - p.x;
+          let dy = myPlayer.y - p.y;
+          let dist = Math.hypot(dx, dy);
+          p.dirX = dx / dist;
+          p.dirY = dy / dist;
+        }
+        p.move();
+        p.draw();
+        if (p.cooldown > 0) p.cooldown -= 16;
+      });
+
+      bullets.forEach((b, i) => {
+        b.x += b.dx * 5;
+        b.y += b.dy * 5;
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 5, 0, Math.PI*2);
+        ctx.fill();
+
+        players.forEach(p => {
+          if (p !== b.owner && !p.protected) {
+            let dist = Math.hypot(p.x - b.x, p.y - b.y);
+            if (dist < p.radius) {
+              p.life -= 25;
+              bullets.splice(i, 1);
+              if (p.life <= 0) {
+                if (!p.ai) ui.style.display = 'flex';
+                players = players.filter(pl => pl !== p);
+              }
+            }
+          }
+        });
+      });
+
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!myPlayer) return;
+      if (e.key === 'w') myPlayer.dirY = -1;
+      if (e.key === 's') myPlayer.dirY = 1;
+      if (e.key === 'a') myPlayer.dirX = -1;
+      if (e.key === 'd') myPlayer.dirX = 1;
+      if (e.key === ' ') myPlayer.attack();
     });
-  });
 
-  letrasIA = letrasIA.filter(m => m.vida > 0);
-  requestAnimationFrame(gameLoop);
-}
+    document.addEventListener('keyup', e => {
+      if (!myPlayer) return;
+      if (['w','s'].includes(e.key)) myPlayer.dirY = 0;
+      if (['a','d'].includes(e.key)) myPlayer.dirX = 0;
+    });
 
-crearSeleccion();
+    attackBtn.onclick = () => myPlayer?.attack();
 
-// Joystick móvil
-let joystick = document.getElementById('joystick');
-let stick = document.getElementById('stick');
-let active = false;
-joystick.addEventListener('touchstart', e => { active = true; }, false);
-joystick.addEventListener('touchend', e => { active = false; player.vx = 0; player.vy = 0; }, false);
-joystick.addEventListener('touchmove', e => {
-  const rect = joystick.getBoundingClientRect();
-  const touch = e.touches[0];
-  const x = touch.clientX - rect.left - 50;
-  const y = touch.clientY - rect.top - 50;
-  player.vx = x / 50;
-  player.vy = y / 50;
-  stick.style.left = `${x + 50 - 20}px`;
-  stick.style.top = `${y + 50 - 20}px`;
-}, false);
+    // Joystick móvil
+    joystickEl.addEventListener('touchstart', e => joystick.active = true);
+    joystickEl.addEventListener('touchmove', e => {
+      const touch = e.touches[0];
+      const rect = joystickEl.getBoundingClientRect();
+      const dx = touch.clientX - (rect.left + 50);
+      const dy = touch.clientY - (rect.top + 50);
+      const dist = Math.hypot(dx, dy);
+      joystick.dx = dx / dist;
+      joystick.dy = dy / dist;
+      joyDot.style.transform = `translate(${dx}px, ${dy}px)`;
+      myPlayer.dirX = joystick.dx;
+      myPlayer.dirY = joystick.dy;
+    });
+    joystickEl.addEventListener('touchend', () => {
+      joystick.active = false;
+      joyDot.style.transform = 'translate(0, 0)';
+      myPlayer.dirX = 0;
+      myPlayer.dirY = 0;
+    });
 
-// Controles PC
-document.addEventListener('keydown', e => {
-  if (!player) return;
-  if (e.key === 'ArrowUp') player.vy = -3;
-  if (e.key === 'ArrowDown') player.vy = 3;
-  if (e.key === 'ArrowLeft') player.vx = -3;
-  if (e.key === 'ArrowRight') player.vx = 3;
-  if (e.key === ' ') disparar(player);
-});
-document.addEventListener('keyup', e => {
-  if (['ArrowUp', 'ArrowDown'].includes(e.key)) player.vy = 0;
-  if (['ArrowLeft', 'ArrowRight'].includes(e.key)) player.vx = 0;
-});
-</script>
+    update();
+  </script>
 </body>
 </html>
