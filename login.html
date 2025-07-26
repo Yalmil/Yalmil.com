@@ -1,15 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Iniciar Sesión</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #00d2ff, #3a47d5);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 15px #000;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      background-color: #ff4081;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e91e63;
+    }
+    a {
+      color: #00e5ff;
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Iniciar Sesión</h2>
-  <input type="email" id="loginEmail" placeholder="Correo">
-  <input type="password" id="loginPassword" placeholder="Contraseña">
-  <button id="loginBtn">Entrar</button>
+  <div class="container">
+    <h2>Iniciar Sesión</h2>
+    <input type="email" id="email" placeholder="Correo">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="login()">Entrar</button>
+    <a href="register.html">¿No tienes cuenta? Regístrate</a>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
@@ -27,20 +81,14 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    const loginBtn = document.getElementById("loginBtn");
-
-    loginBtn.addEventListener("click", () => {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
+    window.login = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          window.location.href = "inicio.html"; // Redirige al inicio si login correcto
-        })
-        .catch(error => {
-          alert("Error al iniciar sesión: " + error.message);
-        });
-    });
+        .then(() => window.location.href = "inicio.html")
+        .catch(error => alert("Error: " + error.message));
+    };
   </script>
 </body>
 </html>
