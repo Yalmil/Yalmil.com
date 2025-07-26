@@ -59,6 +59,80 @@
       box-shadow: 0 0 20px #0ff;
     }
 
+    .anuncios {
+      background: #111;
+      border: 2px solid #ff0;
+      box-shadow: 0 0 20px #ff0a;
+      border-radius: 15px;
+      padding: 1rem;
+      margin: 2rem auto;
+      max-width: 90%;
+    }
+
+    .anuncios h2 {
+      color: #ff0;
+      text-shadow: 0 0 10px #ff0;
+      margin-bottom: 1rem;
+    }
+
+    .anuncios ul {
+      list-style: none;
+      padding: 0;
+      color: #fff;
+    }
+
+    .anuncios li {
+      background: #222;
+      border: 1px solid #555;
+      padding: 0.7rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .edit-icon {
+      cursor: pointer;
+      margin-left: 10px;
+      font-size: 1.2rem;
+      color: #ff0;
+      text-shadow: 0 0 5px #ff0;
+      transition: 0.3s;
+    }
+
+    .edit-icon:hover {
+      color: #fff;
+    }
+
+    .socials {
+      margin-top: 3rem;
+    }
+
+    .socials h2 {
+      color: #00ffcc;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .social-icons a {
+      font-size: 2rem;
+      text-decoration: none;
+      color: #00ffcc;
+      transition: 0.3s;
+    }
+
+    .social-icons a:hover {
+      color: #fff;
+      text-shadow: 0 0 15px #00ffcc;
+    }
+
     .footer {
       margin-top: 3rem;
       font-size: 0.9rem;
@@ -67,15 +141,17 @@
 
     @media (max-width: 600px) {
       h1 { font-size: 2rem; }
+      .btn { font-size: 0.9rem; }
     }
   </style>
+  <script src="https://kit.fontawesome.com/2c36e9b7b1.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <h1>🌟 SEP Minecraft 🌟</h1>
 
   <div class="ip-box">
     <p>🎮 IP del servidor:</p>
-    <p class="ip">Próximamente...</p>
+    <p class="ip">sep.minecraft.net</p>
     <p>📱 Puerto: <span class="ip">19132</span></p>
   </div>
 
@@ -84,8 +160,80 @@
   <a class="btn" href="#staff">👑 Ver staff</a>
   <a class="btn" href="#votar">⭐ Votar por el servidor</a>
 
+  <!-- Anuncios -->
+  <div class="anuncios">
+    <h2>
+      📢 Anuncios del servidor
+      <span class="edit-icon" onclick="pedirContraseña()" title="Editar anuncios">✏️</span>
+    </h2>
+    <ul id="anuncios-lista">
+      <!-- Anuncios cargados por JS -->
+    </ul>
+  </div>
+
+  <!-- Redes Sociales -->
+  <div class="socials">
+    <h2>🌐 Síguenos en redes</h2>
+    <div class="social-icons">
+      <a href="https://youtube.com/@tu-canal" target="_blank"><i class="fab fa-youtube"></i></a>
+      <a href="https://tiktok.com/@tuusuario" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a href="https://instagram.com/tuusuario" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://twitter.com/tuusuario" target="_blank"><i class="fab fa-twitter"></i></a>
+    </div>
+  </div>
+
   <div class="footer">
     © 2025 SEP Minecraft | Página creada por Yalmil
   </div>
+
+  <!-- Script para edición segura y almacenamiento -->
+  <script>
+    const ID_STORAGE = 'sep_anuncios_guardados';
+    const lista = document.getElementById("anuncios-lista");
+
+    function cargarAnuncios() {
+      const guardado = localStorage.getItem(ID_STORAGE);
+      const valores = guardado ? JSON.parse(guardado) : [
+        "🛠 El servidor estará en mantenimiento el 30 de julio a las 10:00 PM.",
+        "🎉 Nuevo evento de supervivencia el fin de semana. ¡Premios exclusivos!",
+        "🆕 Hemos actualizado los plugins y agregado nuevos minijuegos."
+      ];
+
+      lista.innerHTML = '';
+      valores.forEach(txt => {
+        const li = document.createElement("li");
+        li.textContent = txt;
+        lista.appendChild(li);
+      });
+    }
+
+    function pedirContraseña() {
+      const pass = prompt("🔒 Contraseña para editar:");
+      if (pass === "sepowner") {
+        editarAnuncios();
+      } else {
+        alert("❌ Contraseña incorrecta.");
+      }
+    }
+
+    function editarAnuncios() {
+      const actual = Array.from(lista.children).map(li => li.innerText).join("\n");
+      const nuevoTexto = prompt("📝 Edita los anuncios (uno por línea):", actual);
+      if (nuevoTexto !== null) {
+        const nuevos = nuevoTexto.split("\n").map(s => s.trim()).filter(s => s.length > 0);
+        lista.innerHTML = "";
+        nuevos.forEach(txt => {
+          const li = document.createElement("li");
+          li.textContent = txt;
+          lista.appendChild(li);
+        });
+        localStorage.setItem(ID_STORAGE, JSON.stringify(nuevos));
+        alert("✅ Anuncios actualizados y guardados.");
+      }
+    }
+
+    // Cargar anuncios al iniciar
+    cargarAnuncios();
+  </script>
 </body>
 </html>
