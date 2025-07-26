@@ -3,48 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juego de Letras</title>
+  <title>Sobrevive a las Letras</title>
   <style>
     html, body {
       margin: 0;
       overflow: hidden;
-      background: #111;
-      color: white;
-      font-family: sans-serif;
       touch-action: none;
+      background: #111;
+      font-family: sans-serif;
+      color: white;
     }
     canvas {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       display: block;
-      background: #222;
-    }
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 2;
-    }
-    #score {
-      font-size: 1.2em;
-    }
-    #weaponSelect {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      z-index: 3;
-    }
-    .weapon-btn {
-      background: #444;
-      color: white;
-      margin: 5px;
-      padding: 10px;
-      border: none;
-      cursor: pointer;
-      border-radius: 8px;
     }
     #joystickContainer {
       position: absolute;
@@ -52,222 +23,255 @@
       left: 20px;
       width: 120px;
       height: 120px;
-      background: rgba(255,255,255,0.1);
       border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
       touch-action: none;
     }
     #joystickThumb {
+      position: absolute;
       width: 60px;
       height: 60px;
-      background: rgba(255,255,255,0.4);
-      border-radius: 50%;
-      position: absolute;
       left: 30px;
       top: 30px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      pointer-events: none;
+    }
+    #shootZone {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <div id="score">Puntos: 0 | Récord: 0</div>
-  </div>
-
-  <div id="weaponSelect">
-    <h2>Elige tu arma</h2>
-    <button class="weapon-btn" onclick="startGame('normal')">🔫 Normal</button>
-    <button class="weapon-btn" onclick="startGame('doble')">💥 Doble</button>
-    <button class="weapon-btn" onclick="startGame('ráfaga')">⚡ Ráfaga</button>
-  </div>
-
+  <canvas id="game"></canvas>
   <div id="joystickContainer">
     <div id="joystickThumb"></div>
   </div>
-
-  <canvas id="gameCanvas"></canvas>
+  <div id="shootZone"></div>
+  <div id="hud">
+    <div>Puntaje: <span id="score">0</span></div>
+    <div>Récord: <span id="highScore">0</span></div>
+  </div>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
+    const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
-    const scoreDisplay = document.getElementById("score");
-    const joystickContainer = document.getElementById("joystickContainer");
-    const joystickThumb = document.getElementById("joystickThumb");
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
 
-    let score = 0;
-    let record = localStorage.getItem("record") || 0;
-
-    let touchX = 0;
-    let touchY = 0;
-
-    let joystick = {
-      active: false,
-      startX: 0,
-      startY: 0,
-      dx: 0,
-      dy: 0
-    };
-
-    joystickContainer.addEventListener("touchstart", (e) => {
-      joystick.active = true;
-      const rect = joystickContainer.getBoundingClientRect();
-      joystick.startX = e.touches[0].clientX - rect.left - 60;
-      joystick.startY = e.touches[0].clientY - rect.top - 60;
-    });
-
-    joystickContainer.addEventListener("touchmove", (e) => {
-      if (!joystick.active) return;
-      const rect = joystickContainer.getBoundingClientRect();
-      const x = e.touches[0].clientX - rect.left - 60;
-      const y = e.touches[0].clientY - rect.top - 60;
-      let dx = x;
-      let dy = y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const maxDistance = 40;
-      if (distance > maxDistance) {
-        dx = (dx / distance) * maxDistance;
-        dy = (dy / distance) * maxDistance;
-      }
-      joystick.dx = dx / maxDistance;
-      joystick.dy = dy / maxDistance;
-      joystickThumb.style.left = `${60 + dx}px`;
-      joystickThumb.style.top = `${60 + dy}px`;
-    });
-
-    joystickContainer.addEventListener("touchend", () => {
-      joystick.active = false;
-      joystick.dx = 0;
-      joystick.dy = 0;
-      joystickThumb.style.left = "60px";
-      joystickThumb.style.top = "60px";
-    });
-
-    let player = {
-      x: width / 2,
-      y: height / 2,
-      size: 20,
-      color: "lime",
-      letter: "Ñ",
-      speed: 3
-    };
-
+    let player = { x: w / 2, y: h / 2, size: 30, color: "cyan", speed: 3 };
     let bullets = [];
     let enemies = [];
-    let weapon = "normal";
+    let lastSpawn = 0;
+    let score = 0;
+    let highScore = +localStorage.getItem("highScoreLetters") || 0;
+    let shootDirection = { x: 0, y: 0 };
 
-    function spawnEnemy() {
-      const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      enemies.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: 20,
-        letter,
-        color: `hsl(${Math.random() * 360}, 100%, 60%)`,
-        health: letter.charCodeAt(0) - 64
-      });
-    }
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    function shoot(x, y) {
-      const angle = Math.atan2(y - player.y, x - player.x);
-      const bullet = {
+    // Joystick
+    const joy = document.getElementById("joystickContainer");
+    const thumb = document.getElementById("joystickThumb");
+    let joyDir = { x: 0, y: 0 };
+    let joyTouch = null;
+
+    joy.addEventListener("touchstart", (e) => {
+      joyTouch = e.targetTouches[0].identifier;
+    });
+
+    joy.addEventListener("touchmove", (e) => {
+      for (let touch of e.changedTouches) {
+        if (touch.identifier === joyTouch) {
+          let rect = joy.getBoundingClientRect();
+          let dx = touch.clientX - (rect.left + rect.width / 2);
+          let dy = touch.clientY - (rect.top + rect.height / 2);
+          let dist = Math.hypot(dx, dy);
+          let maxDist = rect.width / 2;
+          if (dist > maxDist) {
+            dx *= maxDist / dist;
+            dy *= maxDist / dist;
+          }
+          thumb.style.left = `${30 + dx}px`;
+          thumb.style.top = `${30 + dy}px`;
+          joyDir = { x: dx / maxDist, y: dy / maxDist };
+        }
+      }
+    });
+
+    joy.addEventListener("touchend", (e) => {
+      for (let touch of e.changedTouches) {
+        if (touch.identifier === joyTouch) {
+          joyTouch = null;
+          thumb.style.left = "30px";
+          thumb.style.top = "30px";
+          joyDir = { x: 0, y: 0 };
+        }
+      }
+    });
+
+    // Disparo táctil o mouse
+    let isShooting = false;
+    let shootInterval;
+
+    function shoot() {
+      if (shootDirection.x === 0 && shootDirection.y === 0) return;
+      bullets.push({
         x: player.x,
         y: player.y,
-        dx: Math.cos(angle) * 5,
-        dy: Math.sin(angle) * 5
-      };
+        dx: shootDirection.x * 7,
+        dy: shootDirection.y * 7,
+        size: 6,
+        color: "white"
+      });
+    }
 
-      if (weapon === "doble") {
-        bullets.push({ ...bullet });
-        bullets.push({ x: player.x, y: player.y, dx: Math.cos(angle + 0.2) * 5, dy: Math.sin(angle + 0.2) * 5 });
-      } else if (weapon === "ráfaga") {
-        for (let i = -1; i <= 1; i++) {
-          bullets.push({ x: player.x, y: player.y, dx: Math.cos(angle + i * 0.1) * 5, dy: Math.sin(angle + i * 0.1) * 5 });
-        }
-      } else {
-        bullets.push(bullet);
+    function startShooting() {
+      if (!shootInterval) {
+        shoot();
+        shootInterval = setInterval(shoot, 200);
       }
     }
 
-    canvas.addEventListener("mousedown", (e) => {
-      shoot(e.clientX, e.clientY);
+    function stopShooting() {
+      clearInterval(shootInterval);
+      shootInterval = null;
+    }
+
+    const shootZone = document.getElementById("shootZone");
+    shootZone.addEventListener("touchstart", (e) => {
+      isShooting = true;
+      updateShootDirection(e.touches[0].clientX, e.touches[0].clientY);
+      startShooting();
+    });
+    shootZone.addEventListener("touchmove", (e) => {
+      updateShootDirection(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    shootZone.addEventListener("touchend", () => {
+      isShooting = false;
+      stopShooting();
     });
 
-    canvas.addEventListener("touchstart", (e) => {
-      if (e.touches[0].clientX > width / 2) {
-        shoot(e.touches[0].clientX, e.touches[0].clientY);
-      }
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      shootDirection = normalize(e.clientX - player.x, e.clientY - player.y);
     });
+
+    canvas.addEventListener("mousedown", () => {
+      startShooting();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      stopShooting();
+    });
+
+    function normalize(x, y) {
+      const len = Math.hypot(x, y);
+      return len === 0 ? { x: 0, y: 0 } : { x: x / len, y: y / len };
+    }
+
+    function spawnEnemy() {
+      const letter = letters[Math.floor(Math.random() * letters.length)];
+      const side = Math.floor(Math.random() * 4);
+      let x = 0, y = 0;
+      if (side === 0) { x = Math.random() * w; y = -20; }
+      if (side === 1) { x = w + 20; y = Math.random() * h; }
+      if (side === 2) { x = Math.random() * w; y = h + 20; }
+      if (side === 3) { x = -20; y = Math.random() * h; }
+
+      const life = letters.indexOf(letter) + 1;
+      enemies.push({ x, y, letter, size: 24, life, maxLife: life });
+    }
 
     function update() {
-      player.x += joystick.dx * player.speed;
-      player.y += joystick.dy * player.speed;
+      player.x += joyDir.x * player.speed;
+      player.y += joyDir.y * player.speed;
 
-      // Limitar al mapa
-      player.x = Math.max(player.size, Math.min(width - player.size, player.x));
-      player.y = Math.max(player.size, Math.min(height - player.size, player.y));
+      // Bordes
+      player.x = Math.max(player.size / 2, Math.min(w - player.size / 2, player.x));
+      player.y = Math.max(player.size / 2, Math.min(h - player.size / 2, player.y));
 
-      bullets.forEach((b, i) => {
+      bullets = bullets.filter(b => b.x > 0 && b.x < w && b.y > 0 && b.y < h);
+      bullets.forEach(b => {
         b.x += b.dx;
         b.y += b.dy;
-        if (b.x < 0 || b.y < 0 || b.x > width || b.y > height) bullets.splice(i, 1);
       });
 
-      enemies.forEach((e, i) => {
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.hypot(dx, dy);
-        e.x += (dx / dist) * 1;
-        e.y += (dy / dist) * 1;
+      enemies.forEach(e => {
+        const dir = normalize(player.x - e.x, player.y - e.y);
+        e.x += dir.x * 1.2;
+        e.y += dir.y * 1.2;
+      });
 
-        bullets.forEach((b, j) => {
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        let e = enemies[i];
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          let b = bullets[j];
           if (Math.hypot(e.x - b.x, e.y - b.y) < e.size) {
-            e.health--;
+            e.life--;
             bullets.splice(j, 1);
-            if (e.health <= 0) {
-              enemies.splice(i, 1);
+            if (e.life <= 0) {
               score++;
-              if (score > record) {
-                record = score;
-                localStorage.setItem("record", record);
+              if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("highScoreLetters", highScore);
               }
+              enemies.splice(i, 1);
             }
+            break;
           }
-        });
-      });
+        }
+      }
 
-      if (Math.random() < 0.02) spawnEnemy();
+      if (Date.now() - lastSpawn > 1200) {
+        spawnEnemy();
+        lastSpawn = Date.now();
+      }
     }
 
     function draw() {
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, w, h);
+
+      // Player
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, player.size / 2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "black";
-      ctx.font = "20px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(player.letter, player.x, player.y + 6);
 
-      bullets.forEach((b) => {
-        ctx.fillStyle = "white";
+      // Bullets
+      bullets.forEach(b => {
+        ctx.fillStyle = b.color;
         ctx.beginPath();
-        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      enemies.forEach((e) => {
-        ctx.fillStyle = e.color;
+      // Enemies
+      enemies.forEach(e => {
+        ctx.fillStyle = `hsl(${(letters.indexOf(e.letter) * 13) % 360}, 80%, 60%)`;
         ctx.beginPath();
         ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "black";
-        ctx.fillText(e.letter, e.x, e.y + 6);
+        ctx.fillStyle = "#000";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(e.letter, e.x, e.y);
       });
 
-      scoreDisplay.innerText = `Puntos: ${score} | Récord: ${record}`;
+      document.getElementById("score").textContent = score;
+      document.getElementById("highScore").textContent = highScore;
     }
 
     function loop() {
@@ -276,17 +280,11 @@
       requestAnimationFrame(loop);
     }
 
-    function startGame(selectedWeapon) {
-      weapon = selectedWeapon;
-      document.getElementById("weaponSelect").style.display = "none";
-      loop();
-    }
+    loop();
 
     window.addEventListener("resize", () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
     });
   </script>
 </body>
