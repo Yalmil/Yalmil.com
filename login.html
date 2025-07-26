@@ -3,50 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login con Firebase</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      gap: 1rem;
-    }
-    input, button {
-      padding: 0.6rem;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    .hidden { display: none; }
-  </style>
+  <title>Iniciar Sesión</title>
 </head>
 <body>
-  <h1>Login Firebase</h1>
-
-  <div id="login">
-    <input type="email" id="loginEmail" placeholder="Email"><br>
-    <input type="password" id="loginPassword" placeholder="Contraseña"><br>
-    <button onclick="login()">Iniciar sesión</button>
-    <p>¿No tienes cuenta? <a href="#" onclick="toggleForms()">Regístrate</a></p>
-  </div>
-
-  <div id="register" class="hidden">
-    <input type="text" id="registerName" placeholder="Tu nombre"><br>
-    <input type="email" id="registerEmail" placeholder="Email"><br>
-    <input type="password" id="registerPassword" placeholder="Contraseña"><br>
-    <button onclick="register()">Registrarse</button>
-    <p>¿Ya tienes cuenta? <a href="#" onclick="toggleForms()">Inicia sesión</a></p>
-  </div>
+  <h2>Iniciar Sesión</h2>
+  <input type="email" id="loginEmail" placeholder="Correo">
+  <input type="password" id="loginPassword" placeholder="Contraseña">
+  <button id="loginBtn">Entrar</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -59,64 +26,20 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    // Alternar entre login y registro
-    window.toggleForms = () => {
-      document.getElementById('login').classList.toggle('hidden');
-      document.getElementById('register').classList.toggle('hidden');
-    };
+    const loginBtn = document.getElementById("loginBtn");
 
-    // Registrar nuevo usuario
-    window.register = async () => {
-      const name = document.getElementById('registerName').value;
-      const email = document.getElementById('registerEmail').value;
-      const password = document.getElementById('registerPassword').value;
+    loginBtn.addEventListener("click", () => {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
 
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        await setDoc(doc(db, "users", uid), {
-          name: name,
-          email: email,
-          createdAt: Date.now()
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          window.location.href = "inicio.html"; // Redirige al inicio si login correcto
+        })
+        .catch(error => {
+          alert("Error al iniciar sesión: " + error.message);
         });
-
-        alert("Cuenta creada. Ya puedes iniciar sesión.");
-        toggleForms();
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
-    };
-
-    // Iniciar sesión
-    window.login = async () => {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Bienvenido");
-      } catch (error) {
-        alert("Error al iniciar sesión: " + error.message);
-      }
-    };
-
-    // Detectar si ya está logeado
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docSnap = await getDoc(doc(db, "users", user.uid));
-        const username = docSnap.exists() ? docSnap.data().name : "Usuario";
-
-        document.body.innerHTML = `
-          <h2>Hola, ${username}</h2>
-          <p>Ya has iniciado sesión. Redirigiendo...</p>
-        `;
-        setTimeout(() => {
-          window.location.href = "home.html"; // Cambia por tu página principal
-        }, 1500);
-      }
     });
   </script>
 </body>
