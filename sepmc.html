@@ -67,18 +67,23 @@
       padding: 1rem;
       margin: 2rem auto;
       max-width: 90%;
+      text-align: left;
     }
 
     .anuncios h2 {
       color: #ff0;
       text-shadow: 0 0 10px #ff0;
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .anuncios ul {
       list-style: none;
       padding: 0;
       color: #fff;
+      margin: 0;
     }
 
     .anuncios li {
@@ -87,16 +92,15 @@
       padding: 0.7rem;
       margin: 0.5rem 0;
       border-radius: 10px;
-      text-align: left;
     }
 
     .edit-icon {
       cursor: pointer;
-      margin-left: 10px;
       font-size: 1.2rem;
       color: #ff0;
       text-shadow: 0 0 5px #ff0;
       transition: 0.3s;
+      user-select: none;
     }
 
     .edit-icon:hover {
@@ -174,8 +178,8 @@
   <div class="socials">
     <h2>🌐 Síguenos en redes</h2>
     <div class="social-icons">
-      <a class="btn" href="https://youtube.com/@sep_minecraft">Youtube</a>
-      <a class="btn" href="https://www.instagram.com/sep.comu">Instagram</a>
+      <a class="btn" href="https://youtube.com/@sep_minecraft" target="_blank" rel="noopener noreferrer">Youtube</a>
+      <a class="btn" href="https://www.instagram.com/sep.comu" target="_blank" rel="noopener noreferrer">Instagram</a>
     </div>
   </div>
 
@@ -183,26 +187,54 @@
     © 2025 SEP Minecraft | Página creada por Yalmil
   </div>
 
-  <!-- Script para edición segura y almacenamiento -->
-  <script>
-    const ID_STORAGE = 'sep_anuncios_guardados';
+  <!-- Firebase SDK + lógica anuncios -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVK1jVFsEvjzjQYLPp4nkGdRdMNJ9psPc",
+      authDomain: "sepmc-2ab3d.firebaseapp.com",
+      databaseURL: "https://sepmc-2ab3d-default-rtdb.firebaseio.com",
+      projectId: "sepmc-2ab3d",
+      storageBucket: "sepmc-2ab3d.firebasestorage.app",
+      messagingSenderId: "1015746236260",
+      appId: "1:1015746236260:web:baf7779cc6fcbb5757b471",
+      measurementId: "G-LBBNN1VKKD"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const anuncioRef = ref(db, 'anuncios');
     const lista = document.getElementById("anuncios-lista");
 
-    function cargarAnuncios() {
-      const guardado = localStorage.getItem(ID_STORAGE);
-      const valores = guardado ? JSON.parse(guardado) : [
-        "🛠 El servidor estará en mantenimiento el 30 de julio a las 10:00 PM.",
-        "🎉 Nuevo evento de supervivencia el fin de semana. ¡Premios exclusivos!",
-        "🆕 Hemos actualizado los plugins y agregado nuevos minijuegos."
-      ];
+    // Cargar anuncios en tiempo real
+    onValue(anuncioRef, (snapshot) => {
+      const data = snapshot.val();
+      lista.innerHTML = "";
 
-      lista.innerHTML = '';
-      valores.forEach(txt => {
-        const li = document.createElement("li");
-        li.textContent = txt;
-        lista.appendChild(li);
-      });
-    }
+      if (data && Array.isArray(data)) {
+        data.forEach(anuncio => {
+          const li = document.createElement("li");
+          li.textContent = anuncio;
+          lista.appendChild(li);
+        });
+      } else {
+        // Si no hay datos en Firebase, mostrar anuncios por defecto
+        const defaultAnuncios = [
+          "🛠 El servidor estará en mantenimiento el 30 de julio a las 10:00 PM.",
+          "🎉 Nuevo evento de supervivencia el fin de semana. ¡Premios exclusivos!",
+          "🆕 Hemos actualizado los plugins y agregado nuevos minijuegos."
+        ];
+        defaultAnuncios.forEach(anuncio => {
+          const li = document.createElement("li");
+          li.textContent = anuncio;
+          lista.appendChild(li);
+        });
+      }
+    });
 
     function pedirContraseña() {
       const pass = prompt("🔒 Contraseña para editar:");
@@ -214,23 +246,22 @@
     }
 
     function editarAnuncios() {
-      const actual = Array.from(lista.children).map(li => li.innerText).join("\n");
-      const nuevoTexto = prompt("📝 Edita los anuncios (uno por línea):", actual);
-      if (nuevoTexto !== null) {
-        const nuevos = nuevoTexto.split("\n").map(s => s.trim()).filter(s => s.length > 0);
-        lista.innerHTML = "";
-        nuevos.forEach(txt => {
-          const li = document.createElement("li");
-          li.textContent = txt;
-          lista.appendChild(li);
-        });
-        localStorage.setItem(ID_STORAGE, JSON.stringify(nuevos));
-        alert("✅ Anuncios actualizados y guardados.");
+      const actuales = Array.from(lista.children).map(li => li.textContent).join("\n");
+      const nuevos = prompt("📝 Edita los anuncios (uno por línea):", actuales);
+
+      if (nuevos !== null) {
+        const nuevosArray = nuevos.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+
+        // Guardar en Firebase
+        set(anuncioRef, nuevosArray)
+          .then(() => {
+            alert("✅ Anuncios actualizados.");
+          })
+          .catch(error => {
+            alert("❌ Error al guardar anuncios: " + error.message);
+          });
       }
     }
-
-    // Cargar anuncios al iniciar
-    cargarAnuncios();
   </script>
 </body>
 </html>
