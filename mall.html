@@ -1,227 +1,175 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sobrevive a las Letras</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-      background: black;
-      color: white;
-    }
-    canvas {
-      display: block;
-      background: radial-gradient(circle, #222 0%, #000 100%);
-    }
-    #startScreen {
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    canvas { background: #111; display: block; margin: auto; touch-action: none; }
+    #ui {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-    .weapon-button {
-      padding: 15px 25px;
-      margin: 10px;
-      font-size: 18px;
-      background: #444;
-      border: none;
-      border-radius: 10px;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
       color: white;
-      cursor: pointer;
+      font-family: sans-serif;
+      text-align: center;
     }
-    .weapon-button:hover {
-      background: #666;
+    #weaponSelect {
+      background: #222; color: white; padding: 8px; border: none; font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <div id="startScreen">
-    <h2>Elige tu arma</h2>
-    <button class="weapon-button" onclick="startGame('pistol')">🔫 Pistola</button>
-    <button class="weapon-button" onclick="startGame('shotgun')">🔥 Escopeta</button>
-    <button class="weapon-button" onclick="startGame('ray')">⚡ Rayo</button>
+  <div id="ui">
+    <label for="weaponSelect">Elige tu arma: </label>
+    <select id="weaponSelect">
+      <option value="normal">Normal</option>
+      <option value="piercing">Perforadora</option>
+      <option value="explosive">Explosiva</option>
+    </select>
+    <div id="score">Puntuación: 0</div>
   </div>
-  <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
+    const scoreEl = document.getElementById("score");
+    const weaponSelect = document.getElementById("weaponSelect");
 
-    window.addEventListener("resize", () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    });
-
-    let keys = {};
+    const player = { x: 400, y: 250, r: 15, color: "cyan" };
     let bullets = [];
     let enemies = [];
-    let weapon = "pistol";
-    let mouseX = w/2, mouseY = h/2;
+    let score = 0;
+    let weapon = weaponSelect.value;
+    let mouseTarget = { x: player.x, y: player.y };
 
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
-
-    document.addEventListener("mousemove", e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    document.addEventListener("touchstart", e => {
-      const touch = e.touches[0];
-      mouseX = touch.clientX;
-      mouseY = touch.clientY;
-      shoot();
-    });
-
-    document.addEventListener("click", shoot);
-
-    let player = {
-      x: w/2,
-      y: h/2,
-      size: 30,
-      speed: 4,
-      color: "white"
+    weaponSelect.onchange = () => {
+      weapon = weaponSelect.value;
     };
 
-    function shoot() {
-      let dx = mouseX - player.x;
-      let dy = mouseY - player.y;
-      let angle = Math.atan2(dy, dx);
-
-      if (weapon === "pistol") {
-        bullets.push(createBullet(angle, 7, "white"));
-      } else if (weapon === "ray") {
-        bullets.push(createBullet(angle, 14, "cyan"));
-      } else if (weapon === "shotgun") {
-        for (let i = -2; i <= 2; i++) {
-          bullets.push(createBullet(angle + i * 0.1, 6, randomColor()));
-        }
-      }
-    }
-
-    function createBullet(angle, speed, color) {
-      return {
-        x: player.x,
-        y: player.y,
-        size: 6,
-        speed: speed,
-        dx: Math.cos(angle) * speed,
-        dy: Math.sin(angle) * speed,
-        color: color
-      };
-    }
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     function spawnEnemy() {
-      const size = 25;
-      let side = Math.floor(Math.random() * 4);
-      let x, y;
-      if (side === 0) { x = Math.random() * w; y = -size; }
-      else if (side === 1) { x = w + size; y = Math.random() * h; }
-      else if (side === 2) { x = Math.random() * w; y = h + size; }
-      else { x = -size; y = Math.random() * h; }
-
-      const char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      enemies.push({
-        x, y, size, char,
-        color: randomColor()
-      });
+      const letter = letters[Math.floor(Math.random() * letters.length)];
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = 300;
+      const x = player.x + Math.cos(angle) * radius;
+      const y = player.y + Math.sin(angle) * radius;
+      const dx = (player.x - x) / 100;
+      const dy = (player.y - y) / 100;
+      const color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+      const vida = letters.indexOf(letter) + 1;
+      enemies.push({ x, y, dx, dy, letter, color, vida });
     }
 
-    function randomColor() {
-      const colors = ["red", "green", "yellow", "magenta", "orange", "lime", "aqua"];
-      return colors[Math.floor(Math.random() * colors.length)];
+    function shoot(x, y) {
+      const angle = Math.atan2(y - player.y, x - player.x);
+      const speed = 7;
+      const dx = Math.cos(angle) * speed;
+      const dy = Math.sin(angle) * speed;
+      bullets.push({ x: player.x, y: player.y, dx, dy, type: weapon });
     }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseTarget = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+      shoot(mouseTarget.x, mouseTarget.y);
+    });
+
+    canvas.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      mouseTarget = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      };
+      shoot(mouseTarget.x, mouseTarget.y);
+    });
 
     function update() {
-      // Movimiento
-      if (keys["ArrowUp"] || keys["w"]) player.y -= player.speed;
-      if (keys["ArrowDown"] || keys["s"]) player.y += player.speed;
-      if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
-      if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
-
-      // Mantener dentro
-      player.x = Math.max(player.size/2, Math.min(w - player.size/2, player.x));
-      player.y = Math.max(player.size/2, Math.min(h - player.size/2, player.y));
-
-      // Balas
       bullets.forEach((b, i) => {
         b.x += b.dx;
         b.y += b.dy;
-        if (b.x < 0 || b.x > w || b.y < 0 || b.y > h) bullets.splice(i, 1);
-      });
 
-      // Enemigos
-      enemies.forEach((e, i) => {
-        let dx = player.x - e.x;
-        let dy = player.y - e.y;
-        let dist = Math.hypot(dx, dy);
-        e.x += dx / dist * 1.5;
-        e.y += dy / dist * 1.5;
-
-        // Colisión con jugador
-        if (Math.hypot(player.x - e.x, player.y - e.y) < player.size) {
-          alert("¡Perdiste!");
-          location.reload();
-        }
-
-        // Colisión con bala
-        bullets.forEach((b, j) => {
-          if (Math.hypot(b.x - e.x, b.y - e.y) < e.size) {
-            enemies.splice(i, 1);
-            bullets.splice(j, 1);
+        enemies.forEach((e, j) => {
+          const dx = e.x - b.x;
+          const dy = e.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 15) {
+            if (b.type === "explosive") {
+              enemies = enemies.filter((_, k) => {
+                const ex = enemies[k].x - b.x;
+                const ey = enemies[k].y - b.y;
+                return Math.sqrt(ex * ex + ey * ey) > 40;
+              });
+              bullets.splice(i, 1);
+              score += 10;
+            } else {
+              e.vida -= 1;
+              if (e.vida <= 0) {
+                enemies.splice(j, 1);
+                score += 1;
+              }
+              if (b.type !== "piercing") {
+                bullets.splice(i, 1);
+              }
+            }
           }
         });
       });
 
-      // Spawneo enemigo
+      enemies.forEach((e) => {
+        e.x += e.dx;
+        e.y += e.dy;
+      });
+
+      bullets = bullets.filter(
+        (b) => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height
+      );
+
       if (Math.random() < 0.02) spawnEnemy();
     }
 
     function draw() {
-      ctx.clearRect(0, 0, w, h);
-
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Jugador
       ctx.fillStyle = player.color;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
       ctx.fill();
 
       // Balas
-      bullets.forEach(b => {
-        ctx.fillStyle = b.color;
+      bullets.forEach((b) => {
+        ctx.fillStyle = b.type === "explosive" ? "orange" : "white";
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
         ctx.fill();
       });
 
       // Enemigos
-      enemies.forEach(e => {
+      enemies.forEach((e) => {
         ctx.fillStyle = e.color;
-        ctx.font = e.size + "px Arial";
-        ctx.fillText(e.char, e.x, e.y);
+        ctx.font = "20px sans-serif";
+        ctx.fillText(e.letter, e.x, e.y);
+        ctx.fillStyle = "red";
+        ctx.fillRect(e.x - 10, e.y - 25, 20 * (e.vida / 26), 4);
       });
+
+      scoreEl.innerText = "Puntuación: " + score;
     }
 
-    function gameLoop() {
+    function loop() {
       update();
       draw();
-      requestAnimationFrame(gameLoop);
+      requestAnimationFrame(loop);
     }
 
-    function startGame(selectedWeapon) {
-      weapon = selectedWeapon;
-      document.getElementById("startScreen").style.display = "none";
-      gameLoop();
-    }
+    loop();
   </script>
 </body>
 </html>
