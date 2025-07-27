@@ -1,88 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Perfil de Usuario</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(120deg, #222, #1e1e1e);
-      color: #fff;
-      text-align: center;
-      padding: 40px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0;
+      padding: 20px;
     }
-    .profile-card {
-      background: #2c2c2c;
-      border-radius: 20px;
-      padding: 30px;
+    .perfil-container {
       max-width: 400px;
       margin: auto;
-      box-shadow: 0 0 20px #0ff5;
+      background: #1e1e1e;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 15px #00ffd5;
     }
-    .profile-card img {
+    img {
       width: 120px;
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid #0ff;
+      margin-bottom: 10px;
     }
-    input, button {
+    input[type="file"], input[type="text"] {
       margin-top: 10px;
       padding: 10px;
-      border: none;
+      width: 100%;
       border-radius: 8px;
-      font-size: 1em;
-    }
-    input[type="text"] {
-      width: 80%;
-    }
-    input[type="file"] {
-      background: #111;
-      color: #0ff;
+      border: none;
+      background: #2a2a2a;
+      color: white;
     }
     button {
-      background-color: #0ff;
-      color: #000;
+      margin-top: 20px;
+      padding: 12px 25px;
+      background: #00ffd5;
+      border: none;
+      border-radius: 10px;
+      color: black;
+      font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
     }
     button:hover {
-      background-color: #00cccc;
+      background: #00c9b3;
     }
   </style>
 </head>
 <body>
-  <div class="profile-card">
+  <div class="perfil-container">
     <h2>Tu Perfil</h2>
-    <img id="avatar" src="default.png" alt="Avatar de usuario"><br><br>
-    <p><strong>Correo:</strong> <span id="email">Cargando...</span></p>
-    <p><strong>Nombre:</strong> <span id="username">Cargando...</span></p>
-
-    <hr style="margin: 20px 0; border-color: #444;">
-
-    <h3>Actualizar Perfil</h3>
-    <input type="file" id="newAvatar"><br>
-    <input type="text" id="newUsername" placeholder="Nuevo nombre de usuario"><br>
-    <button onclick="updateProfile()">Guardar Cambios</button><br><br>
-    <button onclick="logout()">Cerrar Sesión</button>
+    <img id="avatarPreview" src="" alt="Avatar">
+    <input type="file" id="avatarInput" accept="image/*" />
+    <input type="text" id="usernameInput" placeholder="Nombre de usuario" />
+    <button id="saveBtn">Guardar cambios</button>
   </div>
 
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      updateProfile,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import {
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -95,54 +79,60 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const avatarImg = document.getElementById("avatar");
-    const emailSpan = document.getElementById("email");
-    const usernameSpan = document.getElementById("username");
-    const newAvatarInput = document.getElementById("newAvatar");
-    const newUsernameInput = document.getElementById("newUsername");
+    const avatarPreview = document.getElementById("avatarPreview");
+    const avatarInput = document.getElementById("avatarInput");
+    const usernameInput = document.getElementById("usernameInput");
+    const saveBtn = document.getElementById("saveBtn");
 
-    onAuthStateChanged(auth, (user) => {
+    let currentUser;
+
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        emailSpan.textContent = user.email;
-        usernameSpan.textContent = user.displayName || "Sin nombre";
-        avatarImg.src = user.photoURL || "default.png";
+        currentUser = user;
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          avatarPreview.src = data.avatar || "https://via.placeholder.com/150";
+          usernameInput.value = data.username || "";
+        } else {
+          await setDoc(docRef, {
+            username: user.displayName || "",
+            avatar: user.photoURL || ""
+          });
+          avatarPreview.src = user.photoURL || "https://via.placeholder.com/150";
+        }
       } else {
         window.location.href = "login.html";
       }
     });
 
-    async function updateProfile() {
-      const user = auth.currentUser;
-      if (!user) return;
+    saveBtn.addEventListener("click", async () => {
+      if (!currentUser) return;
 
-      const newUsername = newUsernameInput.value.trim();
-      const newAvatarFile = newAvatarInput.files[0];
+      const newUsername = usernameInput.value.trim();
+      const newAvatarFile = avatarInput.files[0];
+      const userDocRef = doc(db, "users", currentUser.uid);
 
-      let photoURL = user.photoURL;
-
-      // Si se sube una nueva imagen
-      if (newAvatarFile) {
-        const avatarRef = ref(storage, `avatars/${user.uid}.jpg`);
-        await uploadBytes(avatarRef, newAvatarFile);
-        photoURL = await getDownloadURL(avatarRef);
+      let updates = {};
+      if (newUsername !== "") {
+        updates.username = newUsername;
       }
 
-      await updateProfile(user, {
-        displayName: newUsername || user.displayName,
-        photoURL: photoURL
-      });
+      if (newAvatarFile) {
+        const imgRef = storageRef(storage, `avatars/${currentUser.uid}`);
+        await uploadBytes(imgRef, newAvatarFile);
+        const downloadURL = await getDownloadURL(imgRef);
+        avatarPreview.src = downloadURL;
+        updates.avatar = downloadURL;
+      }
 
-      alert("Perfil actualizado correctamente.");
-      location.reload();
-    }
-
-    function logout() {
-      signOut(auth).then(() => {
-        window.location.href = "login.html";
-      });
-    }
+      await updateDoc(userDocRef, updates);
+      alert("Cambios guardados correctamente.");
+    });
   </script>
 </body>
 </html>
