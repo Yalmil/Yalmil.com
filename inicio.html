@@ -20,6 +20,7 @@
       padding: 1rem 2rem;
       border-bottom: 2px solid #3fffa8;
       text-align: center;
+      position: relative;
     }
 
     header h1 {
@@ -27,6 +28,24 @@
       font-size: 2rem;
       color: #3fffa8;
       text-shadow: 0 0 10px #3fffa8;
+    }
+
+    .profile-pic {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid #3fffa8;
+      box-shadow: 0 0 10px #3fffa8;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #3fffa8;
     }
 
     main {
@@ -75,15 +94,16 @@
   <header>
     <h1>Yalmil web</h1>
     <h3 id="bienvenida">Bienvenido de nuevo, usuario...</h3>
-    <h3>En esta página podrás explorar todos los textos creados por mi (Yalmil).</h3>
+    <h3>En esta página podrás explorar todos los textos creados por mí (Yalmil).</h3>
     <h3>Diviértete y disfruta. :D</h3>
+    <img class="profile-pic" src="https://i.pravatar.cc/100?u=user" alt="Perfil" onclick="window.location.href='https://yalmil.com/perfil'" />
   </header>
   <main>
     <h2>Subpáginas</h2>
     <div class="subpage-list">
       <a class="subpage" href="formulario">Sugerencias</a>
       <a class="subpage" href="juegos">Juegos</a>
-      <a class="subpage" hreg="sepmc">Sep Minecraft</a>
+      <a class="subpage" href="sepmc">Sep Minecraft</a>
     </div>
   </main>
   <footer>
