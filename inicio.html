@@ -1,116 +1,161 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inicio</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: white;
-    }
+<!DOCTYPE html>  <html lang="es">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>Yalmil.tv</title>  
+  <style>  
+    body {  
+      margin: 0;  
+      font-family: 'Segoe UI', sans-serif;  
+      background-color: #0a0a0a;  
+      color: #b8ffd8;  
+      display: flex;  
+      flex-direction: column;  
+      min-height: 100vh;  
+    }  header {  
+  background-color: #0f0f0f;  
+  padding: 1rem 2rem;  
+  border-bottom: 2px solid #3fffa8;  
+  text-align: center;  
+  position: relative;  
+}  
 
-    header {
-      background-color: #1f2a40;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
+header h1 {  
+  margin: 0;  
+  font-size: 2rem;  
+  color: #3fffa8;  
+  text-shadow: 0 0 10px #3fffa8;  
+}  
 
-    .logo {
-      font-size: 1.5em;
-      font-weight: bold;
-    }
+.profile-container {  
+  position: absolute;  
+  top: 10px;  
+  right: 20px;  
+  text-align: center;  
+}  
 
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
+.profile-pic {  
+  width: 45px;  
+  height: 45px;  
+  border-radius: 50%;  
+  border: 2px solid #3fffa8;  
+  box-shadow: 0 0 10px #3fffa8;  
+  cursor: pointer;  
+  transition: transform 0.2s, box-shadow 0.2s;  
+}  
 
-    .profile img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #00ffc8;
-    }
+.profile-pic:hover {  
+  transform: scale(1.1);  
+  box-shadow: 0 0 15px #3fffa8;  
+}  
 
-    .container {
-      padding: 30px;
-      text-align: center;
-    }
+.username-display {  
+  font-size: 0.75rem;  
+  color: #b8ffd8;  
+  margin-top: 2px;  
+}  
 
-    .highlight {
-      color: #00ffc8;
-    }
-  </style>
-</head>
-<body>
+main {  
+  flex: 1;  
+  display: flex;  
+  flex-direction: column;  
+  align-items: center;  
+  justify-content: center;  
+  padding: 2rem;  
+}  
 
-  <header>
-    <div class="logo">🌟 <span class="highlight">Yalmil App</span></div>
-    <div class="profile" id="profileBtn">
-      <img id="profileImage" src="https://via.placeholder.com/40" alt="Avatar" />
-    </div>
-  </header>
+.subpage-list {  
+  display: grid;  
+  gap: 1rem;  
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  
+  width: 100%;  
+  max-width: 800px;  
+}  
 
-  <div class="container">
-    <h1>Bienvenido, <span id="username">Usuario</span>!</h1>
-    <p>Correo: <span id="email">email@example.com</span></p>
-  </div>
+.subpage {  
+  background-color: #1a1a1a;  
+  padding: 1.5rem;  
+  border: 2px solid #3fffa8;  
+  border-radius: 1rem;  
+  text-align: center;  
+  text-decoration: none;  
+  color: #b8ffd8;  
+  box-shadow: 0 0 10px #3fffa8;  
+  transition: transform 0.2s, box-shadow 0.2s;  
+}  
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+.subpage:hover {  
+  transform: translateY(-5px);  
+  box-shadow: 0 0 20px #3fffa8;  
+}  
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
-      authDomain: "databaseloginweb.firebaseapp.com",
-      projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.appspot.com",
-      messagingSenderId: "121538864529",
-      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
-    };
+footer {  
+  text-align: center;  
+  padding: 1rem;  
+  font-size: 0.8rem;  
+  color: #666;  
+}
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  </style>  
+</head>  
+<body>  
+  <header>  
+    <h1>Yalmil web</h1>  
+    <h3 id="bienvenida">Bienvenido de nuevo, usuario...</h3>  
+    <h3>En esta página podrás explorar todos los textos creados por mí (Yalmil).</h3>  
+    <h3>Diviértete y disfruta. :D</h3>  <div class="profile-container" onclick="window.location.href='https://yalmil.github.io/Yalmil.com/perfil'">  
+  <img class="profile-pic" id="profilePic" src="https://i.pravatar.cc/100?u=user" alt="Perfil" />  
+  <div class="username-display" id="usernameDisplay">Cargando...</div>  
+</div>
 
-    const usernameEl = document.getElementById("username");
-    const emailEl = document.getElementById("email");
-    const profileImg = document.getElementById("profileImage");
-    const profileBtn = document.getElementById("profileBtn");
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          usernameEl.textContent = data.username || "Usuario";
-          emailEl.textContent = user.email || "Desconocido";
-          profileImg.src = data.avatar || "https://via.placeholder.com/40";
-        } else {
-          usernameEl.textContent = user.displayName || "Usuario";
-          emailEl.textContent = user.email || "Desconocido";
-        }
-      } else {
-        window.location.href = "login.html";
-      }
-    });
-
-    profileBtn.addEventListener("click", () => {
-      window.location.href = "perfil.html";
-    });
-  </script>
-
-</body>
+  </header>  
+  <main>  
+    <h2>Subpáginas</h2>  
+    <div class="subpage-list">  
+      <a class="subpage" href="formulario">Sugerencias</a>  
+      <a class="subpage" href="juegos">Juegos</a>  
+      <a class="subpage" href="sepmc">Sep Minecraft</a>  
+    </div>  
+  </main>  
+  <footer>  
+    &copy; 2025 Yalmil.tv – Todos los derechos reservados.  
+  </footer>    <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";  
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";  
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";  
+  
+    const firebaseConfig = {  
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",  
+      authDomain: "databaseloginweb.firebaseapp.com",  
+      projectId: "databaseloginweb",  
+      storageBucket: "databaseloginweb.appspot.com",  
+      messagingSenderId: "121538864529",  
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"  
+    };  
+  
+    const app = initializeApp(firebaseConfig);  
+    const auth = getAuth(app);  
+    const db = getFirestore(app);  
+  
+    const profilePic = document.getElementById("profilePic");  
+    const usernameDisplay = document.getElementById("usernameDisplay");  
+    const bienvenida = document.getElementById("bienvenida");  
+  
+    onAuthStateChanged(auth, async (user) => {  
+      if (user) {  
+        const userDoc = await getDoc(doc(db, "users", user.uid));  
+        const data = userDoc.exists() ? userDoc.data() : {};  
+  
+        const username = data.username || user.email;  
+        const avatarUrl = data.avatarUrl || `https://i.pravatar.cc/100?u=${user.uid}`;  
+  
+        usernameDisplay.textContent = username;  
+        profilePic.src = avatarUrl;  
+        bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;  
+      } else {  
+        usernameDisplay.textContent = "Invitado";  
+        bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";  
+      }  
+    });  
+  </script>  </body>  
 </html>
