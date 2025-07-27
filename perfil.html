@@ -2,71 +2,94 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Perfil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil de Usuario</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #121212;
+      font-family: sans-serif;
+      background: #0f0f0f;
       color: white;
       margin: 0;
       padding: 20px;
     }
-    .perfil-container {
+
+    .profile-container {
       max-width: 400px;
       margin: auto;
-      background: #1e1e1e;
-      border-radius: 15px;
+      background: #1a1a1a;
       padding: 20px;
-      text-align: center;
-      box-shadow: 0 0 15px #00ffd5;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00ffcc88;
     }
-    img {
-      width: 120px;
-      height: 120px;
+
+    .avatar {
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 10px;
+      border: 3px solid #00ffcc;
     }
-    input[type="file"], input[type="text"] {
-      margin-top: 10px;
-      padding: 10px;
+
+    input, button {
       width: 100%;
-      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
       border: none;
-      background: #2a2a2a;
-      color: white;
+      border-radius: 6px;
     }
+
     button {
-      margin-top: 20px;
-      padding: 12px 25px;
-      background: #00ffd5;
-      border: none;
-      border-radius: 10px;
+      background-color: #00ffcc;
       color: black;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s;
     }
+
     button:hover {
-      background: #00c9b3;
+      background-color: #00ffaa;
+    }
+
+    .label {
+      margin-top: 15px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="perfil-container">
-    <h2>Tu Perfil</h2>
-    <img id="avatarPreview" src="" alt="Avatar">
-    <input type="file" id="avatarInput" accept="image/*" />
-    <input type="text" id="usernameInput" placeholder="Nombre de usuario" />
+  <div class="profile-container">
+    <center>
+      <img id="avatar" class="avatar" src="default-avatar.png" />
+      <input type="file" id="avatarInput" />
+    </center>
+
+    <div class="label">Correo:</div>
+    <div id="email"></div>
+
+    <div class="label">Nombre de usuario:</div>
+    <input type="text" id="usernameInput" placeholder="Tu nombre" />
+
     <button id="saveBtn">Guardar cambios</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -82,9 +105,10 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    const avatarPreview = document.getElementById("avatarPreview");
-    const avatarInput = document.getElementById("avatarInput");
+    const emailField = document.getElementById("email");
     const usernameInput = document.getElementById("usernameInput");
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarImg = document.getElementById("avatar");
     const saveBtn = document.getElementById("saveBtn");
 
     let currentUser;
@@ -92,18 +116,17 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        emailField.textContent = user.email;
+
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
           const data = docSnap.data();
-          avatarPreview.src = data.avatar || "https://via.placeholder.com/150";
           usernameInput.value = data.username || "";
-        } else {
-          await setDoc(docRef, {
-            username: user.displayName || "",
-            avatar: user.photoURL || ""
-          });
-          avatarPreview.src = user.photoURL || "https://via.placeholder.com/150";
+          if (data.avatarUrl) {
+            avatarImg.src = data.avatarUrl;
+          }
         }
       } else {
         window.location.href = "login.html";
@@ -113,24 +136,26 @@
     saveBtn.addEventListener("click", async () => {
       if (!currentUser) return;
 
-      const newUsername = usernameInput.value.trim();
-      const newAvatarFile = avatarInput.files[0];
+      const username = usernameInput.value;
+
+      // Actualizar Firestore
       const userDocRef = doc(db, "users", currentUser.uid);
+      await setDoc(userDocRef, { username }, { merge: true });
 
-      let updates = {};
-      if (newUsername !== "") {
-        updates.username = newUsername;
+      // Si hay nueva imagen:
+      const file = avatarInput.files[0];
+      if (file) {
+        const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+
+        // Guardar URL de imagen en Firestore
+        await updateDoc(userDocRef, { avatarUrl: url });
+
+        // Cambiar avatar en pantalla
+        avatarImg.src = url;
       }
 
-      if (newAvatarFile) {
-        const imgRef = storageRef(storage, `avatars/${currentUser.uid}`);
-        await uploadBytes(imgRef, newAvatarFile);
-        const downloadURL = await getDownloadURL(imgRef);
-        avatarPreview.src = downloadURL;
-        updates.avatar = downloadURL;
-      }
-
-      await updateDoc(userDocRef, updates);
       alert("Cambios guardados correctamente.");
     });
   </script>
