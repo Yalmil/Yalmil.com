@@ -2,94 +2,62 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfil de Usuario</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #0f0f0f;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1f1f2e, #2c2c3d);
       color: white;
-      margin: 0;
-      padding: 20px;
+      text-align: center;
+      padding: 40px;
     }
-
-    .profile-container {
-      max-width: 400px;
-      margin: auto;
-      background: #1a1a1a;
+    .perfil-container {
+      background: #2e2e40;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #00ffcc88;
+      border-radius: 15px;
+      display: inline-block;
     }
-
-    .avatar {
-      width: 100px;
-      height: 100px;
+    .perfil-avatar {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #00ffcc;
+      border: 3px solid #4caf50;
     }
-
     input, button {
-      width: 100%;
+      display: block;
+      margin: 10px auto;
       padding: 10px;
-      margin-top: 10px;
+      width: 80%;
+      max-width: 300px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
     }
-
     button {
-      background-color: #00ffcc;
-      color: black;
+      background: #4caf50;
+      color: white;
       font-weight: bold;
       cursor: pointer;
     }
-
     button:hover {
-      background-color: #00ffaa;
-    }
-
-    .label {
-      margin-top: 15px;
-      font-weight: bold;
+      background: #45a049;
     }
   </style>
 </head>
 <body>
-  <div class="profile-container">
-    <center>
-      <img id="avatar" class="avatar" src="default-avatar.png" />
-      <input type="file" id="avatarInput" />
-    </center>
-
-    <div class="label">Correo:</div>
-    <div id="email"></div>
-
-    <div class="label">Nombre de usuario:</div>
-    <input type="text" id="usernameInput" placeholder="Tu nombre" />
-
-    <button id="saveBtn">Guardar cambios</button>
+  <div class="perfil-container">
+    <h2>Tu Perfil</h2>
+    <img id="avatar" class="perfil-avatar" src="https://via.placeholder.com/120" alt="Avatar">
+    <input type="text" id="username" placeholder="Nuevo nombre de usuario" />
+    <input type="text" id="photoURL" placeholder="URL de nueva foto de perfil" />
+    <button onclick="guardarCambios()">Guardar Cambios</button>
+    <p id="correo"></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc,
-      updateDoc
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-    import {
-      getStorage,
-      ref,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -102,62 +70,35 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
 
-    const emailField = document.getElementById("email");
-    const usernameInput = document.getElementById("usernameInput");
-    const avatarInput = document.getElementById("avatarInput");
-    const avatarImg = document.getElementById("avatar");
-    const saveBtn = document.getElementById("saveBtn");
-
-    let currentUser;
-
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        currentUser = user;
-        emailField.textContent = user.email;
-
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          usernameInput.value = data.username || "";
-          if (data.avatarUrl) {
-            avatarImg.src = data.avatarUrl;
-          }
-        }
+        document.getElementById("avatar").src = user.photoURL || "https://via.placeholder.com/120";
+        document.getElementById("username").value = user.displayName || "";
+        document.getElementById("photoURL").value = user.photoURL || "";
+        document.getElementById("correo").innerText = "Correo: " + user.email;
       } else {
-        window.location.href = "login.html";
+        window.location.href = "login.html"; // Redirige si no está logueado
       }
     });
 
-    saveBtn.addEventListener("click", async () => {
-      if (!currentUser) return;
+    window.guardarCambios = function () {
+      const user = auth.currentUser;
+      if (user) {
+        const nuevoNombre = document.getElementById("username").value;
+        const nuevaFoto = document.getElementById("photoURL").value;
 
-      const username = usernameInput.value;
-
-      // Actualizar Firestore
-      const userDocRef = doc(db, "users", currentUser.uid);
-      await setDoc(userDocRef, { username }, { merge: true });
-
-      // Si hay nueva imagen:
-      const file = avatarInput.files[0];
-      if (file) {
-        const storageRef = ref(storage, `avatars/${currentUser.uid}`);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-
-        // Guardar URL de imagen en Firestore
-        await updateDoc(userDocRef, { avatarUrl: url });
-
-        // Cambiar avatar en pantalla
-        avatarImg.src = url;
+        updateProfile(user, {
+          displayName: nuevoNombre,
+          photoURL: nuevaFoto
+        }).then(() => {
+          alert("Cambios guardados correctamente.");
+          location.reload();
+        }).catch((error) => {
+          alert("Error al guardar: " + error.message);
+        });
       }
-
-      alert("Cambios guardados correctamente.");
-    });
+    }
   </script>
 </body>
 </html>
