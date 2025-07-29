@@ -1,64 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ingresar nombre</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ingreso Forsaken</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      margin: 0;
     }
 
-    h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
+    input, button {
+      font-size: 18px;
+      padding: 10px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
     }
 
     input {
-      padding: 10px 15px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      width: 80%;
-      max-width: 300px;
-      margin-bottom: 15px;
-      outline: none;
+      width: 250px;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #00c9a7;
-      border: none;
-      border-radius: 8px;
+      background-color: #00c9a7;
       color: white;
       cursor: pointer;
-      transition: background 0.3s;
     }
 
     button:hover {
-      background: #00a88f;
+      background-color: #00a88f;
     }
   </style>
 </head>
 <body>
   <h1>Ingresa tu nombre</h1>
-  <input type="text" id="username" placeholder="Escribe tu nombre">
-  <button id="enviarBtn">Enviar</button>
+  <input type="text" id="username" placeholder="Tu nombre" />
+  <button id="enviarBtn">Entrar</button>
 
-  <!-- Firebase modular SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getDatabase, ref, set, onDisconnect } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD0bPdjr-IxuIbHENsJP23wqo-BKD9dk-w",
@@ -70,33 +59,35 @@
       appId: "1:923035495925:web:80242dbf5cd8f5706444bc"
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const db = getDatabase(app);
 
-    // Función para guardar nombre
+    // Si ya está guardado, ir directo al lobby
+    if (localStorage.getItem("usuario") && localStorage.getItem("usuario_id")) {
+      window.location.href = "forsakenlobby.html";
+    }
+
     document.getElementById("enviarBtn").addEventListener("click", async () => {
       const nombre = document.getElementById("username").value.trim();
+      if (nombre === "") return alert("Escribe tu nombre");
 
-      if (nombre === "") {
-        alert("Por favor, escribe tu nombre.");
-        return;
-      }
+      const id = crypto.randomUUID(); // ID único para evitar duplicados
 
-      try {
-        const usuariosRef = ref(database, "usuarios");
-        const nuevoUsuarioRef = push(usuariosRef);
-        await set(nuevoUsuarioRef, {
-          nombre: nombre,
-          timestamp: Date.now()
-        });
+      // Guardar en Firebase
+      const userRef = ref(db, "usuarios/" + id);
+      await set(userRef, {
+        nombre: nombre,
+        timestamp: Date.now()
+      });
 
-        // Redirecciona después de guardar
-        window.location.href = "forsakenlobby.html";
-      } catch (error) {
-        console.error("Error al guardar en Firebase:", error);
-        alert("Hubo un error. Intenta de nuevo.");
-      }
+      // Eliminar si se desconecta/cierra
+      onDisconnect(userRef).remove();
+
+      // Guardar localmente
+      localStorage.setItem("usuario", nombre);
+      localStorage.setItem("usuario_id", id);
+
+      window.location.href = "forsakenlobby.html";
     });
   </script>
 </body>
