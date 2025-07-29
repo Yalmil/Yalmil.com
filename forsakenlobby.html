@@ -91,6 +91,26 @@
     .killer-buttons button:hover {
       background: #00ddaa;
     }
+
+    .select-btn {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background-color: #00ffcc;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .select-btn:hover {
+      background-color: #00ddaa;
+    }
+
+    .select-btn:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -107,13 +127,14 @@
       <h2>Killers</h2>
       <div id="killers">
         <!-- Tarjeta de Aure añadida aquí -->
-        <div class="killer-card">
+        <div class="killer-card" id="aureCard">
           <img src="https://cdn.discordapp.com/avatars/1124589523003785246/89096b5da406cd5d155539a279225b98.png?size=1024" alt="AureComay">
           <div class="killer-name">Aure Comay</div>
           <div class="killer-buttons">
             <button onclick="alert('Mostrar skins de Aure')">🎭</button>
             <button onclick="alert('Descripción de Aure: El narrador del desorden con poderes de caos, 3 vidas, habilidad de controlar el entorno.')">ℹ️</button>
           </div>
+          <button class="select-btn" id="selectAure">Seleccionar</button>
         </div>
       </div>
     </div>
@@ -153,7 +174,7 @@
 
     if (!nombre || !id) {
       alert("No hay usuario registrado. Volviendo al inicio...");
-      window.location.href = "forsaken.html";
+      window.location.href = "index.html";
     }
 
     const userRef = ref(db, "usuarios/" + id);
@@ -180,12 +201,27 @@
     const timer = setInterval(() => {
       tiempo--;
       countdown.textContent = `Tiempo restante: ${tiempo}s`;
-
       if (tiempo <= 0) {
         clearInterval(timer);
         window.location.href = "juego.html";
       }
     }, 1000);
+
+    // Manejar selección de killer
+    const selectBtn = document.getElementById("selectAure");
+    const killerSeleccionado = localStorage.getItem("killerSeleccionado");
+
+    if (killerSeleccionado === "Aure Comay") {
+      selectBtn.textContent = "Seleccionado";
+      selectBtn.disabled = true;
+    }
+
+    selectBtn.addEventListener("click", () => {
+      localStorage.setItem("killerSeleccionado", "Aure Comay");
+      selectBtn.textContent = "Seleccionado";
+      selectBtn.disabled = true;
+      alert("Has seleccionado a Aure Comay como tu killer.");
+    });
   </script>
 </body>
 </html>
