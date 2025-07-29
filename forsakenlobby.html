@@ -72,7 +72,14 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      onDisconnect,
+      onValue,
+      get,
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD0bPdjr-IxuIbHENsJP23wqo-BKD9dk-w",
@@ -89,13 +96,33 @@
 
     const userListDiv = document.getElementById("userList");
 
+    // Recuperar datos locales
+    const nombre = localStorage.getItem("usuario");
+    const id = localStorage.getItem("usuario_id");
+
+    if (!nombre || !id) {
+      alert("No hay usuario registrado. Volviendo al inicio...");
+      window.location.href = "index.html";
+    }
+
+    // Volver a registrar por seguridad
+    const userRef = ref(db, "usuarios/" + id);
+    await set(userRef, {
+      nombre: nombre,
+      timestamp: Date.now()
+    });
+
+    // Eliminar si se desconecta
+    onDisconnect(userRef).remove();
+
+    // Mostrar usuarios activos
     onValue(ref(db, "usuarios"), (snapshot) => {
       userListDiv.innerHTML = "";
       snapshot.forEach((child) => {
-        const nombre = child.val().nombre;
+        const usuario = child.val().nombre;
         const div = document.createElement("div");
         div.className = "userItem";
-        div.textContent = nombre;
+        div.textContent = usuario;
         userListDiv.appendChild(div);
       });
     });
@@ -109,7 +136,7 @@
 
       if (tiempo <= 0) {
         clearInterval(timer);
-        window.location.href = "juego.html"; // Cámbialo si usas otro archivo
+        window.location.href = "juego.html"; // Cambiar si quieres otra página
       }
     }, 1000);
   </script>
