@@ -51,14 +51,14 @@
       color: #ffde59;
     }
 
-    .killer-card {
+    .killer-card, .survivor-card {
       background: rgba(255, 255, 255, 0.08);
       border-radius: 15px;
       padding: 15px;
       margin-top: 15px;
     }
 
-    .killer-card img {
+    .killer-card img, .survivor-card img {
       width: 100px;
       height: 100px;
       border-radius: 50%;
@@ -66,20 +66,20 @@
       border: 3px solid #00ffcc;
     }
 
-    .killer-name {
+    .killer-name, .survivor-name {
       font-size: 20px;
       font-weight: bold;
       margin-top: 10px;
     }
 
-    .killer-buttons {
+    .killer-buttons, .survivor-buttons {
       margin-top: 10px;
       display: flex;
       justify-content: center;
       gap: 10px;
     }
 
-    .killer-buttons button {
+    .killer-buttons button, .survivor-buttons button {
       background: #00ffcc;
       border: none;
       padding: 10px;
@@ -88,7 +88,7 @@
       font-size: 18px;
     }
 
-    .killer-buttons button:hover {
+    .killer-buttons button:hover, .survivor-buttons button:hover {
       background: #00ddaa;
     }
 
@@ -137,18 +137,6 @@
           <button class="select-btn" id="selectAure">Seleccionar</button>
         </div>
 
-        <!-- Tarjeta de Yalmil -->
-        <div class="killer-card" id="yalmilCard">
-          <img src="https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024" alt="Yalmil">
-          <div class="killer-name">Yalmil – “El Jugador de Mil Caras”</div>
-          <div class="killer-buttons">
-            <button onclick="alert('Mostrar skins de Yalmil')">🎭</button>
-            <button onclick="alert('Descripción de Yalmil: Especialista en escape y engaño. Habilidades como invisibilidad temporal y sabotaje.')">ℹ️</button>
-          </div>
-          <button class="select-btn" id="selectYalmil">Seleccionar</button>
-        </div>
-
-        <!-- Tarjeta de Abricraft -->
         <div class="killer-card" id="abricraftCard">
           <img src="https://cdn.discordapp.com/avatars/1226360384517046303/51c5a9adfa4fb382273f34c8ac685ae9.png?size=1024" alt="Abricraft">
           <div class="killer-name">Abricraft – “El Arquitecto Maldito”</div>
@@ -163,7 +151,18 @@
 
     <div class="team-box">
       <h2>Survivors</h2>
-      <div id="survivors"></div>
+      <div id="survivors">
+        <!-- Tarjeta de Yalmil como survivor -->
+        <div class="survivor-card" id="yalmilCard">
+          <img src="https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024" alt="Yalmil">
+          <div class="survivor-name">Yalmil – “El Jugador de Mil Caras”</div>
+          <div class="survivor-buttons">
+            <button onclick="alert('Mostrar skins de Yalmil')">🎭</button>
+            <button onclick="alert('Descripción de Yalmil: Especialista en escape y engaño. Habilidades como invisibilidad temporal y sabotaje.')">ℹ️</button>
+          </div>
+          <!-- No hay botón de seleccionar porque es survivor -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -230,43 +229,35 @@
       }
     }, 1000);
 
-    // Manejar selección de killer
-    const selectAureBtn = document.getElementById("selectAure");
-    const selectYalmilBtn = document.getElementById("selectYalmil");
-    const selectAbricraftBtn = document.getElementById("selectAbricraft");
+    // Solo killers tienen botón de seleccionar
+    const killers = [
+      { name: "Aure Comay", button: document.getElementById("selectAure") },
+      { name: "Abricraft", button: document.getElementById("selectAbricraft") },
+    ];
 
-    const killerSeleccionado = localStorage.getItem("killerSeleccionado");
-
-    if (killerSeleccionado === "Aure Comay") {
-      selectAureBtn.textContent = "Seleccionado";
-      selectAureBtn.disabled = true;
-    } else if (killerSeleccionado === "Yalmil") {
-      selectYalmilBtn.textContent = "Seleccionado";
-      selectYalmilBtn.disabled = true;
-    } else if (killerSeleccionado === "Abricraft") {
-      selectAbricraftBtn.textContent = "Seleccionado";
-      selectAbricraftBtn.disabled = true;
+    function actualizarBotones(killerSeleccionado) {
+      killers.forEach(killer => {
+        if (killer.name === killerSeleccionado) {
+          killer.button.textContent = "Seleccionado";
+          killer.button.disabled = true;
+        } else {
+          killer.button.textContent = "Seleccionar";
+          killer.button.disabled = false;
+        }
+      });
     }
 
-    selectAureBtn.addEventListener("click", () => {
-      localStorage.setItem("killerSeleccionado", "Aure Comay");
-      selectAureBtn.textContent = "Seleccionado";
-      selectAureBtn.disabled = true;
-      alert("Has seleccionado a Aure Comay como tu killer.");
-    });
+    const killerGuardado = localStorage.getItem("killerSeleccionado");
+    if (killerGuardado) {
+      actualizarBotones(killerGuardado);
+    }
 
-    selectYalmilBtn.addEventListener("click", () => {
-      localStorage.setItem("killerSeleccionado", "Yalmil");
-      selectYalmilBtn.textContent = "Seleccionado";
-      selectYalmilBtn.disabled = true;
-      alert("Has seleccionado a Yalmil como tu killer.");
-    });
-
-    selectAbricraftBtn.addEventListener("click", () => {
-      localStorage.setItem("killerSeleccionado", "Abricraft");
-      selectAbricraftBtn.textContent = "Seleccionado";
-      selectAbricraftBtn.disabled = true;
-      alert("Has seleccionado a Abricraft como tu killer.");
+    killers.forEach(killer => {
+      killer.button.addEventListener("click", () => {
+        localStorage.setItem("killerSeleccionado", killer.name);
+        actualizarBotones(killer.name);
+        alert(`Has seleccionado a ${killer.name} como tu killer.`);
+      });
     });
   </script>
 </body>
