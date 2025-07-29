@@ -1,61 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lobby Forsaken</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forsaken Lobby</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: sans-serif;
       background: linear-gradient(135deg, #141e30, #243b55);
       color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       padding: 20px;
+      text-align: center;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    #userList {
-      background: rgba(255, 255, 255, 0.05);
+    #usuarios {
+      margin: 20px auto;
+      max-width: 400px;
+      background: rgba(255,255,255,0.05);
       padding: 15px;
       border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-      margin-bottom: 30px;
     }
 
     .userItem {
-      padding: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     #countdown {
       font-size: 24px;
-      margin-bottom: 30px;
       color: #00ffcc;
+      margin: 20px 0;
     }
 
     .teams {
       display: flex;
       justify-content: space-around;
-      width: 100%;
-      max-width: 600px;
+      margin-top: 30px;
     }
 
     .team-box {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 15px;
+      background: rgba(255,255,255,0.05);
       border-radius: 10px;
+      padding: 10px;
       width: 45%;
     }
 
     .team-box h2 {
-      text-align: center;
       color: #ffde59;
     }
   </style>
@@ -64,9 +54,9 @@
   <h1>Lobby Forsaken</h1>
   <div id="countdown">Tiempo restante: 40s</div>
 
-  <div id="userList">
-    <h2>Usuarios en la sala:</h2>
-    <div id="usuarios"></div>
+  <div id="usuarios">
+    <h2>Usuarios conectados:</h2>
+    <div id="userList"></div>
   </div>
 
   <div class="teams">
@@ -80,7 +70,6 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
@@ -97,30 +86,30 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const usuariosDiv = document.getElementById('usuarios');
 
-    const usuariosRef = ref(db, 'usuarios');
-    onValue(usuariosRef, (snapshot) => {
-      usuariosDiv.innerHTML = "";
-      snapshot.forEach(child => {
+    const userListDiv = document.getElementById("userList");
+
+    onValue(ref(db, "usuarios"), (snapshot) => {
+      userListDiv.innerHTML = "";
+      snapshot.forEach((child) => {
         const nombre = child.val().nombre;
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.className = "userItem";
         div.textContent = nombre;
-        usuariosDiv.appendChild(div);
+        userListDiv.appendChild(div);
       });
     });
 
-    // Cronómetro de 40 segundos
+    // Cronómetro
     let tiempo = 40;
-    const countdownEl = document.getElementById('countdown');
+    const countdown = document.getElementById("countdown");
     const timer = setInterval(() => {
       tiempo--;
-      countdownEl.textContent = `Tiempo restante: ${tiempo}s`;
+      countdown.textContent = `Tiempo restante: ${tiempo}s`;
 
       if (tiempo <= 0) {
         clearInterval(timer);
-        window.location.href = "juego.html"; // Cambia esto a la siguiente página
+        window.location.href = "juego.html"; // Cámbialo si usas otro archivo
       }
     }, 1000);
   </script>
