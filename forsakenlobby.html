@@ -15,58 +15,15 @@
 
     #usuarios {
       margin: 20px auto;
-      max-width: 600px;
+      max-width: 400px;
       background: rgba(255,255,255,0.05);
       padding: 15px;
       border-radius: 10px;
     }
 
-    .userCard {
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .userCard img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 2px solid white;
-    }
-
-    .userInfo {
-      flex-grow: 1;
-      text-align: left;
-    }
-
-    .userName {
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .userButtons {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .userButtons button {
-      background: rgba(0,0,0,0.3);
-      border: none;
-      padding: 6px;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-size: 16px;
-    }
-
-    .userButtons button:hover {
-      background: rgba(0,0,0,0.5);
+    .userItem {
+      padding: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     #countdown {
@@ -79,6 +36,7 @@
       display: flex;
       justify-content: space-around;
       margin-top: 30px;
+      flex-wrap: wrap;
     }
 
     .team-box {
@@ -86,10 +44,52 @@
       border-radius: 10px;
       padding: 10px;
       width: 45%;
+      min-width: 280px;
     }
 
     .team-box h2 {
       color: #ffde59;
+    }
+
+    .killer-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .killer-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #00ffcc;
+    }
+
+    .killer-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .killer-buttons {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .killer-buttons button {
+      background: #00ffcc;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .killer-buttons button:hover {
+      background: #00ddaa;
     }
   </style>
 </head>
@@ -105,7 +105,17 @@
   <div class="teams">
     <div class="team-box">
       <h2>Killers</h2>
-      <div id="killers"></div>
+      <div id="killers">
+        <!-- Tarjeta de Aure añadida aquí -->
+        <div class="killer-card">
+          <img src="https://yt3.googleusercontent.com/ytc/AIdro_k7gIZO0LaUAl49TKcAmMsnAIfV4txq9epDJKcz6Q=s176-c-k-c0x00ffffff-no-rj" alt="AureComay">
+          <div class="killer-name">Aure Comay</div>
+          <div class="killer-buttons">
+            <button onclick="alert('Mostrar skins de Aure')">🎭</button>
+            <button onclick="alert('Descripción de Aure: El narrador del desorden con poderes de caos, 3 vidas, habilidad de controlar el entorno.')">ℹ️</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="team-box">
       <h2>Survivors</h2>
@@ -128,13 +138,14 @@
       authDomain: "dtabaseusers.firebaseapp.com",
       databaseURL: "https://dtabaseusers-default-rtdb.firebaseio.com",
       projectId: "dtabaseusers",
-      storageBucket: "dtabaseusers.appspot.com",
+      storageBucket: "dtabaseusers.firebasestorage.app",
       messagingSenderId: "923035495925",
       appId: "1:923035495925:web:80242dbf5cd8f5706444bc"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
     const userListDiv = document.getElementById("userList");
 
     const nombre = localStorage.getItem("usuario");
@@ -156,47 +167,11 @@
     onValue(ref(db, "usuarios"), (snapshot) => {
       userListDiv.innerHTML = "";
       snapshot.forEach((child) => {
-        const data = child.val();
-        const username = data.nombre;
-
-        const userCard = document.createElement("div");
-        userCard.className = "userCard";
-
-        const avatar = document.createElement("img");
-        avatar.src = `https://mc-heads.net/avatar/${username}`; // Imagen estilo Minecraft
-
-        const info = document.createElement("div");
-        info.className = "userInfo";
-        const nameEl = document.createElement("div");
-        nameEl.className = "userName";
-        nameEl.textContent = username;
-        info.appendChild(nameEl);
-
-        const buttons = document.createElement("div");
-        buttons.className = "userButtons";
-
-        const skinBtn = document.createElement("button");
-        skinBtn.innerHTML = "🎭"; // Icono skin
-        skinBtn.title = "Ver skin";
-        skinBtn.onclick = () => {
-          window.open(`https://mc-heads.net/body/${username}`, "_blank");
-        };
-
-        const descBtn = document.createElement("button");
-        descBtn.innerHTML = "📖"; // Icono info
-        descBtn.title = "Ver descripción";
-        descBtn.onclick = () => {
-          alert(`Información de ${username}\nVida: 100\nHabilidades: Correr, esquivar, saltar`);
-        };
-
-        buttons.appendChild(skinBtn);
-        buttons.appendChild(descBtn);
-
-        userCard.appendChild(avatar);
-        userCard.appendChild(info);
-        userCard.appendChild(buttons);
-
-        userListDiv.appendChild(userCard);
+        const usuario = child.val().nombre;
+        const div = document.createElement("div");
+        div.className = "userItem";
+        div.textContent = usuario;
+        userListDiv.appendChild(div);
       });
     });
 
