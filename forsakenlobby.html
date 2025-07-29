@@ -126,7 +126,7 @@
     <div class="team-box">
       <h2>Killers</h2>
       <div id="killers">
-        <!-- Tarjeta de Aure añadida aquí -->
+        <!-- Tarjetas de los killers -->
         <div class="killer-card" id="aureCard">
           <img src="https://cdn.discordapp.com/avatars/1124589523003785246/89096b5da406cd5d155539a279225b98.png?size=1024" alt="AureComay">
           <div class="killer-name">Aure Comay</div>
@@ -136,8 +136,31 @@
           </div>
           <button class="select-btn" id="selectAure">Seleccionar</button>
         </div>
+
+        <!-- Tarjeta de Yalmil -->
+        <div class="killer-card" id="yalmilCard">
+          <img src="https://cdn.discordapp.com/avatars/1282532222305308682/a_20e39bb9d8fbbc28a69e54ab28475634.gif?size=1024" alt="Yalmil">
+          <div class="killer-name">Yalmil – “El Jugador de Mil Caras”</div>
+          <div class="killer-buttons">
+            <button onclick="alert('Mostrar skins de Yalmil')">🎭</button>
+            <button onclick="alert('Descripción de Yalmil: Especialista en escape y engaño. Habilidades como invisibilidad temporal y sabotaje.')">ℹ️</button>
+          </div>
+          <button class="select-btn" id="selectYalmil">Seleccionar</button>
+        </div>
+
+        <!-- Tarjeta de Abricraft -->
+        <div class="killer-card" id="abricraftCard">
+          <img src="https://cdn.discordapp.com/avatars/1226360384517046303/51c5a9adfa4fb382273f34c8ac685ae9.png?size=1024" alt="Abricraft">
+          <div class="killer-name">Abricraft – “El Arquitecto Maldito”</div>
+          <div class="killer-buttons">
+            <button onclick="alert('Mostrar skins de Abricraft')">🎭</button>
+            <button onclick="alert('Descripción de Abricraft: Un estratega que usa su habilidad para atrapar a survivors usando bloques mágicos y trampas decorativas.')">ℹ️</button>
+          </div>
+          <button class="select-btn" id="selectAbricraft">Seleccionar</button>
+        </div>
       </div>
     </div>
+
     <div class="team-box">
       <h2>Survivors</h2>
       <div id="survivors"></div>
@@ -208,19 +231,42 @@
     }, 1000);
 
     // Manejar selección de killer
-    const selectBtn = document.getElementById("selectAure");
+    const selectAureBtn = document.getElementById("selectAure");
+    const selectYalmilBtn = document.getElementById("selectYalmil");
+    const selectAbricraftBtn = document.getElementById("selectAbricraft");
+
     const killerSeleccionado = localStorage.getItem("killerSeleccionado");
 
     if (killerSeleccionado === "Aure Comay") {
-      selectBtn.textContent = "Seleccionado";
-      selectBtn.disabled = true;
+      selectAureBtn.textContent = "Seleccionado";
+      selectAureBtn.disabled = true;
+    } else if (killerSeleccionado === "Yalmil") {
+      selectYalmilBtn.textContent = "Seleccionado";
+      selectYalmilBtn.disabled = true;
+    } else if (killerSeleccionado === "Abricraft") {
+      selectAbricraftBtn.textContent = "Seleccionado";
+      selectAbricraftBtn.disabled = true;
     }
 
-    selectBtn.addEventListener("click", () => {
+    selectAureBtn.addEventListener("click", () => {
       localStorage.setItem("killerSeleccionado", "Aure Comay");
-      selectBtn.textContent = "Seleccionado";
-      selectBtn.disabled = true;
+      selectAureBtn.textContent = "Seleccionado";
+      selectAureBtn.disabled = true;
       alert("Has seleccionado a Aure Comay como tu killer.");
+    });
+
+    selectYalmilBtn.addEventListener("click", () => {
+      localStorage.setItem("killerSeleccionado", "Yalmil");
+      selectYalmilBtn.textContent = "Seleccionado";
+      selectYalmilBtn.disabled = true;
+      alert("Has seleccionado a Yalmil como tu killer.");
+    });
+
+    selectAbricraftBtn.addEventListener("click", () => {
+      localStorage.setItem("killerSeleccionado", "Abricraft");
+      selectAbricraftBtn.textContent = "Seleccionado";
+      selectAbricraftBtn.disabled = true;
+      alert("Has seleccionado a Abricraft como tu killer.");
     });
   </script>
 </body>
