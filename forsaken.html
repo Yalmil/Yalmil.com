@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formulario con Firebase</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 300px;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #00c9a7;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #00a88f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ingresa tu nombre</h1>
+  <input type="text" id="username" placeholder="Escribe tu nombre">
+  <button id="enviarBtn">Enviar</button>
+
+  <!-- Firebase modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0bPdjr-IxuIbHENsJP23wqo-BKD9dk-w",
+      authDomain: "dtabaseusers.firebaseapp.com",
+      databaseURL: "https://dtabaseusers-default-rtdb.firebaseio.com",
+      projectId: "dtabaseusers",
+      storageBucket: "dtabaseusers.firebasestorage.app",
+      messagingSenderId: "923035495925",
+      appId: "1:923035495925:web:80242dbf5cd8f5706444bc"
+    };
+
+    // Inicializa Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Función para guardar nombre
+    document.getElementById("enviarBtn").addEventListener("click", async () => {
+      const nombre = document.getElementById("username").value.trim();
+
+      if (nombre === "") {
+        alert("Por favor, escribe tu nombre.");
+        return;
+      }
+
+      try {
+        const usuariosRef = ref(database, "usuarios");
+        const nuevoUsuarioRef = push(usuariosRef);
+        await set(nuevoUsuarioRef, {
+          nombre: nombre,
+          timestamp: Date.now()
+        });
+
+        // Redirecciona después de guardar
+        window.location.href = "pagina.html";
+      } catch (error) {
+        console.error("Error al guardar en Firebase:", error);
+        alert("Hubo un error. Intenta de nuevo.");
+      }
+    });
+  </script>
+</body>
+</html>
