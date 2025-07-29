@@ -15,15 +15,58 @@
 
     #usuarios {
       margin: 20px auto;
-      max-width: 400px;
+      max-width: 600px;
       background: rgba(255,255,255,0.05);
       padding: 15px;
       border-radius: 10px;
     }
 
-    .userItem {
-      padding: 5px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+    .userCard {
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .userCard img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .userInfo {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .userName {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .userButtons {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .userButtons button {
+      background: rgba(0,0,0,0.3);
+      border: none;
+      padding: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
+    }
+
+    .userButtons button:hover {
+      background: rgba(0,0,0,0.5);
     }
 
     #countdown {
@@ -78,7 +121,6 @@
       set,
       onDisconnect,
       onValue,
-      get,
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -86,17 +128,15 @@
       authDomain: "dtabaseusers.firebaseapp.com",
       databaseURL: "https://dtabaseusers-default-rtdb.firebaseio.com",
       projectId: "dtabaseusers",
-      storageBucket: "dtabaseusers.firebasestorage.app",
+      storageBucket: "dtabaseusers.appspot.com",
       messagingSenderId: "923035495925",
       appId: "1:923035495925:web:80242dbf5cd8f5706444bc"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const userListDiv = document.getElementById("userList");
 
-    // Recuperar datos locales
     const nombre = localStorage.getItem("usuario");
     const id = localStorage.getItem("usuario_id");
 
@@ -105,29 +145,61 @@
       window.location.href = "index.html";
     }
 
-    // Volver a registrar por seguridad
     const userRef = ref(db, "usuarios/" + id);
     await set(userRef, {
       nombre: nombre,
       timestamp: Date.now()
     });
 
-    // Eliminar si se desconecta
     onDisconnect(userRef).remove();
 
-    // Mostrar usuarios activos
     onValue(ref(db, "usuarios"), (snapshot) => {
       userListDiv.innerHTML = "";
       snapshot.forEach((child) => {
-        const usuario = child.val().nombre;
-        const div = document.createElement("div");
-        div.className = "userItem";
-        div.textContent = usuario;
-        userListDiv.appendChild(div);
+        const data = child.val();
+        const username = data.nombre;
+
+        const userCard = document.createElement("div");
+        userCard.className = "userCard";
+
+        const avatar = document.createElement("img");
+        avatar.src = `https://mc-heads.net/avatar/${username}`; // Imagen estilo Minecraft
+
+        const info = document.createElement("div");
+        info.className = "userInfo";
+        const nameEl = document.createElement("div");
+        nameEl.className = "userName";
+        nameEl.textContent = username;
+        info.appendChild(nameEl);
+
+        const buttons = document.createElement("div");
+        buttons.className = "userButtons";
+
+        const skinBtn = document.createElement("button");
+        skinBtn.innerHTML = "🎭"; // Icono skin
+        skinBtn.title = "Ver skin";
+        skinBtn.onclick = () => {
+          window.open(`https://mc-heads.net/body/${username}`, "_blank");
+        };
+
+        const descBtn = document.createElement("button");
+        descBtn.innerHTML = "📖"; // Icono info
+        descBtn.title = "Ver descripción";
+        descBtn.onclick = () => {
+          alert(`Información de ${username}\nVida: 100\nHabilidades: Correr, esquivar, saltar`);
+        };
+
+        buttons.appendChild(skinBtn);
+        buttons.appendChild(descBtn);
+
+        userCard.appendChild(avatar);
+        userCard.appendChild(info);
+        userCard.appendChild(buttons);
+
+        userListDiv.appendChild(userCard);
       });
     });
 
-    // Cronómetro
     let tiempo = 40;
     const countdown = document.getElementById("countdown");
     const timer = setInterval(() => {
@@ -136,7 +208,7 @@
 
       if (tiempo <= 0) {
         clearInterval(timer);
-        window.location.href = "juego.html"; // Cambiar si quieres otra página
+        window.location.href = "juego.html";
       }
     }, 1000);
   </script>
