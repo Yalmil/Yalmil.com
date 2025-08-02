@@ -5,81 +5,113 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Yalmil Clicker</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: #0f0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: start;
+      justify-content: flex-start;
       min-height: 100vh;
+      padding: 2rem 1rem;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     h1 {
-      margin-top: 2rem;
+      margin: 1rem 0 0.5rem;
       font-size: 2.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 10px #c084fc;
     }
 
     #counter {
-      font-size: 2rem;
-      margin: 1rem 0;
+      font-size: 1.5rem;
+      margin: 1rem 0 2rem;
+      color: #98f5e1;
+      text-shadow: 0 0 8px #98f5e1;
     }
 
     #click-btn {
       padding: 1.2rem 2rem;
       font-size: 1.2rem;
-      background: #ACF760;
-      color: #000;
+      background: #98f5e1;
+      color: #1a001f;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
       margin-bottom: 2rem;
-      transition: transform 0.1s ease;
+      box-shadow: 0 0 15px #98f5e188;
+      transition: transform 0.1s ease, background 0.3s;
+    }
+
+    #click-btn:hover {
+      background: #70e4d0;
     }
 
     #click-btn:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
     .upgrades {
       display: flex;
       flex-direction: column;
-      width: 90%;
+      width: 100%;
       max-width: 500px;
       gap: 1rem;
-      margin-bottom: 2rem;
     }
 
     .upgrade {
-      background: #222;
+      background: rgba(40, 0, 60, 0.25);
+      backdrop-filter: blur(5px);
+      border: 2px solid #c084fc;
       padding: 1rem;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 0 10px #c084fc44;
+      color: #e5ccff;
     }
 
     .upgrade button {
       padding: 0.5rem 1rem;
       font-size: 1rem;
-      background: #0f0;
-      color: #000;
+      background: #c084fc;
+      color: #fff;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
+      box-shadow: 0 0 10px #c084fc88;
+      transition: background 0.3s ease;
+    }
+
+    .upgrade button:hover {
+      background: #a855f7;
     }
 
     .back-link {
-      margin-bottom: 2rem;
+      margin-top: 0.5rem;
       color: #3fffa8;
       text-decoration: none;
       font-size: 0.9rem;
+      text-shadow: 0 0 5px #3fffa8;
+    }
+
+    .back-link:hover {
+      color: #9effc2;
     }
 
     @media (max-width: 600px) {
@@ -88,7 +120,7 @@
       }
 
       #click-btn {
-        width: 90%;
+        width: 100%;
       }
     }
   </style>
@@ -120,13 +152,7 @@
     const counter = document.getElementById("counter");
 
     function saveGame() {
-      const data = {
-        clicks,
-        autoClickers,
-        clickPower,
-        cost1,
-        cost2
-      };
+      const data = { clicks, autoClickers, clickPower, cost1, cost2 };
       localStorage.setItem("clickerSave", JSON.stringify(data));
     }
 
