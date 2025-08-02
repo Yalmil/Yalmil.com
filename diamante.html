@@ -114,6 +114,28 @@
       color: #d9b8ff;
     }
 
+    .difficulty-select {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .difficulty-select button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1.1rem;
+      background-color: #8a2be2;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #c084fc88;
+    }
+
+    .difficulty-select button:hover {
+      background-color: #a855f7;
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 2rem;
@@ -133,40 +155,67 @@
 </head>
 <body>
   <h1>¿Dónde está el diamante?</h1>
-  <p>Elige uno de los 3 cofres</p>
-  <div class="chest-container">
-    <div class="chest" onclick="checkChest(0)">🧰</div>
-    <div class="chest" onclick="checkChest(1)">🧰</div>
-    <div class="chest" onclick="checkChest(2)">🧰</div>
+  <p id="game-description">Elige una dificultad para comenzar</p>
+
+  <div class="difficulty-select" id="difficulty-select">
+    <button onclick="startGame(3)">Fácil (3 cofres)</button>
+    <button onclick="startGame(5)">Normal (5 cofres)</button>
+    <button onclick="startGame(15)">Difícil (15 cofres)</button>
   </div>
+
+  <div class="chest-container" id="chest-container"></div>
   <div class="result" id="result"></div>
-  <button class="restart-btn" onclick="startGame()">Intentar de nuevo</button>
+  <button class="restart-btn" onclick="restartGame()" style="display:none;">Intentar de nuevo</button>
   <a class="back-link" href="juegos">← Volver a Juegos</a>
 
   <script>
     let correctChest = -1;
     let revealed = false;
+    let currentAmount = 3;
 
-    function startGame() {
-      correctChest = Math.floor(Math.random() * 3);
-      document.getElementById('result').textContent = '';
+    function startGame(amount) {
+      currentAmount = amount;
       revealed = false;
+      correctChest = Math.floor(Math.random() * amount);
+      document.getElementById("difficulty-select").style.display = "none";
+      document.getElementById("game-description").textContent = `Elige uno de los ${amount} cofres`;
+      document.getElementById("result").textContent = "";
+      document.querySelector(".restart-btn").style.display = "inline-block";
+      generateChests(amount);
+    }
+
+    function generateChests(amount) {
+      const container = document.getElementById("chest-container");
+      container.innerHTML = "";
+
+      for (let i = 0; i < amount; i++) {
+        const chest = document.createElement("div");
+        chest.classList.add("chest");
+        chest.textContent = "🧰";
+        chest.onclick = () => checkChest(i);
+        container.appendChild(chest);
+      }
     }
 
     function checkChest(index) {
       if (revealed) return;
-
-      if (index === correctChest) {
-        document.getElementById('result').textContent = "🎉 ¡Encontraste el diamante!";
-      } else {
-        document.getElementById('result').textContent = "💨 ¡Nada aquí! Inténtalo otra vez.";
-      }
-
       revealed = true;
+
+      const result = document.getElementById("result");
+      if (index === correctChest) {
+        result.textContent = "🎉 ¡Encontraste el diamante!";
+      } else {
+        result.textContent = `❌ Ese no era... El diamante estaba en el cofre #${correctChest + 1}`;
+      }
     }
 
-    // Iniciar al cargar
-    startGame();
+    function restartGame() {
+      document.getElementById("difficulty-select").style.display = "flex";
+      document.getElementById("game-description").textContent = "Elige una dificultad para comenzar";
+      document.getElementById("chest-container").innerHTML = "";
+      document.getElementById("result").textContent = "";
+      document.querySelector(".restart-btn").style.display = "none";
+    }
   </script>
 </body>
 </html>
