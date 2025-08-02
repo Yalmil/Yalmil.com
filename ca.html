@@ -36,7 +36,7 @@
     }
     button {
       width: 100%;
-      background-color: #4caf50;
+      background-color: #9c27b0; /* Morado principal */
       border: none;
       color: white;
       padding: 12px;
@@ -45,10 +45,10 @@
       cursor: pointer;
     }
     button:hover {
-      background-color: #388e3c;
+      background-color: #7b1fa2; /* Morado más oscuro al pasar el mouse */
     }
     a {
-      color: #bbdefb;
+      color: #e1bee7;
       display: block;
       text-align: center;
       margin-top: 12px;
@@ -66,11 +66,9 @@
   </div>
 
   <script type="module">
-    // Firebase SDKs desde CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
@@ -83,23 +81,13 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Función de registro
-    window.register = async () => {
-      const email = document.getElementById("email").value.trim();
+    window.register = () => {
+      const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      if (!email || !password) {
-        alert("Por favor completa todos los campos.");
-        return;
-      }
-
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Cuenta creada correctamente");
-        window.location.href = "inicio.html";
-      } catch (error) {
-        alert("Error: " + error.message);
-      }
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "inicio.html")
+        .catch(error => alert("Error: " + error.message));
     };
   </script>
 </body>
