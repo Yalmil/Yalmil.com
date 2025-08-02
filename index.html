@@ -5,28 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Yalmil.tv</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0a0a0a;
-      color: #b8ffd8;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0b0012, #1c0033);
+      color: #e5ccff;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     header {
-      background-color: #0f0f0f;
+      background-color: #140022;
       padding: 1rem 2rem;
-      border-bottom: 2px solid #3fffa8;
+      border-bottom: 2px solid #c084fc;
       text-align: center;
+      box-shadow: 0 0 12px #c084fc55;
     }
 
     header h1 {
       margin: 0;
-      font-size: 2rem;
-      color: #3fffa8;
-      text-shadow: 0 0 10px #3fffa8;
+      font-size: 2.2rem;
+      color: #c084fc;
+      text-shadow: 0 0 10px #c084fcaa;
+    }
+
+    header h3 {
+      margin: 0.5rem 0;
+      font-weight: 400;
+      color: #e5ccff;
     }
 
     main {
@@ -38,6 +57,13 @@
       padding: 2rem;
     }
 
+    main h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 6px #c084fc88;
+    }
+
     .subpage-list {
       display: grid;
       gap: 1rem;
@@ -47,34 +73,39 @@
     }
 
     .subpage {
-      background-color: #1a1a1a;
+      background: rgba(40, 0, 60, 0.2);
+      backdrop-filter: blur(6px);
       padding: 1.5rem;
-      border: 2px solid #3fffa8;
+      border: 2px solid #c084fc;
       border-radius: 1rem;
       text-align: center;
       text-decoration: none;
-      color: #b8ffd8;
-      box-shadow: 0 0 10px #3fffa8;
+      color: #e5ccff;
+      font-weight: 500;
+      box-shadow: 0 0 10px #c084fc55;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .subpage:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px #3fffa8;
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px #c084fc;
     }
+
     footer {
       text-align: center;
       padding: 1rem;
       font-size: 0.8rem;
-      color: #666;
+      color: #999;
+      background-color: #0f0018;
+      border-top: 1px solid #2e0050;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Yalmil web</h1>
-    <H3>En esta página podrás explorar todos los textos creados por mi (Yalmil).<h3/>
-    <h3>Diviértete y disfruta. :D<H3/>
+    <h1>Yalmil.tv</h1>
+    <h3>En esta página podrás explorar todos los textos creados por mí (Yalmil).</h3>
+    <h3>¡Diviértete y disfruta! :D</h3>
   </header>
   <main>
     <h2>Iniciar sesión</h2>
