@@ -5,22 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Encuentra el Diamante</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0a0a0a;
-      color: #b8ffd8;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
+      padding: 2rem 1rem;
+      animation: fadeIn 1s ease-out;
       text-align: center;
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     h1 {
-      color: #3fffa8;
-      text-shadow: 0 0 8px #3fffa8;
+      margin: 1rem 0 0.5rem;
+      font-size: 2.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 10px #c084fc;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #e5ccff;
+      text-shadow: 0 0 6px #c084fc88;
     }
 
     .chest-container {
@@ -34,45 +55,79 @@
     .chest {
       width: 100px;
       height: 100px;
-      background-color: #1a1a1a;
-      border: 2px solid #3fffa8;
-      border-radius: 0.5rem;
+      background: rgba(40, 0, 60, 0.25);
+      border: 2px solid #c084fc;
+      border-radius: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2rem;
       cursor: pointer;
-      box-shadow: 0 0 10px #3fffa8;
+      box-shadow: 0 0 10px #c084fc44;
+      color: #fff;
       transition: transform 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(5px);
     }
 
     .chest:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 15px #3fffa8;
+      box-shadow: 0 0 15px #c084fc;
     }
 
     .result {
-      font-size: 1.5rem;
-      margin: 1rem 0;
+      font-size: 1.4rem;
+      margin-top: 1rem;
+      color: #b55eff;
+      text-shadow: 0 0 6px #b55eff88;
     }
 
     .restart-btn {
       margin-top: 1rem;
-      padding: 0.5rem 1rem;
+      padding: 0.7rem 1.5rem;
       font-size: 1rem;
-      background-color: #3fffa8;
-      color: #0a0a0a;
+      background: #b55eff;
+      color: #fff;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 0 10px #3fffa8;
+      box-shadow: 0 0 15px #b55eff88;
+      transition: transform 0.1s ease, background 0.3s;
+    }
+
+    .restart-btn:hover {
+      background: #a855f7;
+    }
+
+    .restart-btn:active {
+      transform: scale(0.95);
     }
 
     .back-link {
       margin-top: 2rem;
-      color: #3fffa8;
+      color: #b55eff;
       text-decoration: none;
-      display: block;
+      font-size: 0.9rem;
+      text-shadow: 0 0 5px #e5ccff;
+    }
+
+    .back-link:hover {
+      color: #d9b8ff;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .chest {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+      }
+
+      .restart-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
