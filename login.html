@@ -1,66 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Iniciar Sesión</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: linear-gradient(135deg, #00d2ff, #3a47d5);
-      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #2a003f, #0c0016);
+      font-family: 'Poppins', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      color: white;
+      color: #e5ccff;
+      animation: fadeIn 1s ease;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .container {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(30, 0, 50, 0.3);
+      backdrop-filter: blur(6px);
       padding: 30px;
       border-radius: 15px;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 0 15px #000;
+      box-shadow: 0 0 20px #c084fc44;
+      border: 1px solid #c084fc55;
     }
+
     h2 {
       text-align: center;
       margin-bottom: 25px;
+      color: #c084fc;
+      text-shadow: 0 0 10px #c084fcaa;
     }
+
     input {
       width: 100%;
       padding: 12px;
-      margin: 8px 0;
-      border: none;
+      margin: 10px 0;
+      border: 1px solid #c084fc55;
       border-radius: 8px;
+      background-color: #14001f;
+      color: #e5ccff;
+      outline: none;
+      font-size: 1rem;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
+
+    input:focus {
+      box-shadow: 0 0 10px #c084fc;
+      border-color: #c084fc;
+    }
+
     button {
       width: 100%;
-      background-color: #ff4081;
+      background-color: #c084fc;
       border: none;
       color: white;
       padding: 12px;
       border-radius: 8px;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 0 12px #c084fc99;
+      transition: background-color 0.3s, transform 0.2s;
     }
+
     button:hover {
-      background-color: #e91e63;
+      background-color: #a855f7;
+      transform: scale(1.03);
     }
+
     a {
-      color: #00e5ff;
+      color: #a78bfa;
       display: block;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 14px;
       text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: #d8b4fe;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Iniciar Sesión</h2>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
+    <input type="email" id="email" placeholder="Correo electrónico" />
+    <input type="password" id="password" placeholder="Contraseña" />
     <button onclick="login()">Entrar</button>
     <a href="register.html">¿No tienes cuenta? Regístrate</a>
   </div>
