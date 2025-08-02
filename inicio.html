@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IP Reveal Troll</title>
+  <title>Yalmil.com</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
@@ -20,8 +20,6 @@
       flex-direction: column;
       min-height: 100vh;
       animation: fadeIn 1s ease-out;
-      text-align: center;
-      padding: 1rem;
     }
 
     @keyframes fadeIn {
@@ -45,6 +43,40 @@
       text-shadow: 0 0 12px #c084fc;
     }
 
+    header h3 {
+      margin: 0.3rem 0;
+      font-weight: 400;
+      color: #e5ccff;
+    }
+
+    .profile-container {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .profile-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #c084fc;
+      box-shadow: 0 0 10px #c084fc;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 18px #c084fc;
+    }
+
+    .username-display {
+      font-size: 0.75rem;
+      color: #e5ccff;
+      margin-top: 4px;
+    }
+
     main {
       flex: 1;
       display: flex;
@@ -54,65 +86,38 @@
       padding: 2rem;
     }
 
-    input, button {
-      padding: 12px 18px;
-      font-size: 16px;
-      margin: 10px;
-      border: none;
-      border-radius: 12px;
-      outline: none;
-      transition: 0.3s ease;
-      font-family: 'Poppins', sans-serif;
+    main h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 8px #c084fc;
     }
 
-    input {
-      width: 240px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #e5ccff;
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .subpage {
+      background: rgba(40, 0, 60, 0.2);
+      backdrop-filter: blur(6px);
       border: 2px solid #c084fc;
-    }
-
-    input:focus {
-      box-shadow: 0 0 12px #c084fc;
-    }
-
-    button {
-      background: #c084fc;
-      color: #1a001f;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 10px #c084fc99;
-    }
-
-    button:hover {
-      background: #e5ccff;
-      color: #1a001f;
-    }
-
-    .resultado {
-      margin-top: 20px;
-      font-size: 1.3rem;
-      color: #fff;
-      text-shadow: 0 0 5px #c084fc;
-    }
-
-    .cargando {
-      font-size: 1rem;
-      margin-top: 15px;
-      height: 20px;
-      color: #c084fc;
-    }
-
-    .back-link {
-      margin-top: 1rem;
-      color: #c084fc;
+      border-radius: 1rem;
+      text-align: center;
       text-decoration: none;
-      font-size: 0.9rem;
-      transition: 0.2s;
+      color: #e5ccff;
+      box-shadow: 0 0 10px #c084fc55;
+      padding: 1.5rem;
+      font-weight: 500;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .back-link:hover {
-      color: #e5ccff;
+    .subpage:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 0 20px #c084fc;
     }
 
     footer {
@@ -126,69 +131,73 @@
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Busca la IP de alguien</h1>
+    <h1>Yalmil Web</h1>
+    <h3 id="bienvenida">TEH EPIK DUCK IS COMING!!!!!!!!!</h3>
+
+    <div class="profile-container" id="goToProfile">
+      <img class="profile-pic" id="profilePic" src="https://i.pravatar.cc/100?u=user" alt="Perfil" />
+      <div class="username-display" id="usernameDisplay">Cargando...</div>
+    </div>
   </header>
 
   <main>
-    <a class="back-link" href="juegos.html">← Volver a los juegos</a>
-    <input type="text" id="nombre" placeholder="Escribe un nombre...">
-    <button id="btn" onclick="iniciarBusqueda()">Enviar</button>
-
-    <div class="cargando" id="cargando"></div>
-    <div class="resultado" id="resultado"></div>
+    <h2>Subpáginas</h2>
+    <div class="subpage-list">
+      <a class="subpage" href="formulario">Sugerencias</a>
+      <a class="subpage" href="juegos">Juegos</a>
+      <a class="subpage" href="sepmc">Sepmc</a>
+      <a class="subpage" href="letterballslore">Letterballs Lore</a>
+      <a class="subpage" href="forsaken">Forsaken [Alfa]</a>
+    </div>
   </main>
 
   <footer>
-    &copy; 2025 IP Reveal Troll - Yalmil Edition
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
   </footer>
 
-  <script>
-    const frases = [
-      "Contactando a la Guardia Española...",
-      "Hackeando el FBI... no, espera, era la OXXO Net.",
-      "Pidiendo ayuda a Anonymous...",
-      "Intercambiando datos con Google por una Coca-Cola.",
-      "Siguiendo el WiFi del vecino...",
-      "Rastreando por satélite... o por tortuga mensajera.",
-      "Analizando memes filtrados..."
-    ];
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    function generarIP() {
-      return Array(4).fill(0).map(() => Math.floor(Math.random() * 256)).join(".");
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.appspot.com",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
 
-    function iniciarBusqueda() {
-      const nombre = document.getElementById('nombre').value.trim();
-      const resultado = document.getElementById('resultado');
-      const cargando = document.getElementById('cargando');
-      const boton = document.getElementById('btn');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-      if (!nombre) {
-        resultado.innerText = "Por favor, escribe un nombre.";
-        return;
+    const profilePic = document.getElementById("profilePic");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const bienvenida = document.getElementById("bienvenida");
+    const goToProfile = document.getElementById("goToProfile");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const data = userDoc.exists() ? userDoc.data() : {};
+        const username = data.username || user.email;
+        const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
+
+        usernameDisplay.textContent = username;
+        profilePic.src = avatarUrl;
+        bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;
+      } else {
+        usernameDisplay.textContent = "Invitado";
+        bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
       }
+    });
 
-      resultado.innerText = "";
-      cargando.innerText = "";
-      boton.disabled = true;
-      let index = 0;
-
-      const intervalo = setInterval(() => {
-        cargando.innerText = frases[index % frases.length];
-        index++;
-      }, 1000);
-
-      setTimeout(() => {
-        clearInterval(intervalo);
-        const ip = generarIP();
-        cargando.innerText = "";
-        resultado.innerText = `🛰️ La IP de ${nombre} es: ${ip}`;
-        boton.disabled = false;
-      }, 4000);
-    }
+    goToProfile.addEventListener('click', () => {
+      window.location.href = "perfil.html";
+    });
   </script>
-
 </body>
 </html>
