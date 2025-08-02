@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tus chats</title>
+  <title>Mini Discord Web</title>
   <style>
     body {
       font-family: sans-serif;
@@ -15,10 +16,10 @@
     input, button, select { padding: 10px; margin: 5px 0; width: 100%; }
     .user-info, .chat-box { margin-top: 20px; }
     .message { background: #333; padding: 10px; margin: 5px 0; border-radius: 8px; }
-    .friend-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .friend-info img { width: 32px; height: 32px; border-radius: 50%; }
+    .friend-item { display: flex; align-items: center; gap: 10px; margin: 5px 0; cursor: pointer; }
+    .friend-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
     .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .online { background: limegreen; }
+    .online { background: lime; }
     .dnd { background: red; }
     .offline { background: gray; }
   </style>
@@ -30,51 +31,43 @@
     <input type="text" id="avatar" placeholder="URL de tu imagen de perfil">
     <select id="status">
       <option value="online">🟢 En línea</option>
-      <option value="dnd">⛔ No molestar</option>
+      <option value="dnd">🔴 No molestar</option>
       <option value="offline">⚫ Desconectado</option>
     </select>
     <button onclick="saveUser()">Entrar</button>
-  </div>  <div class="container" id="chat" style="display:none">
+  </div>
+
+  <div class="container" id="chat" style="display:none">
     <div class="user-info">
-      <p id="welcome"></p><h4>Editar perfil</h4>
-  <input type="text" id="newAvatar" placeholder="Nueva URL de avatar">
-  <select id="newStatus">
-    <option value="online">🟢 En línea</option>
-    <option value="dnd">⛔ No molestar</option>
-    <option value="offline">⚫ Desconectado</option>
-  </select>
-  <button onclick="updateProfile()">Actualizar</button>
-  <button onclick="logout()">Cerrar sesión</button>
+      <p id="welcome"></p>
+      <img id="myAvatar" src="" width="60" style="border-radius: 50%;"><br>
+      <input type="text" id="avatarEdit" placeholder="Nuevo avatar URL">
+      <select id="statusEdit">
+        <option value="online">🟢 En línea</option>
+        <option value="dnd">🔴 No molestar</option>
+        <option value="offline">⚫ Desconectado</option>
+      </select>
+      <button onclick="updateProfile()">Actualizar perfil</button>
+      <button onclick="logout()">Salir</button>
+      <hr>
+      <input type="text" id="friendName" placeholder="Nombre de tu amigo">
+      <button onclick="addFriend()">Agregar amigo</button>
+    </div>
+    <div>
+      <h3>Amigos</h3>
+      <ul id="friendsList"></ul>
+    </div>
+    <div class="chat-box" id="chatBox" style="display:none">
+      <h3>Chat con <span id="chatWith"></span></h3>
+      <div id="messages"></div>
+      <input type="text" id="messageInput" placeholder="Escribe un mensaje">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
 
-  <h4>Agregar amigo</h4>
-  <input type="text" id="friendName" placeholder="Nombre de tu amigo">
-  <button onclick="addFriend()">Agregar amigo</button>
-</div>
-
-<div>
-  <h3>Amigos</h3>
-  <ul id="friendsList"></ul>
-</div>
-
-<div class="chat-box" id="chatBox" style="display:none">
-  <h3>Chat con <span id="chatWith"></span></h3>
-  <div id="messages"></div>
-  <input type="text" id="messageInput" placeholder="Escribe un mensaje">
-  <button onclick="sendMessage()">Enviar</button>
-</div>
-
-  </div>  <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      set,
-      get,
-      remove,
-      onValue
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAYkzaOGhIYh10UkQnYEgUfnM-RFG1E4zs",
@@ -91,34 +84,39 @@
     let currentUser = null;
     let currentFriend = null;
 
+    // Guardar nombre, avatar y estado
     window.saveUser = () => {
-      const name = document.getElementById("username").value.trim();
-      const avatar = document.getElementById("avatar").value.trim();
+      const name = document.getElementById("username").value;
+      const avatar = document.getElementById("avatar").value || "https://i.imgur.com/placeholder.png";
       const status = document.getElementById("status").value;
       if (!name) return alert("Pon un nombre");
 
       const userData = { name, avatar, status };
       localStorage.setItem("user", JSON.stringify(userData));
-      set(ref(db, `users/${name}`), userData);
+      set(ref(db, `users/${name}/profile`), userData);
       startChat();
     };
 
+    function startChat() {
+      const data = JSON.parse(localStorage.getItem("user"));
+      if (!data) return;
+      currentUser = data;
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      document.getElementById("welcome").textContent = `Hola, ${data.name}`;
+      document.getElementById("myAvatar").src = data.avatar;
+      document.getElementById("statusEdit").value = data.status || "online";
+      loadFriends();
+    }
+
     window.updateProfile = () => {
-      const avatar = document.getElementById("newAvatar").value.trim();
-      const status = document.getElementById("newStatus").value;
-      if (!avatar && !status) return;
-
-      const updated = {};
-      if (avatar) updated.avatar = avatar;
-      if (status) updated.status = status;
-
-      set(ref(db, `users/${currentUser.name}`), {
-        ...currentUser,
-        ...updated
-      });
-
-      currentUser = { ...currentUser, ...updated };
-      localStorage.setItem("user", JSON.stringify(currentUser));
+      const avatar = document.getElementById("avatarEdit").value || currentUser.avatar;
+      const status = document.getElementById("statusEdit").value;
+      const updated = { ...currentUser, avatar, status };
+      currentUser = updated;
+      localStorage.setItem("user", JSON.stringify(updated));
+      set(ref(db, `users/${currentUser.name}/profile`), updated);
+      document.getElementById("myAvatar").src = avatar;
     };
 
     window.logout = () => {
@@ -126,77 +124,51 @@
       location.reload();
     };
 
-    function startChat() {
-      const data = JSON.parse(localStorage.getItem("user"));
-      if (!data) return;
-      currentUser = data;
-
-      onValue(ref(db, `users/${data.name}`), (snap) => {
-        if (snap.exists()) {
-          const userData = snap.val();
-          currentUser = userData;
-          localStorage.setItem("user", JSON.stringify(userData));
-          document.getElementById("welcome").textContent = `Hola, ${userData.name}`;
-        }
-      });
-
-      document.getElementById("setup").style.display = "none";
-      document.getElementById("chat").style.display = "block";
-      loadFriends();
-    }
-
-    window.addFriend = async () => {
-      const friend = document.getElementById("friendName").value.trim();
-      if (!friend || friend === currentUser.name) return alert("Nombre inválido");
-
-      const friendSnap = await get(ref(db, `users/${friend}`));
-      if (!friendSnap.exists()) {
-        alert("Este usuario no existe");
-        return;
-      }
-
+    window.addFriend = () => {
+      const friend = document.getElementById("friendName").value;
+      if (!friend) return;
       const friendsRef = ref(db, `users/${currentUser.name}/friends/${friend}`);
       set(friendsRef, true);
       loadFriends();
     };
 
-    async function loadFriends() {
+    function loadFriends() {
       const list = document.getElementById("friendsList");
       list.innerHTML = '';
-      const friendsSnap = await get(ref(db, `users/${currentUser.name}/friends`));
-      if (friendsSnap.exists()) {
-        for (const friend of Object.keys(friendsSnap.val())) {
-          const userRef = ref(db, `users/${friend}`);
-
-          onValue(userRef, (snap) => {
-            const info = snap.exists() ? snap.val() : { avatar: "", status: "offline" };
+      get(ref(db, `users/${currentUser.name}/friends`)).then(snap => {
+        if (snap.exists()) {
+          Object.keys(snap.val()).forEach(friend => {
             const li = document.createElement("li");
-            li.className = "friend";
-            li.innerHTML = `
-              <div class="friend-info" onclick="openChat('${friend}')">
-                <img src="${info.avatar}" alt="avatar">
-                <span>${friend}</span>
-                <span class="status-dot ${info.status}"></span>
-              </div>
-              <button onclick="deleteFriend('${friend}')">Eliminar</button>
-            `;
-            const existing = document.querySelector(`#friendsList li:has(span:contains('${friend}'))`);
-            if (existing) existing.remove();
+            li.className = "friend-item";
+
+            const img = document.createElement("img");
+            img.className = "friend-avatar";
+
+            const span = document.createElement("span");
+            span.textContent = friend;
+
+            const dot = document.createElement("span");
+            dot.className = "status-dot offline";
+
+            onValue(ref(db, `users/${friend}/profile`), (snap) => {
+              const d = snap.val();
+              if (d) {
+                img.src = d.avatar || "";
+                dot.className = "status-dot " + (d.status || "offline");
+              }
+            });
+
+            li.appendChild(dot);
+            li.appendChild(img);
+            li.appendChild(span);
+            li.onclick = () => openChat(friend);
             list.appendChild(li);
           });
         }
-      }
+      });
     }
 
-    window.deleteFriend = (friend) => {
-      remove(ref(db, `users/${currentUser.name}/friends/${friend}`));
-      loadFriends();
-      if (currentFriend === friend) {
-        document.getElementById("chatBox").style.display = "none";
-      }
-    };
-
-    window.openChat = async (friend) => {
+    function openChat(friend) {
       currentFriend = friend;
       document.getElementById("chatWith").textContent = friend;
       document.getElementById("chatBox").style.display = "block";
@@ -209,15 +181,14 @@
         const msg = data.val();
         const div = document.createElement("div");
         div.className = "message";
-        if (msg.from === currentUser.name) div.classList.add("me");
         div.innerHTML = `<strong>${msg.from}:</strong> ${msg.text}`;
         document.getElementById("messages").appendChild(div);
       });
-    };
+    }
 
     window.sendMessage = () => {
       const input = document.getElementById("messageInput");
-      const text = input.value.trim();
+      const text = input.value;
       if (!text) return;
       const chatId = getChatId(currentUser.name, currentFriend);
       const msgRef = push(ref(db, `chats/${chatId}`));
@@ -229,10 +200,12 @@
       input.value = '';
     };
 
-    function getChatId(a, b) {
-      return [a, b].sort().join("_");
+    function getChatId(user1, user2) {
+      return [user1, user2].sort().join("_");
     }
 
+    // Auto login
     if (localStorage.getItem("user")) startChat();
-  </script></body>
+  </script>
+</body>
 </html>
