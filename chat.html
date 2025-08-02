@@ -70,115 +70,159 @@
     .dnd { background: #ff5050; }
     .offline { background: #999; }
   </style>
-</head>
 <body>
-  <div class="container" id="setup">
-    <h2>Tu perfil</h2>
-    <input type="text" id="username" placeholder="Tu nombre">
-    <input type="text" id="avatar" placeholder="URL de tu imagen de perfil">
-    <select id="status">
+  <!-- ... TODO EL <head> Y <style> ES EL MISMO DE ANTES, NO CAMBIA -->
+
+<!-- Dentro del <body> -->
+
+<!-- ... SETUP inicial igual -->
+
+<div class="container" id="chat" style="display:none">
+  <div class="user-info">
+    <p id="welcome"></p>
+
+    <!-- EDITAR PERFIL -->
+    <h4>Editar perfil</h4>
+    <input type="text" id="newAvatar" placeholder="Nueva URL de avatar">
+    <select id="newStatus">
       <option value="online">🟢 En línea</option>
       <option value="dnd">⛔ No molestar</option>
       <option value="offline">⚫ Desconectado</option>
     </select>
-    <button onclick="saveUser()">Entrar</button>
+    <button onclick="updateProfile()">Actualizar</button>
+    <button onclick="logout()">Cerrar sesión</button>
+
+    <!-- AGREGAR AMIGOS -->
+    <h4>Agregar amigo</h4>
+    <input type="text" id="friendName" placeholder="Nombre de tu amigo">
+    <button onclick="addFriend()">Agregar amigo</button>
   </div>
 
-  <div class="container" id="chat" style="display:none">
-    <div class="user-info">
-      <p id="welcome"></p>
-      <input type="text" id="friendName" placeholder="Nombre de tu amigo">
-      <button onclick="addFriend()">Agregar amigo</button>
-    </div>
-    <div>
-      <h3>Amigos</h3>
-      <ul id="friendsList"></ul>
-    </div>
-    <div class="chat-box" id="chatBox" style="display:none">
-      <h3>Chat con <span id="chatWith"></span></h3>
-      <div id="messages"></div>
-      <input type="text" id="messageInput" placeholder="Escribe un mensaje">
-      <button onclick="sendMessage()">Enviar</button>
-    </div>
+  <div>
+    <h3>Amigos</h3>
+    <ul id="friendsList"></ul>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      set,
-      get,
-      remove,
-      child
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+  <div class="chat-box" id="chatBox" style="display:none">
+    <h3>Chat con <span id="chatWith"></span></h3>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Escribe un mensaje">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAYkzaOGhIYh10UkQnYEgUfnM-RFG1E4zs",
-      authDomain: "database-mensajes.firebaseapp.com",
-      projectId: "database-mensajes",
-      storageBucket: "database-mensajes.firebasestorage.app",
-      messagingSenderId: "925185272269",
-      appId: "1:925185272269:web:c9e2b1b61ceb90a8febc84"
-    };
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    onChildAdded,
+    set,
+    get,
+    remove,
+    onValue
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyAYkzaOGhIYh10UkQnYEgUfnM-RFG1E4zs",
+    authDomain: "database-mensajes.firebaseapp.com",
+    projectId: "database-mensajes",
+    storageBucket: "database-mensajes.firebasestorage.app",
+    messagingSenderId: "925185272269",
+    appId: "1:925185272269:web:c9e2b1b61ceb90a8febc84"
+  };
 
-    let currentUser = null;
-    let currentFriend = null;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    // Guardar perfil
-    window.saveUser = () => {
-      const name = document.getElementById("username").value.trim();
-      const avatar = document.getElementById("avatar").value.trim();
-      const status = document.getElementById("status").value;
-      if (!name) return alert("Pon un nombre");
+  let currentUser = null;
+  let currentFriend = null;
 
-      const userData = { name, avatar, status };
-      localStorage.setItem("user", JSON.stringify(userData));
-      set(ref(db, `users/${name}`), userData); // Guardar en Firebase
-      startChat();
-    };
+  // Guardar perfil
+  window.saveUser = () => {
+    const name = document.getElementById("username").value.trim();
+    const avatar = document.getElementById("avatar").value.trim();
+    const status = document.getElementById("status").value;
+    if (!name) return alert("Pon un nombre");
 
-    function startChat() {
-      const data = JSON.parse(localStorage.getItem("user"));
-      if (!data) return;
-      currentUser = data;
-      document.getElementById("setup").style.display = "none";
-      document.getElementById("chat").style.display = "block";
-      document.getElementById("welcome").textContent = `Hola, ${data.name}`;
-      loadFriends();
+    const userData = { name, avatar, status };
+    localStorage.setItem("user", JSON.stringify(userData));
+    set(ref(db, `users/${name}`), userData); // Guardar en Firebase
+    startChat();
+  };
+
+  // Actualizar perfil
+  window.updateProfile = () => {
+    const avatar = document.getElementById("newAvatar").value.trim();
+    const status = document.getElementById("newStatus").value;
+    if (!avatar && !status) return;
+
+    const updated = {};
+    if (avatar) updated.avatar = avatar;
+    if (status) updated.status = status;
+
+    set(ref(db, `users/${currentUser.name}`), {
+      ...currentUser,
+      ...updated
+    });
+
+    // Actualizar localStorage también
+    currentUser = { ...currentUser, ...updated };
+    localStorage.setItem("user", JSON.stringify(currentUser));
+  };
+
+  // Logout
+  window.logout = () => {
+    localStorage.removeItem("user");
+    location.reload();
+  };
+
+  function startChat() {
+    const data = JSON.parse(localStorage.getItem("user"));
+    if (!data) return;
+    currentUser = data;
+
+    // Escuchar cambios de estado/avatar en tiempo real
+    onValue(ref(db, `users/${data.name}`), (snap) => {
+      if (snap.exists()) {
+        const userData = snap.val();
+        currentUser = userData;
+        localStorage.setItem("user", JSON.stringify(userData));
+        document.getElementById("welcome").textContent = `Hola, ${userData.name}`;
+      }
+    });
+
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+    loadFriends();
+  }
+
+  window.addFriend = async () => {
+    const friend = document.getElementById("friendName").value.trim();
+    if (!friend || friend === currentUser.name) return alert("Nombre inválido");
+
+    const friendSnap = await get(ref(db, `users/${friend}`));
+    if (!friendSnap.exists()) {
+      alert("Este usuario no existe");
+      return;
     }
 
-    // Agregar amigo solo si existe
-    window.addFriend = async () => {
-      const friend = document.getElementById("friendName").value.trim();
-      if (!friend || friend === currentUser.name) return alert("Nombre inválido");
+    const friendsRef = ref(db, `users/${currentUser.name}/friends/${friend}`);
+    set(friendsRef, true);
+    loadFriends();
+  };
 
-      const friendSnap = await get(ref(db, `users/${friend}`));
-      if (!friendSnap.exists()) {
-        alert("Este usuario no existe");
-        return;
-      }
+  async function loadFriends() {
+    const list = document.getElementById("friendsList");
+    list.innerHTML = '';
+    const friendsSnap = await get(ref(db, `users/${currentUser.name}/friends`));
+    if (friendsSnap.exists()) {
+      for (const friend of Object.keys(friendsSnap.val())) {
+        const userRef = ref(db, `users/${friend}`);
 
-      const friendsRef = ref(db, `users/${currentUser.name}/friends/${friend}`);
-      set(friendsRef, true);
-      loadFriends();
-    };
-
-    // Cargar amigos
-    async function loadFriends() {
-      const list = document.getElementById("friendsList");
-      list.innerHTML = '';
-      const friendsSnap = await get(ref(db, `users/${currentUser.name}/friends`));
-      if (friendsSnap.exists()) {
-        for (const friend of Object.keys(friendsSnap.val())) {
-          const userSnap = await get(ref(db, `users/${friend}`));
-          const info = userSnap.exists() ? userSnap.val() : { avatar: "", status: "offline" };
-
+        onValue(userRef, (snap) => {
+          const info = snap.exists() ? snap.val() : { avatar: "", status: "offline" };
           const li = document.createElement("li");
           li.className = "friend";
 
@@ -190,57 +234,58 @@
             </div>
             <button onclick="deleteFriend('${friend}')">Eliminar</button>
           `;
+          const existing = document.querySelector(`#friendsList li:has(span:contains('${friend}'))`);
+          if (existing) existing.remove(); // evitar duplicados
           list.appendChild(li);
-        }
+        });
       }
     }
+  }
 
-    window.deleteFriend = (friend) => {
-      remove(ref(db, `users/${currentUser.name}/friends/${friend}`));
-      loadFriends();
-      if (currentFriend === friend) {
-        document.getElementById("chatBox").style.display = "none";
-      }
-    };
-
-    window.openChat = async (friend) => {
-      currentFriend = friend;
-      document.getElementById("chatWith").textContent = friend;
-      document.getElementById("chatBox").style.display = "block";
-      document.getElementById("messages").innerHTML = "";
-
-      const chatId = getChatId(currentUser.name, friend);
-      const messagesRef = ref(db, `chats/${chatId}`);
-
-      onChildAdded(messagesRef, (data) => {
-        const msg = data.val();
-        const div = document.createElement("div");
-        div.className = "message";
-        if (msg.from === currentUser.name) div.classList.add("me");
-        div.innerHTML = `<strong>${msg.from}:</strong> ${msg.text}`;
-        document.getElementById("messages").appendChild(div);
-      });
-    };
-
-    window.sendMessage = () => {
-      const input = document.getElementById("messageInput");
-      const text = input.value.trim();
-      if (!text) return;
-      const chatId = getChatId(currentUser.name, currentFriend);
-      const msgRef = push(ref(db, `chats/${chatId}`));
-      set(msgRef, {
-        from: currentUser.name,
-        text,
-        time: Date.now()
-      });
-      input.value = '';
-    };
-
-    function getChatId(a, b) {
-      return [a, b].sort().join("_");
+  window.deleteFriend = (friend) => {
+    remove(ref(db, `users/${currentUser.name}/friends/${friend}`));
+    loadFriends();
+    if (currentFriend === friend) {
+      document.getElementById("chatBox").style.display = "none";
     }
+  };
 
-    if (localStorage.getItem("user")) startChat();
-  </script>
-</body>
-</html>
+  window.openChat = async (friend) => {
+    currentFriend = friend;
+    document.getElementById("chatWith").textContent = friend;
+    document.getElementById("chatBox").style.display = "block";
+    document.getElementById("messages").innerHTML = "";
+
+    const chatId = getChatId(currentUser.name, friend);
+    const messagesRef = ref(db, `chats/${chatId}`);
+
+    onChildAdded(messagesRef, (data) => {
+      const msg = data.val();
+      const div = document.createElement("div");
+      div.className = "message";
+      if (msg.from === currentUser.name) div.classList.add("me");
+      div.innerHTML = `<strong>${msg.from}:</strong> ${msg.text}`;
+      document.getElementById("messages").appendChild(div);
+    });
+  };
+
+  window.sendMessage = () => {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if (!text) return;
+    const chatId = getChatId(currentUser.name, currentFriend);
+    const msgRef = push(ref(db, `chats/${chatId}`));
+    set(msgRef, {
+      from: currentUser.name,
+      text,
+      time: Date.now()
+    });
+    input.value = '';
+  };
+
+  function getChatId(a, b) {
+    return [a, b].sort().join("_");
+  }
+
+  if (localStorage.getItem("user")) startChat();
+    </script>
