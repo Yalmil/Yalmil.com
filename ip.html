@@ -5,52 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IP Reveal Troll</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #111;
-      color: #0f0;
-      font-family: monospace;
+      background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+      color: #00ffae;
+      font-family: 'Segoe UI', monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       text-align: center;
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 5px #00ffae, 0 0 10px #00ffc3;
     }
 
     input, button {
-      padding: 10px;
+      padding: 10px 15px;
       font-size: 16px;
       margin: 10px;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
+      outline: none;
+      transition: 0.2s;
     }
 
     input {
       width: 220px;
+      background: #1f1f1f;
+      color: #0ff;
+      border: 1px solid #00ffc3;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px #00ffc3;
     }
 
     button {
-      background-color: #0f0;
+      background: #00ffae;
       color: #000;
       cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px #00ffae, 0 0 20px #00ffc3;
+    }
+
+    button:hover {
+      background: #00ffc3;
     }
 
     .resultado {
       margin-top: 20px;
-      font-size: 20px;
+      font-size: 1.2rem;
+      color: #fff;
+      text-shadow: 0 0 3px #0ff;
     }
 
     .cargando {
-      font-size: 16px;
+      font-size: 1rem;
       margin-top: 15px;
       height: 20px;
+      color: #ccc;
     }
-        .back-link {
+
+    .back-link {
       margin-bottom: 2rem;
-      color: #3fffa8;
+      color: #00ffae;
       text-decoration: none;
       font-size: 0.9rem;
-        }
+      transition: 0.2s;
+    }
+
+    .back-link:hover {
+      color: #00ffc3;
+    }
   </style>
 </head>
 <body>
@@ -90,24 +125,21 @@
         return;
       }
 
-      // Preparar estado inicial
       resultado.innerText = "";
       cargando.innerText = "";
       boton.disabled = true;
       let index = 0;
 
-      // Cambiar frases cada segundo
       const intervalo = setInterval(() => {
         cargando.innerText = frases[index % frases.length];
         index++;
       }, 1000);
 
-      // Mostrar IP después de 4 segundos
       setTimeout(() => {
         clearInterval(intervalo);
         const ip = generarIP();
         cargando.innerText = "";
-        resultado.innerText = `La IP de ${nombre} es: ${ip}`;
+        resultado.innerText = `🛰️ La IP de ${nombre} es: ${ip}`;
         boton.disabled = false;
       }, 4000);
     }
