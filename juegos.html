@@ -8,8 +8,8 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #0a0a0a;
-      color: #b8ffd8;
+      background: linear-gradient(135deg, #0a0f1a, #000000);
+      color: #b55eff;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -18,15 +18,15 @@
     header {
       background-color: #0f0f0f;
       padding: 1rem 2rem;
-      border-bottom: 2px solid #3fffa8;
+      border-bottom: 2px solid #b55eff;
       text-align: center;
     }
 
     header h1 {
       margin: 0;
       font-size: 2rem;
-      color: #3fffa8;
-      text-shadow: 0 0 10px #3fffa8;
+      color: #b55eff;
+      text-shadow: 0 0 10px #b55eff;
     }
 
     main {
@@ -38,8 +38,8 @@
     }
 
     h2 {
-      color: #3fffa8;
-      text-shadow: 0 0 6px #3fffa8;
+      color: #b55eff;
+      text-shadow: 0 0 6px #b55eff;
     }
 
     .game-list {
@@ -51,34 +51,39 @@
     }
 
     .game {
-      background-color: #1a1a1a;
-      border: 2px solid #3fffa8;
+      background-color: #121212;
+      border: 2px solid #b55eff;
       border-radius: 1rem;
       padding: 1.5rem;
       text-align: center;
       text-decoration: none;
-      color: #b8ffd8;
-      box-shadow: 0 0 10px #3fffa8;
+      color: #f5e8ff;
+      box-shadow: 0 0 12px #b55eff44;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .game:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px #3fffa8;
+      transform: translateY(-6px);
+      box-shadow: 0 0 24px #b55eff;
     }
 
     footer {
       text-align: center;
       padding: 1rem;
       font-size: 0.8rem;
-      color: #666;
+      color: #888;
     }
 
     .back-link {
       margin-bottom: 2rem;
-      color: #3fffa8;
+      color: #b55eff;
       text-decoration: none;
       font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #d1aaff;
     }
   </style>
 </head>
@@ -98,7 +103,6 @@
       <a class="game" href="sall.html">Sobrevive a las letras 🔪</a>
       <a class="game" href="acertijo.html">Acertijo de contraseñas 🔑 [Nuevo]</a>
       <a class="game" href="mall.html">Mata a las letras 🔪 [Alpha]</a>
-      <!-- Agrega más juegos aquí -->
     </div>
   </main>
   <footer>
