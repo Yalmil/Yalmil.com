@@ -6,32 +6,79 @@
   <title>Mini Discord Web</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #121212;
-      color: white;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
       margin: 0;
       padding: 0;
     }
-    .container { padding: 20px; max-width: 600px; margin: auto; }
-    input, button, select { padding: 10px; margin: 5px 0; width: 100%; }
+    .container {
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      background: #a300ff;
+      color: white;
+      cursor: pointer;
+    }
     .user-info, .chat-box { margin-top: 20px; }
-    .message { background: #333; padding: 10px; margin: 5px 0; border-radius: 8px; }
-    .friend-item { display: flex; align-items: center; gap: 10px; margin: 5px 0; cursor: pointer; }
-    .friend-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .online { background: lime; }
-    .dnd { background: red; }
-    .offline { background: gray; }
+    .friend {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #290033;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 5px 0;
+    }
+    .friend img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .message {
+      background: #39004d;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 8px;
+    }
+    .message.me {
+      background: #640099;
+    }
+    .friend-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .online { background: #00ff7f; }
+    .dnd { background: #ff5050; }
+    .offline { background: #999; }
   </style>
 </head>
 <body>
   <div class="container" id="setup">
-    <h2>Ingresa tu nombre y avatar</h2>
+    <h2>Tu perfil</h2>
     <input type="text" id="username" placeholder="Tu nombre">
     <input type="text" id="avatar" placeholder="URL de tu imagen de perfil">
     <select id="status">
       <option value="online">🟢 En línea</option>
-      <option value="dnd">🔴 No molestar</option>
+      <option value="dnd">⛔ No molestar</option>
       <option value="offline">⚫ Desconectado</option>
     </select>
     <button onclick="saveUser()">Entrar</button>
@@ -40,16 +87,6 @@
   <div class="container" id="chat" style="display:none">
     <div class="user-info">
       <p id="welcome"></p>
-      <img id="myAvatar" src="" width="60" style="border-radius: 50%;"><br>
-      <input type="text" id="avatarEdit" placeholder="Nuevo avatar URL">
-      <select id="statusEdit">
-        <option value="online">🟢 En línea</option>
-        <option value="dnd">🔴 No molestar</option>
-        <option value="offline">⚫ Desconectado</option>
-      </select>
-      <button onclick="updateProfile()">Actualizar perfil</button>
-      <button onclick="logout()">Salir</button>
-      <hr>
       <input type="text" id="friendName" placeholder="Nombre de tu amigo">
       <button onclick="addFriend()">Agregar amigo</button>
     </div>
@@ -67,7 +104,16 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, get, child, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onChildAdded,
+      set,
+      get,
+      remove,
+      child
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAYkzaOGhIYh10UkQnYEgUfnM-RFG1E4zs",
@@ -84,16 +130,16 @@
     let currentUser = null;
     let currentFriend = null;
 
-    // Guardar nombre, avatar y estado
+    // Guardar perfil
     window.saveUser = () => {
-      const name = document.getElementById("username").value;
-      const avatar = document.getElementById("avatar").value || "https://i.imgur.com/placeholder.png";
+      const name = document.getElementById("username").value.trim();
+      const avatar = document.getElementById("avatar").value.trim();
       const status = document.getElementById("status").value;
       if (!name) return alert("Pon un nombre");
 
       const userData = { name, avatar, status };
       localStorage.setItem("user", JSON.stringify(userData));
-      set(ref(db, `users/${name}/profile`), userData);
+      set(ref(db, `users/${name}`), userData); // Guardar en Firebase
       startChat();
     };
 
@@ -104,71 +150,60 @@
       document.getElementById("setup").style.display = "none";
       document.getElementById("chat").style.display = "block";
       document.getElementById("welcome").textContent = `Hola, ${data.name}`;
-      document.getElementById("myAvatar").src = data.avatar;
-      document.getElementById("statusEdit").value = data.status || "online";
       loadFriends();
     }
 
-    window.updateProfile = () => {
-      const avatar = document.getElementById("avatarEdit").value || currentUser.avatar;
-      const status = document.getElementById("statusEdit").value;
-      const updated = { ...currentUser, avatar, status };
-      currentUser = updated;
-      localStorage.setItem("user", JSON.stringify(updated));
-      set(ref(db, `users/${currentUser.name}/profile`), updated);
-      document.getElementById("myAvatar").src = avatar;
-    };
+    // Agregar amigo solo si existe
+    window.addFriend = async () => {
+      const friend = document.getElementById("friendName").value.trim();
+      if (!friend || friend === currentUser.name) return alert("Nombre inválido");
 
-    window.logout = () => {
-      localStorage.removeItem("user");
-      location.reload();
-    };
+      const friendSnap = await get(ref(db, `users/${friend}`));
+      if (!friendSnap.exists()) {
+        alert("Este usuario no existe");
+        return;
+      }
 
-    window.addFriend = () => {
-      const friend = document.getElementById("friendName").value;
-      if (!friend) return;
       const friendsRef = ref(db, `users/${currentUser.name}/friends/${friend}`);
       set(friendsRef, true);
       loadFriends();
     };
 
-    function loadFriends() {
+    // Cargar amigos
+    async function loadFriends() {
       const list = document.getElementById("friendsList");
       list.innerHTML = '';
-      get(ref(db, `users/${currentUser.name}/friends`)).then(snap => {
-        if (snap.exists()) {
-          Object.keys(snap.val()).forEach(friend => {
-            const li = document.createElement("li");
-            li.className = "friend-item";
+      const friendsSnap = await get(ref(db, `users/${currentUser.name}/friends`));
+      if (friendsSnap.exists()) {
+        for (const friend of Object.keys(friendsSnap.val())) {
+          const userSnap = await get(ref(db, `users/${friend}`));
+          const info = userSnap.exists() ? userSnap.val() : { avatar: "", status: "offline" };
 
-            const img = document.createElement("img");
-            img.className = "friend-avatar";
+          const li = document.createElement("li");
+          li.className = "friend";
 
-            const span = document.createElement("span");
-            span.textContent = friend;
-
-            const dot = document.createElement("span");
-            dot.className = "status-dot offline";
-
-            onValue(ref(db, `users/${friend}/profile`), (snap) => {
-              const d = snap.val();
-              if (d) {
-                img.src = d.avatar || "";
-                dot.className = "status-dot " + (d.status || "offline");
-              }
-            });
-
-            li.appendChild(dot);
-            li.appendChild(img);
-            li.appendChild(span);
-            li.onclick = () => openChat(friend);
-            list.appendChild(li);
-          });
+          li.innerHTML = `
+            <div class="friend-info" onclick="openChat('${friend}')">
+              <img src="${info.avatar}" alt="avatar">
+              <span>${friend}</span>
+              <span class="status-dot ${info.status}"></span>
+            </div>
+            <button onclick="deleteFriend('${friend}')">Eliminar</button>
+          `;
+          list.appendChild(li);
         }
-      });
+      }
     }
 
-    function openChat(friend) {
+    window.deleteFriend = (friend) => {
+      remove(ref(db, `users/${currentUser.name}/friends/${friend}`));
+      loadFriends();
+      if (currentFriend === friend) {
+        document.getElementById("chatBox").style.display = "none";
+      }
+    };
+
+    window.openChat = async (friend) => {
       currentFriend = friend;
       document.getElementById("chatWith").textContent = friend;
       document.getElementById("chatBox").style.display = "block";
@@ -181,14 +216,15 @@
         const msg = data.val();
         const div = document.createElement("div");
         div.className = "message";
+        if (msg.from === currentUser.name) div.classList.add("me");
         div.innerHTML = `<strong>${msg.from}:</strong> ${msg.text}`;
         document.getElementById("messages").appendChild(div);
       });
-    }
+    };
 
     window.sendMessage = () => {
       const input = document.getElementById("messageInput");
-      const text = input.value;
+      const text = input.value.trim();
       if (!text) return;
       const chatId = getChatId(currentUser.name, currentFriend);
       const msgRef = push(ref(db, `chats/${chatId}`));
@@ -200,11 +236,10 @@
       input.value = '';
     };
 
-    function getChatId(user1, user2) {
-      return [user1, user2].sort().join("_");
+    function getChatId(a, b) {
+      return [a, b].sort().join("_");
     }
 
-    // Auto login
     if (localStorage.getItem("user")) startChat();
   </script>
 </body>
