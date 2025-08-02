@@ -3,31 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Yalmil.tv</title>
+  <title>Yalmil.com</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-      color: #b8ffd8;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     header {
-      background-color: #0f0f0f;
+      background-color: #140022;
       padding: 1rem 2rem;
-      border-bottom: 2px solid #3fffa8;
+      border-bottom: 2px solid #c084fc;
       text-align: center;
       position: relative;
+      box-shadow: 0 0 15px #c084fc33;
     }
 
     header h1 {
       margin: 0;
-      font-size: 2rem;
-      color: #3fffa8;
-      text-shadow: 0 0 10px #3fffa8;
+      font-size: 2.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 12px #c084fc;
+    }
+
+    header h3 {
+      margin: 0.3rem 0;
+      font-weight: 400;
+      color: #e5ccff;
     }
 
     .profile-container {
@@ -39,23 +58,23 @@
     }
 
     .profile-pic {
-      width: 45px;
-      height: 45px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      border: 2px solid #3fffa8;
-      box-shadow: 0 0 10px #3fffa8;
+      border: 2px solid #c084fc;
+      box-shadow: 0 0 10px #c084fc;
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .profile-pic:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 15px #3fffa8;
+      box-shadow: 0 0 18px #c084fc;
     }
 
     .username-display {
       font-size: 0.75rem;
-      color: #b8ffd8;
-      margin-top: 2px;
+      color: #e5ccff;
+      margin-top: 4px;
     }
 
     main {
@@ -67,45 +86,56 @@
       padding: 2rem;
     }
 
+    main h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 8px #c084fc;
+    }
+
     .subpage-list {
       display: grid;
       gap: 1rem;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       width: 100%;
-      max-width: 800px;
+      max-width: 900px;
     }
 
     .subpage {
-      background-color: #1a1a1a;
-      padding: 1.5rem;
-      border: 2px solid #3fffa8;
+      background: rgba(40, 0, 60, 0.2);
+      backdrop-filter: blur(6px);
+      border: 2px solid #c084fc;
       border-radius: 1rem;
       text-align: center;
       text-decoration: none;
-      color: #b8ffd8;
-      box-shadow: 0 0 10px #3fffa8;
-      transition: transform 0.2s, box-shadow 0.2s;
+      color: #e5ccff;
+      box-shadow: 0 0 10px #c084fc55;
+      padding: 1.5rem;
+      font-weight: 500;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .subpage:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 0 20px #3fffa8;
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 0 20px #c084fc;
     }
 
     footer {
       text-align: center;
       padding: 1rem;
       font-size: 0.8rem;
-      color: #666;
+      color: #888;
+      background-color: #100015;
+      border-top: 1px solid #321144;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Yalmil web</h1>
+    <h1>Yalmil Web</h1>
     <h3 id="bienvenida">Bienvenido de nuevo, usuario...</h3>
-    <h3>En esta página podrás explorar todos los textos creados por mí (Yalmil).</h3>
-    <h3>Diviértete y disfruta. :D</h3>
+    <h3>Explora todos los textos creados por mí (Yalmil).</h3>
+    <h3>¡Diviértete y disfruta! :D</h3>
 
     <div class="profile-container" id="goToProfile">
       <img class="profile-pic" id="profilePic" src="https://i.pravatar.cc/100?u=user" alt="Perfil" />
@@ -119,13 +149,13 @@
       <a class="subpage" href="formulario">Sugerencias</a>
       <a class="subpage" href="juegos">Juegos</a>
       <a class="subpage" href="sepmc">Sepmc</a>
-      <a class="subpage" href="letterballslore">Letterballs lore</a>
+      <a class="subpage" href="letterballslore">Letterballs Lore</a>
       <a class="subpage" href="forsaken">Forsaken [Alfa]</a>
     </div>
   </main>
 
   <footer>
-    &copy; 2025 Yalmil.tv – Todos los derechos reservados.
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
   </footer>
 
   <script type="module">
@@ -155,7 +185,6 @@
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const data = userDoc.exists() ? userDoc.data() : {};
-
         const username = data.username || user.email;
         const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
 
