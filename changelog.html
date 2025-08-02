@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contenedor Editable</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background: rgba(40, 0, 60, 0.2);
+      backdrop-filter: blur(6px);
+      border: 2px solid #c084fc;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 20px #c084fc88;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 8px #c084fc;
+    }
+
+    .editable {
+      min-height: 200px;
+      padding: 1rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      font-size: 1rem;
+      border: 1px solid #c084fc88;
+      overflow-y: auto;
+    }
+
+    .editable:focus {
+      box-shadow: 0 0 10px #c084fcaa;
+      border-color: #c084fc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>✍️ Escribe aquí</h2>
+    <div class="editable" contenteditable="true">
+      Puedes escribir lo que quieras en este contenedor editable. ¡Personalízalo a tu gusto!
+    </div>
+  </div>
+</body>
+</html>
