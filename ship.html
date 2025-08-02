@@ -1,74 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>💘 Ship Generator</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background: linear-gradient(to bottom right, #ff6ec4, #7873f5);
-      color: white;
-      font-family: 'Arial', sans-serif;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      animation: fadeIn 1s ease-out;
       text-align: center;
-      padding: 20px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
+      font-size: 2.5rem;
+      color: #ff7de9;
+      text-shadow: 0 0 12px #ff7de9aa;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      text-shadow: 0 0 5px #c084fc88;
+      margin-bottom: 1.5rem;
     }
 
     input {
-      padding: 10px;
+      padding: 0.6rem;
+      font-size: 1rem;
       border-radius: 10px;
-      border: none;
-      margin: 5px;
+      border: 2px solid #ff8de1;
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+      margin: 0.4rem;
       width: 90%;
       max-width: 300px;
-      font-size: 1em;
+      box-shadow: 0 0 8px #ffb2ec44;
+      outline: none;
+      backdrop-filter: blur(3px);
     }
 
     button {
-      margin-top: 15px;
-      padding: 10px 20px;
+      margin-top: 1rem;
+      padding: 0.8rem 2rem;
       border: none;
-      border-radius: 10px;
-      background: #ffffff;
-      color: #ff6ec4;
+      border-radius: 12px;
+      background: #ff8de1;
+      color: #1a001f;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      font-size: 1em;
-      transition: 0.3s;
+      box-shadow: 0 0 15px #ff8de188;
+      transition: transform 0.1s ease, background 0.3s ease;
     }
 
     button:hover {
-      background: #ffd6ec;
+      background: #ffb2ec;
     }
 
-    #output {
-      margin-top: 30px;
-      font-size: 1.2em;
-      word-wrap: break-word;
+    button:active {
+      transform: scale(0.96);
     }
 
     #loading {
       margin-top: 20px;
-      font-size: 1em;
+      font-size: 1rem;
+      color: #ffb2ec;
       display: none;
+      text-shadow: 0 0 6px #ff8de1aa;
+    }
+
+    #output {
+      margin-top: 30px;
+      font-size: 1.1rem;
+      word-wrap: break-word;
+      text-shadow: 0 0 5px #e5ccff88;
+    }
+
+    #output h2 {
+      color: #ffacee;
+      text-shadow: 0 0 10px #ffacee88;
+    }
+
+    #output strong {
+      color: #ff8de1;
+      text-shadow: 0 0 6px #ff8de188;
     }
 
     .back-link {
-      display: block;
-      margin-bottom: 2rem;
-      color: #3fffa8;
+      margin-top: 1rem;
+      color: #b55eff;
       text-decoration: none;
       font-size: 0.9rem;
+      text-shadow: 0 0 5px #e5ccff;
+    }
+
+    .back-link:hover {
+      color: #d9b8ff;
     }
 
     @media (max-width: 400px) {
       h1 {
-        font-size: 2em;
+        font-size: 2rem;
       }
+
       button {
         width: 90%;
       }
@@ -79,7 +133,7 @@
   <h1>💖 Ship Generator</h1>
   <p>¡Escribe dos nombres y descubre su amor digital!</p>
   <a class="back-link" href="juegos.html">← Volver a los juegos</a>
-  
+
   <input type="text" id="name1" placeholder="Nombre 1">
   <input type="text" id="name2" placeholder="Nombre 2"><br>
   <button onclick="ship()">💘 Calcular Amor</button>
