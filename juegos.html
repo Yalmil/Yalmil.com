@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yalmil.com – Juegos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0f1a, #000000);
+      color: #b55eff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #140022;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #c084fc;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 15px #c084fc33;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #b55eff;
+      text-shadow: 0 0 10px #b55eff;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #b55eff;
+      text-shadow: 0 0 6px #b55eff;
+    }
+
+    .game-list {
+      width: 100%;
+      max-width: 800px;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .game {
+      background-color: #121212;
+      border: 2px solid #b55eff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      text-decoration: none;
+      color: #f5e8ff;
+      box-shadow: 0 0 12px #b55eff44;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .game:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 24px #b55eff;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .back-link {
+      margin-bottom: 2rem;
+      color: #b55eff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #d1aaff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Juegos</h1>
+  </header>
+  <main>
+    <a class="back-link" href="inicio.html">← Volver al inicio</a>
+    <h2 id="welcome">¿Qué tipo de juego quieres jugar?</h2>
+    <div class="game-list">
+      <a class="game" href="solitariogames.html">Juegos para un jugador 🎮</a>
+      <a class="game" href="multiplayergames.html">Juegos multijugador 💻</a>
+    </div>
+  </main>
+  <footer>
+    &copy; 2025 Yalmil.tv – Juegos
+  </footer>
+</body>
+</html>
