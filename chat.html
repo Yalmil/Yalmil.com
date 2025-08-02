@@ -1,1 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Discord Web</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container { padding: 20px; max-width: 600px; margin: auto; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .user-info, .chat-box { margin-top: 20px; }
+    .message { background: #333; padding: 10px; margin: 5px 0; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container" id="setup">
+    <h2>Ingresa tu nombre y avatar</h2>
+    <input type="text" id="username" placeholder="Tu nombre">
+    <input type="text" id="avatar" placeholder="URL de tu imagen de perfil">
+    <button onclick="saveUser()">Entrar</button>
+  </div>
 
+  <div class="container" id="chat" style="display:none">
+    <div class="user-info">
+      <p id="welcome"></p>
+      <input type="text" id="friendName" placeholder="Nombre de tu amigo">
+      <button onclick="addFriend()">Agregar amigo</button>
+    </div>
+    <div>
+      <h3>Amigos</h3>
+      <ul id="friendsList"></ul>
+    </div>
+    <div class="chat-box" id="chatBox" style="display:none">
+      <h3>Chat con <span id="chatWith"></span></h3>
+      <div id="messages"></div>
+      <input type="text" id="messageInput" placeholder="Escribe un mensaje">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, set, get, child } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAYkzaOGhIYh10UkQnYEgUfnM-RFG1E4zs",
+      authDomain: "database-mensajes.firebaseapp.com",
+      projectId: "database-mensajes",
+      storageBucket: "database-mensajes.firebasestorage.app",
+      messagingSenderId: "925185272269",
+      appId: "1:925185272269:web:c9e2b1b61ceb90a8febc84"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let currentUser = null;
+    let currentFriend = null;
+
+    // Guardar nombre y avatar
+    window.saveUser = () => {
+      const name = document.getElementById("username").value;
+      const avatar = document.getElementById("avatar").value;
+      if (!name) return alert("Pon un nombre");
+
+      localStorage.setItem("user", JSON.stringify({ name, avatar }));
+      startChat();
+    };
+
+    function startChat() {
+      const data = JSON.parse(localStorage.getItem("user"));
+      if (!data) return;
+      currentUser = data;
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      document.getElementById("welcome").textContent = `Hola, ${data.name}`;
+      loadFriends();
+    }
+
+    // Agregar amigo
+    window.addFriend = () => {
+      const friend = document.getElementById("friendName").value;
+      if (!friend) return;
+
+      const friendsRef = ref(db, `users/${currentUser.name}/friends/${friend}`);
+      set(friendsRef, true);
+      loadFriends();
+    };
+
+    function loadFriends() {
+      const list = document.getElementById("friendsList");
+      list.innerHTML = '';
+      get(ref(db, `users/${currentUser.name}/friends`)).then(snap => {
+        if (snap.exists()) {
+          Object.keys(snap.val()).forEach(friend => {
+            const li = document.createElement("li");
+            li.textContent = friend;
+            li.style.cursor = "pointer";
+            li.onclick = () => openChat(friend);
+            list.appendChild(li);
+          });
+        }
+      });
+    }
+
+    function openChat(friend) {
+      currentFriend = friend;
+      document.getElementById("chatWith").textContent = friend;
+      document.getElementById("chatBox").style.display = "block";
+      document.getElementById("messages").innerHTML = "";
+
+      const chatId = getChatId(currentUser.name, friend);
+      const messagesRef = ref(db, `chats/${chatId}`);
+
+      onChildAdded(messagesRef, (data) => {
+        const msg = data.val();
+        const div = document.createElement("div");
+        div.className = "message";
+        div.innerHTML = `<strong>${msg.from}:</strong> ${msg.text}`;
+        document.getElementById("messages").appendChild(div);
+      });
+    }
+
+    window.sendMessage = () => {
+      const input = document.getElementById("messageInput");
+      const text = input.value;
+      if (!text) return;
+      const chatId = getChatId(currentUser.name, currentFriend);
+      const msgRef = push(ref(db, `chats/${chatId}`));
+      set(msgRef, {
+        from: currentUser.name,
+        text,
+        time: Date.now()
+      });
+      input.value = '';
+    };
+
+    function getChatId(user1, user2) {
+      return [user1, user2].sort().join("_");
+    }
+
+    // Auto login si ya existe
+    if (localStorage.getItem("user")) startChat();
+  </script>
+</body>
+</html>
