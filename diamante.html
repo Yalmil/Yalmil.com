@@ -7,9 +7,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -24,6 +22,7 @@
       padding: 2rem 1rem;
       animation: fadeIn 1s ease-out;
       text-align: center;
+      overflow-x: hidden;
     }
 
     @keyframes fadeIn {
@@ -46,22 +45,23 @@
 
     .chest-container {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
       margin: 2rem 0;
-      flex-wrap: wrap;
       justify-content: center;
+      max-width: 1200px;
     }
 
     .chest {
-      width: 100px;
-      height: 100px;
+      width: 70px;
+      height: 70px;
       background: rgba(40, 0, 60, 0.25);
       border: 2px solid #c084fc;
       border-radius: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
+      font-size: 1.5rem;
       cursor: pointer;
       box-shadow: 0 0 10px #c084fc44;
       color: #fff;
@@ -72,6 +72,17 @@
     .chest:hover {
       transform: scale(1.1);
       box-shadow: 0 0 15px #c084fc;
+    }
+
+    .chest.correct {
+      animation: sparkle 0.7s ease forwards;
+      background-color: #7c3aed;
+    }
+
+    @keyframes sparkle {
+      0% { transform: scale(1); box-shadow: 0 0 10px #c084fc; }
+      50% { transform: scale(1.3); box-shadow: 0 0 30px #c084fc; }
+      100% { transform: scale(1.1); box-shadow: 0 0 15px #7c3aed; }
     }
 
     .result {
@@ -137,19 +148,9 @@
     }
 
     @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-
-      .chest {
-        width: 80px;
-        height: 80px;
-        font-size: 1.5rem;
-      }
-
-      .restart-btn {
-        width: 100%;
-      }
+      h1 { font-size: 2rem; }
+      .chest { width: 60px; height: 60px; font-size: 1.3rem; }
+      .restart-btn { width: 100%; }
     }
   </style>
 </head>
@@ -161,12 +162,18 @@
     <button onclick="startGame(3)">Fácil (3 cofres)</button>
     <button onclick="startGame(5)">Normal (5 cofres)</button>
     <button onclick="startGame(15)">Difícil (15 cofres)</button>
+    <button onclick="startGame(100)">Extremos (100 cofres 😈)</button>
   </div>
 
   <div class="chest-container" id="chest-container"></div>
   <div class="result" id="result"></div>
   <button class="restart-btn" onclick="restartGame()" style="display:none;">Intentar de nuevo</button>
   <a class="back-link" href="juegos">← Volver a Juegos</a>
+
+  <!-- 🎵 Sonidos -->
+  <audio id="winSound" src="https://freesound.org/data/previews/341/341695_3248244-lq.mp3"></audio>
+  <audio id="failSound" src="https://freesound.org/data/previews/108/108262_861714-lq.mp3"></audio>
+  <audio id="clickSound" src="https://freesound.org/data/previews/256/256113_3263906-lq.mp3"></audio>
 
   <script>
     let correctChest = -1;
@@ -192,20 +199,29 @@
         const chest = document.createElement("div");
         chest.classList.add("chest");
         chest.textContent = "🧰";
-        chest.onclick = () => checkChest(i);
+        chest.onclick = () => checkChest(i, chest);
         container.appendChild(chest);
       }
     }
 
-    function checkChest(index) {
+    function checkChest(index, chestElement) {
       if (revealed) return;
       revealed = true;
 
+      const clickSound = document.getElementById("clickSound");
+      clickSound.play();
+
       const result = document.getElementById("result");
+      const winSound = document.getElementById("winSound");
+      const failSound = document.getElementById("failSound");
+
       if (index === correctChest) {
+        chestElement.classList.add("correct");
         result.textContent = "🎉 ¡Encontraste el diamante!";
+        winSound.play();
       } else {
         result.textContent = `❌ Ese no era... El diamante estaba en el cofre #${correctChest + 1}`;
+        failSound.play();
       }
     }
 
