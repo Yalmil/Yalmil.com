@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ñorsaken - Lobby</title>
+<style>
+  body {
+    margin: 0; background: #111; color: #eee; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+  }
+  #app {
+    width: 100%; max-width: 480px; padding: 1rem; background: #222; border-radius: 8px; box-shadow: 0 0 15px #0f0;
+  }
+  h1 { text-align: center; color: #0f0; }
+  select, button {
+    width: 100%; padding: 0.75rem; margin: 0.5rem 0; font-size: 1.1rem; border-radius: 5px;
+    border: none; background: #333; color: #0f0; cursor: pointer;
+  }
+  button:disabled { background: #444; cursor: default; color: #666; }
+  #lobby, #game { display: none; }
+  ul { padding-left: 1.5rem; }
+  .player {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #0f0;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Ñorsaken</h1>
+
+  <div id="language-select">
+    <label for="lang">Idioma / Language:</label>
+    <select id="lang">
+      <option value="es" selected>Español</option>
+      <option value="en">English</option>
+    </select>
+    <button id="btnConnect">Crear/Unirse a Lobby</button>
+  </div>
+
+  <div id="lobby">
+    <h2>Lobby</h2>
+    <p>Esperando jugadores...</p>
+    <ul id="playerList"></ul>
+    <button id="btnStart" disabled>Iniciar partida (40s)</button>
+    <p id="countdown"></p>
+  </div>
+
+  <div id="game">
+    <h2>Partida iniciada</h2>
+    <p id="gameStatus">Preparando...</p>
+    <button id="btnLeave">Salir</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script>
+  // Tu configuración Firebase aquí:
+  const firebaseConfig = {
+    apiKey: "TU_APIKEY",
+    authDomain: "TU_AUTHDOMAIN",
+    databaseURL: "TU_DATABASEURL",
+    projectId: "TU_PROJECTID",
+    storageBucket: "TU_STORAGEBUCKET",
+    messagingSenderId: "TU_MESSAGINGSENDERID",
+    appId: "TU_APPID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const btnConnect = document.getElementById('btnConnect');
+  const lobbyDiv = document.getElementById('lobby');
+  const languageSelect = document.getElementById('lang');
+  const playerList = document.getElementById('playerList');
+  const btnStart = document.getElementById('btnStart');
+  const countdownElem = document.getElementById('countdown');
+  const gameDiv = document.getElementById('game');
+  const gameStatus = document.getElementById('gameStatus');
+  const btnLeave = document.getElementById('btnLeave');
+  const languageMap = {
+    es: {
+      waiting: "Esperando jugadores...",
+      start: "Iniciar partida (40s)",
+      started: "Partida iniciada",
+      preparing: "Preparando..."
+    },
+    en: {
+      waiting: "Waiting for players...",
+      start: "Start Game (40s)",
+      started: "Game started",
+      preparing: "Preparing..."
+    }
+  };
+
+  let roomId = null;
+  let players = {};
+  let isHost = false;
+  let countdown = 40;
+  let countdownInterval;
+
+  btnConnect.onclick = async () => {
+    btnConnect.disabled = true;
+    const lang = languageSelect.value;
+
+    // Generar id de sala aleatoria
+    roomId = 'room-' + Math.floor(Math.random() * 10000);
+    const roomRef = db.ref('rooms/' + roomId);
+
+    // Intentar unirse a sala o crearla
+    await roomRef.transaction(room => {
+      if (room === null) {
+        return { players: {}, started: false, host: null };
+      } else {
+        return room;
+      }
+    });
+
+    // Agregar jugador a sala
+    const playerId = 'player-' + Math.floor(Math.random() * 10000);
+    const playerName = 'Jugador_' + playerId.slice(-4);
+    players[playerId] = { name: playerName, ready: false };
+
+    await roomRef.child('players/' + playerId).set(players[playerId]);
+
+    // Determinar host
+    const snap = await roomRef.child('host').get();
+    if (!snap.exists()) {
+      await roomRef.child('host').set(playerId);
+      isHost = true;
+      btnStart.disabled = false;
+    }
+
+    // Mostrar lobby
+    document.getElementById('language-select').style.display = 'none';
+    lobbyDiv.style.display = 'block';
+
+    // Escuchar jugadores
+    roomRef.child('players').on('value', snapshot => {
+      players = snapshot.val() || {};
+      renderPlayers();
+    });
+
+    // Escuchar inicio
+    roomRef.child('started').on('value', snapshot => {
+      if (snapshot.val()) {
+        startGame();
+      }
+    });
+  };
+
+  btnStart.onclick = () => {
+    if (isHost) {
+      const roomRef = db.ref('rooms/' + roomId);
+      countdown = 40;
+      btnStart.disabled = true;
+      roomRef.child('started').set(true);
+      startCountdown();
+    }
+  };
+
+  function renderPlayers() {
+    playerList.innerHTML = '';
+    Object.entries(players).forEach(([id, player]) => {
+      const li = document.createElement('li');
+      li.className = 'player';
+      li.textContent = player.name;
+      playerList.appendChild(li);
+    });
+  }
+
+  function startCountdown() {
+    countdownElem.textContent = `Tiempo restante: ${countdown}s`;
+    countdownInterval = setInterval(() => {
+      countdown--;
+      countdownElem.textContent = `Tiempo restante: ${countdown}s`;
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+  }
+
+  function startGame() {
+    lobbyDiv.style.display = 'none';
+    gameDiv.style.display = 'block';
+    gameStatus.textContent = languageMap[languageSelect.value].preparing;
+  }
+
+  btnLeave.onclick = () => {
+    if (roomId) {
+      db.ref('rooms/' + roomId).remove();
+      location.reload();
+    }
+  };
+</script>
+</body>
+  </html>
