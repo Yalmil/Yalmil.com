@@ -3,199 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lobby Firebase Modular</title>
+  <title>Lobby</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #0d0d0d;
-      color: white;
-      margin: 0;
-      padding: 0;
+      background-color: #0a0a0a;
+      color: #d0a0ff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      margin: 0;
     }
-
-    .container {
-      background-color: #1a1a1a;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 15px #8000ff;
-    }
-
     input, button {
+      margin: 10px;
       padding: 10px;
-      margin: 10px 0;
       border: none;
-      border-radius: 8px;
+      border-radius: 5px;
       font-size: 16px;
     }
-
     input {
-      width: 100%;
-      background: #262626;
-      color: white;
+      width: 200px;
     }
-
     button {
-      background-color: #8000ff;
+      background-color: #7a00cc;
       color: white;
       cursor: pointer;
-      width: 100%;
     }
-
-    .player {
-      background: #2e2e2e;
-      margin-top: 5px;
-      padding: 6px;
-      border-radius: 6px;
+    button:hover {
+      background-color: #9900ff;
     }
-
-    #lobbyView {
-      display: none;
+    #lobbyInfo {
+      margin-top: 30px;
+      padding: 20px;
+      border: 2px solid #a040ff;
+      border-radius: 10px;
+      max-width: 300px;
+      text-align: center;
+      background: #1a001f;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Sistema de Lobby (Firebase)</h2>
-    <input type="text" id="username" placeholder="Tu nombre o ID">
-    <button onclick="createLobby()">Crear Lobby</button>
-    <input type="text" id="joinCode" placeholder="Código de lobby">
-    <button onclick="joinLobby()">Unirse a Lobby</button>
+  <h1>Sistema de Lobby</h1>
+  <input type="text" id="username" placeholder="Tu nombre de usuario">
+  <input type="text" id="lobbyId" placeholder="ID del Lobby">
+  <br>
+  <button onclick="crearLobby()">Crear Lobby</button>
+  <button onclick="unirseLobby()">Unirse a Lobby</button>
 
-    <div id="lobbyView">
-      <h3>Lobby: <span id="lobbyCodeText"></span></h3>
-      <p>Jugadores:</p>
-      <div id="playerList"></div>
-      <button onclick="leaveLobby()">Salir del Lobby</button>
-    </div>
-  </div>
+  <div id="lobbyInfo" style="display:none;"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      set,
-      get,
-      onValue,
-      remove,
-      child,
-      off
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDZPuKVmmQ7cbaqnUvlhOoxqkj_Zo30WRA",
-      authDomain: "lobby-questions.firebaseapp.com",
-      projectId: "lobby-questions",
-      storageBucket: "lobby-questions.firebasestorage.app",
-      messagingSenderId: "972212469820",
-      appId: "1:972212469820:web:5c85bdc7685ebb8f958339",
-      databaseURL: "https://lobby-questions-default-rtdb.firebaseio.com"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let currentLobby = null;
-    let currentPlayer = null;
-
-    function randomCode(length = 6) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < length; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
+  <script>
+    function obtenerRol(nombre) {
+      return nombre.trim().toLowerCase() === "yalmil" ? "Creador" : "Jugador";
     }
 
-    window.createLobby = async function () {
-      if (currentLobby) return alert("Ya estás en un lobby");
-      const username = document.getElementById('username').value.trim();
-      if (!username) return alert("Escribe tu nombre");
-
-      const code = randomCode();
-      const playerId = crypto.randomUUID();
-
-      let role = "Host";
-      if (username.toLowerCase() === "yalmil") {
-        role = "Creador";
-      }
-
-      const player = { name: username, id: playerId, role };
-
-      await set(ref(db, `lobbies/${code}/players/${playerId}`), player);
-
-      currentLobby = code;
-      currentPlayer = player;
-      showLobby(code);
+    function mostrarLobby(usuario, lobby, rol) {
+      const info = document.getElementById("lobbyInfo");
+      info.style.display = "block";
+      info.innerHTML = `
+        <strong>Estás en el Lobby:</strong> ${lobby}<br>
+        <strong>Usuario:</strong> ${usuario}<br>
+        <strong>Rol:</strong> ${rol}
+      `;
     }
 
-    window.joinLobby = async function () {
-      if (currentLobby) return alert("Ya estás en un lobby");
+    function crearLobby() {
+      const username = document.getElementById("username").value.trim();
+      const lobbyId = document.getElementById("lobbyId").value.trim();
 
-      const username = document.getElementById('username').value.trim();
-      const code = document.getElementById('joinCode').value.trim().toUpperCase();
-      if (!username || !code) return alert("Completa los campos");
-
-      const snapshot = await get(ref(db, `lobbies/${code}/players`));
-      if (!snapshot.exists()) return alert("Lobby no encontrado");
-
-      const playerId = crypto.randomUUID();
-
-      let role = "Usuario";
-      if (username.toLowerCase() === "yalmil") {
-        role = "Creador";
+      if (!username || !lobbyId) {
+        alert("Por favor, ingresa tu nombre y un ID de Lobby.");
+        return;
       }
 
-      const player = { name: username, id: playerId, role };
-
-      await set(ref(db, `lobbies/${code}/players/${playerId}`), player);
-
-      currentLobby = code;
-      currentPlayer = player;
-      showLobby(code);
+      const rol = obtenerRol(username);
+      mostrarLobby(username, lobbyId, rol + " (creador del lobby)");
     }
 
-    function showLobby(code) {
-      document.getElementById("lobbyCodeText").textContent = code;
-      document.getElementById("lobbyView").style.display = "block";
+    function unirseLobby() {
+      const username = document.getElementById("username").value.trim();
+      const lobbyId = document.getElementById("lobbyId").value.trim();
 
-      const playerList = document.getElementById("playerList");
-      onValue(ref(db, `lobbies/${code}/players`), snapshot => {
-        playerList.innerHTML = "";
-        snapshot.forEach(child => {
-          const p = child.val();
-          const div = document.createElement("div");
-          div.classList.add("player");
-          div.textContent = `${p.name} (#${p.id}) – ${p.role}`;
-          playerList.appendChild(div);
-        });
-      });
-    }
-
-    window.leaveLobby = async function () {
-      if (!currentLobby || !currentPlayer) return;
-
-      const playerPath = `lobbies/${currentLobby}/players/${currentPlayer.id}`;
-      await remove(ref(db, playerPath));
-
-      // Verificar si el lobby quedó vacío
-      const snapshot = await get(ref(db, `lobbies/${currentLobby}/players`));
-      if (!snapshot.exists()) {
-        await remove(ref(db, `lobbies/${currentLobby}`));
+      if (!username || !lobbyId) {
+        alert("Por favor, ingresa tu nombre y un ID de Lobby.");
+        return;
       }
 
-      off(ref(db, `lobbies/${currentLobby}/players`));
-      currentLobby = null;
-      currentPlayer = null;
-      document.getElementById("lobbyView").style.display = "none";
+      const rol = obtenerRol(username);
+      mostrarLobby(username, lobbyId, rol);
     }
   </script>
 </body>
