@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Demuestra a abricraft que esta equivocado</title>
+  <title>Capítulos de Dinero</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -53,17 +53,27 @@
       background-color: #00ff88;
       color: #000;
     }
+
+    .story {
+      font-size: 18px;
+      background: #222;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px auto;
+      max-width: 600px;
+    }
   </style>
 </head>
 <body>
-<h1>Demuestra a abricraft que esta equivocado</h1>
+
   <h1>💰 Tu Dinero</h1>
   <div class="money" id="moneyDisplay">$0</div>
+  <div class="story" id="historiaTexto"></div>
 
   <div class="store">
-    <h2>🛒 Tienda (Piso <span id="floorDisplay">1</span>)</h2>
+    <h2>🛒 Puesto de Venta – Capítulo <span id="floorDisplay">1</span></h2>
     <div id="storeItems"></div>
-    <button id="nextFloorBtn" onclick="subirDePiso()">🔓 Desbloquear nuevo piso</button>
+    <button id="nextFloorBtn" onclick="subirDePiso()">🔓 Siguiente capítulo ($1500)</button>
   </div>
 
   <script>
@@ -74,25 +84,29 @@
     let mejorasCompradas = {};
     let decoracionesCompradas = {};
 
-    const pisos = {
+    const capitulos = {
       1: {
+        historia: '💧 Demuestra a Abricraft que está equivocado vendiendo agua.',
+        desbloqueo: 1500,
         upgrades: [
-          { id: 'u1', nombre: '+1 dinero/segundo', valor: 1, precio: 10, stock: 5 },
-          { id: 'u2', nombre: '+5 dinero/segundo', valor: 5, precio: 50, stock: 3 }
+          { id: 'agua', nombre: 'Vaso de agua', valor: 1, precio: 10, stock: 5 },
+          { id: 'limonada', nombre: 'Vaso de limonada', valor: 5, precio: 50, stock: 3 }
         ],
         decoraciones: [
-          { id: 'd1', nombre: 'Fondo morado neón', precio: 100, color: '#6a00ff' },
-          { id: 'd2', nombre: 'Fondo azul eléctrico', precio: 100, color: '#0088ff' }
+          { id: 'stand1', nombre: 'Puesto de cartón', precio: 100, color: '#2a2a2a' },
+          { id: 'stand2', nombre: 'Stand con sombrilla', precio: 120, color: '#4444aa' }
         ]
       },
       2: {
+        historia: '🧮 Channel cree que las calculadoras no se venden. ¡Hazle cambiar de opinión!',
+        desbloqueo: 3000,
         upgrades: [
-          { id: 'u3', nombre: '+10 dinero/segundo', valor: 10, precio: 200, stock: 4 },
-          { id: 'u4', nombre: '+25 dinero/segundo', valor: 25, precio: 400, stock: 2 }
+          { id: 'calc1', nombre: 'Calculadora básica', valor: 10, precio: 200, stock: 4 },
+          { id: 'calc2', nombre: 'Calculadora científica', valor: 25, precio: 400, stock: 2 }
         ],
         decoraciones: [
-          { id: 'd3', nombre: 'Fondo cian brillante', precio: 150, color: '#00ffff' },
-          { id: 'd4', nombre: 'Fondo rosa intenso', precio: 150, color: '#ff00cc' }
+          { id: 'estante', nombre: 'Estante digital', precio: 250, color: '#00cccc' },
+          { id: 'caja', nombre: 'Caja registradora', precio: 200, color: '#9900cc' }
         ]
       }
     };
@@ -114,7 +128,6 @@
       mejorasCompradas = JSON.parse(localStorage.getItem('mejorasCompradas')) || {};
       decoracionesCompradas = JSON.parse(localStorage.getItem('decoracionesCompradas')) || {};
       document.body.style.backgroundColor = estiloFondo;
-      document.getElementById('floorDisplay').textContent = piso;
     }
 
     function actualizarDinero() {
@@ -127,10 +140,12 @@
 
     function renderizarTienda() {
       const contenedor = document.getElementById('storeItems');
+      const cap = capitulos[piso];
       contenedor.innerHTML = '';
+      document.getElementById('historiaTexto').textContent = cap.historia;
 
-      let mejoras = pisos[piso].upgrades.filter(u => (mejorasCompradas[u.id] || 0) < u.stock);
-      let decoraciones = pisos[piso].decoraciones.filter(d => !decoracionesCompradas[d.id]);
+      let mejoras = cap.upgrades.filter(u => (mejorasCompradas[u.id] || 0) < u.stock);
+      let decoraciones = cap.decoraciones.filter(d => !decoracionesCompradas[d.id]);
 
       mejoras.forEach(u => {
         const compradas = mejorasCompradas[u.id] || 0;
@@ -139,7 +154,7 @@
         div.innerHTML = `
           <p><strong>${u.nombre}</strong></p>
           <p>💵 Precio: $${u.precio} | Stock restante: ${u.stock - compradas}</p>
-          <button onclick="comprarMejora('${u.id}')">Comprar</button>
+          <button onclick="comprarMejora('${u.id}')">Vender</button>
         `;
         contenedor.appendChild(div);
       });
@@ -150,23 +165,21 @@
         div.innerHTML = `
           <p><strong>${d.nombre}</strong></p>
           <p>🎨 Precio: $${d.precio}</p>
-          <button onclick="comprarDecoracion('${d.id}')">Comprar</button>
+          <button onclick="comprarDecoracion('${d.id}')">Mejorar Puesto</button>
         `;
         contenedor.appendChild(div);
       });
 
-      // Mostrar botón si ya compraste todo
-      if (mejoras.length === 0 && decoraciones.length === 0 && pisos[piso + 1]) {
-        document.getElementById('nextFloorBtn').style.display = 'inline-block';
-      } else {
-        document.getElementById('nextFloorBtn').style.display = 'none';
-      }
+      const todoComprado = mejoras.length === 0 && decoraciones.length === 0;
+      const puedePagar = dinero >= cap.desbloqueo;
 
       document.getElementById('floorDisplay').textContent = piso;
+      document.getElementById('nextFloorBtn').style.display = (todoComprado && capitulos[piso + 1] && puedePagar) ? 'inline-block' : 'none';
     }
 
     function comprarMejora(id) {
-      const mejora = pisos[piso].upgrades.find(u => u.id === id);
+      const cap = capitulos[piso];
+      const mejora = cap.upgrades.find(u => u.id === id);
       if (!mejora) return;
 
       if (dinero >= mejora.precio && (mejorasCompradas[id] || 0) < mejora.stock) {
@@ -175,14 +188,15 @@
         mejorasCompradas[id] = (mejorasCompradas[id] || 0) + 1;
         actualizarDinero();
         renderizarTienda();
-        alert(`Compraste ${mejora.nombre}`);
+        alert(`Vendiste: ${mejora.nombre}`);
       } else {
         alert("No tienes suficiente dinero o ya no hay stock.");
       }
     }
 
     function comprarDecoracion(id) {
-      const decoracion = pisos[piso].decoraciones.find(d => d.id === id);
+      const cap = capitulos[piso];
+      const decoracion = cap.decoraciones.find(d => d.id === id);
       if (!decoracion) return;
 
       if (dinero >= decoracion.precio && !decoracionesCompradas[id]) {
@@ -192,20 +206,26 @@
         decoracionesCompradas[id] = true;
         actualizarDinero();
         renderizarTienda();
-        alert(`Decoración aplicada: ${decoracion.nombre}`);
+        alert(`Puesto mejorado: ${decoracion.nombre}`);
       } else {
-        alert("No puedes comprar esta decoración.");
+        alert("No puedes comprar esta mejora visual.");
       }
     }
 
     function subirDePiso() {
+      if (!capitulos[piso + 1]) return;
+      const costo = capitulos[piso].desbloqueo;
+      if (dinero < costo) {
+        alert("No tienes suficiente dinero para avanzar.");
+        return;
+      }
+      dinero -= costo;
       piso++;
+      actualizarDinero();
       renderizarTienda();
-      guardar();
-      alert(`¡Bienvenido al piso ${piso}!`);
+      alert(`¡Nuevo capítulo desbloqueado!`);
     }
 
-    // Cargar al iniciar
     cargar();
     renderizarTienda();
     actualizarDinero();
