@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contador de Dinero</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      background-color: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    .money {
+      font-size: 48px;
+      margin: 20px 0;
+      color: #00ff88;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    .store {
+      margin-top: 30px;
+    }
+
+    .upgrade {
+      background: #111;
+      border: 1px solid #444;
+      margin: 10px auto;
+      padding: 15px;
+      max-width: 300px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>💰 Tu Dinero</h1>
+  <div class="money" id="moneyDisplay">$0</div>
+
+  <div class="store">
+    <h2>🛒 Tienda de Mejoras</h2>
+
+    <div class="upgrade">
+      <p><strong>+1 dinero/segundo</strong></p>
+      <p>💵 Precio: $10</p>
+      <button onclick="buyUpgrade(1, 10)">Comprar</button>
+    </div>
+
+    <div class="upgrade">
+      <p><strong>+5 dinero/segundo</strong></p>
+      <p>💵 Precio: $50</p>
+      <button onclick="buyUpgrade(5, 50)">Comprar</button>
+    </div>
+
+    <div class="upgrade">
+      <p><strong>Cambiar fondo a morado neón</strong></p>
+      <p>🎨 Precio: $100</p>
+      <button onclick="buyStyle('morado', 100)">Comprar</button>
+    </div>
+
+    <div class="upgrade">
+      <p><strong>Cambiar fondo a azul eléctrico</strong></p>
+      <p>🎨 Precio: $100</p>
+      <button onclick="buyStyle('azul', 100)">Comprar</button>
+    </div>
+  </div>
+
+  <script>
+    let dinero = 0;
+    let dineroPorSegundo = 1;
+    let estiloFondo = '#1a1a1a';
+
+    // Cargar progreso al iniciar
+    window.onload = function () {
+      if (localStorage.getItem('dinero')) {
+        dinero = parseInt(localStorage.getItem('dinero'));
+      }
+      if (localStorage.getItem('dineroPorSegundo')) {
+        dineroPorSegundo = parseInt(localStorage.getItem('dineroPorSegundo'));
+      }
+      if (localStorage.getItem('estiloFondo')) {
+        estiloFondo = localStorage.getItem('estiloFondo');
+        document.body.style.backgroundColor = estiloFondo;
+      }
+      actualizarDinero();
+    };
+
+    function actualizarDinero() {
+      dinero += dineroPorSegundo;
+      document.getElementById('moneyDisplay').textContent = `$${dinero}`;
+      guardarProgreso();
+    }
+
+    setInterval(actualizarDinero, 1000);
+
+    function buyUpgrade(aumento, precio) {
+      if (dinero >= precio) {
+        dinero -= precio;
+        dineroPorSegundo += aumento;
+        actualizarDinero();
+        alert(`¡Compraste +${aumento} dinero por segundo!`);
+      } else {
+        alert("No tienes suficiente dinero.");
+      }
+    }
+
+    function buyStyle(tipo, precio) {
+      if (dinero >= precio) {
+        dinero -= precio;
+        if (tipo === 'morado') {
+          estiloFondo = '#6a00ff';
+        } else if (tipo === 'azul') {
+          estiloFondo = '#0088ff';
+        }
+        document.body.style.backgroundColor = estiloFondo;
+        actualizarDinero();
+        alert("¡Cambio de estilo aplicado!");
+      } else {
+        alert("No tienes suficiente dinero.");
+      }
+    }
+
+    function guardarProgreso() {
+      localStorage.setItem('dinero', dinero);
+      localStorage.setItem('dineroPorSegundo', dineroPorSegundo);
+      localStorage.setItem('estiloFondo', estiloFondo);
+    }
+  </script>
+
+</body>
+</html>
