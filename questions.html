@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobby</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 15px #8000ff;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    input {
+      width: 100%;
+      background: #262626;
+      color: white;
+    }
+
+    button {
+      background-color: #8000ff;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .lobby {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .player {
+      background: #2e2e2e;
+      margin-top: 5px;
+      padding: 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Lobby System</h2>
+    <input type="text" id="username" placeholder="Tu nombre o ID">
+    <button onclick="createLobby()">Crear Lobby</button>
+    <input type="text" id="joinCode" placeholder="Código de lobby">
+    <button onclick="joinLobby()">Unirse a Lobby</button>
+
+    <div id="lobbyView" style="display:none;">
+      <h3>Lobby: <span id="lobbyCodeText"></span></h3>
+      <p>Jugadores:</p>
+      <div id="playerList"></div>
+      <button onclick="leaveLobby()">Salir del Lobby</button>
+    </div>
+  </div>
+
+  <script>
+    let currentLobbyCode = null;
+    let playersInLobby = [];
+
+    function randomCode(length = 6) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < length; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function createLobby() {
+      const username = document.getElementById('username').value.trim();
+      if (!username) return alert("Escribe tu nombre");
+
+      currentLobbyCode = randomCode();
+      playersInLobby = [];
+      playersInLobby.push({ name: username, id: Math.floor(Math.random() * 10000) });
+
+      showLobby();
+    }
+
+    function joinLobby() {
+      const username = document.getElementById('username').value.trim();
+      const joinCode = document.getElementById('joinCode').value.trim().toUpperCase();
+
+      if (!username || !joinCode) return alert("Completa los campos");
+
+      currentLobbyCode = joinCode;
+      playersInLobby.push({ name: username, id: Math.floor(Math.random() * 10000) });
+
+      showLobby();
+    }
+
+    function showLobby() {
+      document.getElementById('lobbyCodeText').textContent = currentLobbyCode;
+      const playerList = document.getElementById('playerList');
+      playerList.innerHTML = '';
+      playersInLobby.forEach(p => {
+        const div = document.createElement('div');
+        div.classList.add('player');
+        div.textContent = `${p.name} (#${p.id})`;
+        playerList.appendChild(div);
+      });
+      document.getElementById('lobbyView').style.display = 'block';
+    }
+
+    function leaveLobby() {
+      currentLobbyCode = null;
+      playersInLobby = [];
+      document.getElementById('lobbyView').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
