@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contador de Dinero</title>
+  <title>Demuestra a abricraft que esta equivocado</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -11,10 +11,6 @@
       background-color: #1a1a1a;
       color: #fff;
       padding: 20px;
-    }
-
-    h1 {
-      font-size: 32px;
     }
 
     .money {
@@ -51,101 +47,168 @@
       max-width: 300px;
       border-radius: 10px;
     }
+
+    #nextFloorBtn {
+      display: none;
+      background-color: #00ff88;
+      color: #000;
+    }
   </style>
 </head>
 <body>
-
+<h1>Demuestra a abricraft que esta equivocado</h1>
   <h1>💰 Tu Dinero</h1>
   <div class="money" id="moneyDisplay">$0</div>
 
   <div class="store">
-    <h2>🛒 Tienda de Mejoras</h2>
-
-    <div class="upgrade">
-      <p><strong>+1 dinero/segundo</strong></p>
-      <p>💵 Precio: $10</p>
-      <button onclick="buyUpgrade(1, 10)">Comprar</button>
-    </div>
-
-    <div class="upgrade">
-      <p><strong>+5 dinero/segundo</strong></p>
-      <p>💵 Precio: $50</p>
-      <button onclick="buyUpgrade(5, 50)">Comprar</button>
-    </div>
-
-    <div class="upgrade">
-      <p><strong>Cambiar fondo a morado neón</strong></p>
-      <p>🎨 Precio: $100</p>
-      <button onclick="buyStyle('morado', 100)">Comprar</button>
-    </div>
-
-    <div class="upgrade">
-      <p><strong>Cambiar fondo a azul eléctrico</strong></p>
-      <p>🎨 Precio: $100</p>
-      <button onclick="buyStyle('azul', 100)">Comprar</button>
-    </div>
+    <h2>🛒 Tienda (Piso <span id="floorDisplay">1</span>)</h2>
+    <div id="storeItems"></div>
+    <button id="nextFloorBtn" onclick="subirDePiso()">🔓 Desbloquear nuevo piso</button>
   </div>
 
   <script>
     let dinero = 0;
     let dineroPorSegundo = 1;
     let estiloFondo = '#1a1a1a';
+    let piso = 1;
+    let mejorasCompradas = {};
+    let decoracionesCompradas = {};
 
-    // Cargar progreso al iniciar
-    window.onload = function () {
-      if (localStorage.getItem('dinero')) {
-        dinero = parseInt(localStorage.getItem('dinero'));
+    const pisos = {
+      1: {
+        upgrades: [
+          { id: 'u1', nombre: '+1 dinero/segundo', valor: 1, precio: 10, stock: 5 },
+          { id: 'u2', nombre: '+5 dinero/segundo', valor: 5, precio: 50, stock: 3 }
+        ],
+        decoraciones: [
+          { id: 'd1', nombre: 'Fondo morado neón', precio: 100, color: '#6a00ff' },
+          { id: 'd2', nombre: 'Fondo azul eléctrico', precio: 100, color: '#0088ff' }
+        ]
+      },
+      2: {
+        upgrades: [
+          { id: 'u3', nombre: '+10 dinero/segundo', valor: 10, precio: 200, stock: 4 },
+          { id: 'u4', nombre: '+25 dinero/segundo', valor: 25, precio: 400, stock: 2 }
+        ],
+        decoraciones: [
+          { id: 'd3', nombre: 'Fondo cian brillante', precio: 150, color: '#00ffff' },
+          { id: 'd4', nombre: 'Fondo rosa intenso', precio: 150, color: '#ff00cc' }
+        ]
       }
-      if (localStorage.getItem('dineroPorSegundo')) {
-        dineroPorSegundo = parseInt(localStorage.getItem('dineroPorSegundo'));
-      }
-      if (localStorage.getItem('estiloFondo')) {
-        estiloFondo = localStorage.getItem('estiloFondo');
-        document.body.style.backgroundColor = estiloFondo;
-      }
-      actualizarDinero();
     };
+
+    function guardar() {
+      localStorage.setItem('dinero', dinero);
+      localStorage.setItem('dineroPorSegundo', dineroPorSegundo);
+      localStorage.setItem('estiloFondo', estiloFondo);
+      localStorage.setItem('piso', piso);
+      localStorage.setItem('mejorasCompradas', JSON.stringify(mejorasCompradas));
+      localStorage.setItem('decoracionesCompradas', JSON.stringify(decoracionesCompradas));
+    }
+
+    function cargar() {
+      dinero = parseInt(localStorage.getItem('dinero')) || 0;
+      dineroPorSegundo = parseInt(localStorage.getItem('dineroPorSegundo')) || 1;
+      estiloFondo = localStorage.getItem('estiloFondo') || '#1a1a1a';
+      piso = parseInt(localStorage.getItem('piso')) || 1;
+      mejorasCompradas = JSON.parse(localStorage.getItem('mejorasCompradas')) || {};
+      decoracionesCompradas = JSON.parse(localStorage.getItem('decoracionesCompradas')) || {};
+      document.body.style.backgroundColor = estiloFondo;
+      document.getElementById('floorDisplay').textContent = piso;
+    }
 
     function actualizarDinero() {
       dinero += dineroPorSegundo;
       document.getElementById('moneyDisplay').textContent = `$${dinero}`;
-      guardarProgreso();
+      guardar();
     }
 
     setInterval(actualizarDinero, 1000);
 
-    function buyUpgrade(aumento, precio) {
-      if (dinero >= precio) {
-        dinero -= precio;
-        dineroPorSegundo += aumento;
-        actualizarDinero();
-        alert(`¡Compraste +${aumento} dinero por segundo!`);
+    function renderizarTienda() {
+      const contenedor = document.getElementById('storeItems');
+      contenedor.innerHTML = '';
+
+      let mejoras = pisos[piso].upgrades.filter(u => (mejorasCompradas[u.id] || 0) < u.stock);
+      let decoraciones = pisos[piso].decoraciones.filter(d => !decoracionesCompradas[d.id]);
+
+      mejoras.forEach(u => {
+        const compradas = mejorasCompradas[u.id] || 0;
+        let div = document.createElement('div');
+        div.className = 'upgrade';
+        div.innerHTML = `
+          <p><strong>${u.nombre}</strong></p>
+          <p>💵 Precio: $${u.precio} | Stock restante: ${u.stock - compradas}</p>
+          <button onclick="comprarMejora('${u.id}')">Comprar</button>
+        `;
+        contenedor.appendChild(div);
+      });
+
+      decoraciones.forEach(d => {
+        let div = document.createElement('div');
+        div.className = 'upgrade';
+        div.innerHTML = `
+          <p><strong>${d.nombre}</strong></p>
+          <p>🎨 Precio: $${d.precio}</p>
+          <button onclick="comprarDecoracion('${d.id}')">Comprar</button>
+        `;
+        contenedor.appendChild(div);
+      });
+
+      // Mostrar botón si ya compraste todo
+      if (mejoras.length === 0 && decoraciones.length === 0 && pisos[piso + 1]) {
+        document.getElementById('nextFloorBtn').style.display = 'inline-block';
       } else {
-        alert("No tienes suficiente dinero.");
+        document.getElementById('nextFloorBtn').style.display = 'none';
+      }
+
+      document.getElementById('floorDisplay').textContent = piso;
+    }
+
+    function comprarMejora(id) {
+      const mejora = pisos[piso].upgrades.find(u => u.id === id);
+      if (!mejora) return;
+
+      if (dinero >= mejora.precio && (mejorasCompradas[id] || 0) < mejora.stock) {
+        dinero -= mejora.precio;
+        dineroPorSegundo += mejora.valor;
+        mejorasCompradas[id] = (mejorasCompradas[id] || 0) + 1;
+        actualizarDinero();
+        renderizarTienda();
+        alert(`Compraste ${mejora.nombre}`);
+      } else {
+        alert("No tienes suficiente dinero o ya no hay stock.");
       }
     }
 
-    function buyStyle(tipo, precio) {
-      if (dinero >= precio) {
-        dinero -= precio;
-        if (tipo === 'morado') {
-          estiloFondo = '#6a00ff';
-        } else if (tipo === 'azul') {
-          estiloFondo = '#0088ff';
-        }
+    function comprarDecoracion(id) {
+      const decoracion = pisos[piso].decoraciones.find(d => d.id === id);
+      if (!decoracion) return;
+
+      if (dinero >= decoracion.precio && !decoracionesCompradas[id]) {
+        dinero -= decoracion.precio;
+        estiloFondo = decoracion.color;
         document.body.style.backgroundColor = estiloFondo;
+        decoracionesCompradas[id] = true;
         actualizarDinero();
-        alert("¡Cambio de estilo aplicado!");
+        renderizarTienda();
+        alert(`Decoración aplicada: ${decoracion.nombre}`);
       } else {
-        alert("No tienes suficiente dinero.");
+        alert("No puedes comprar esta decoración.");
       }
     }
 
-    function guardarProgreso() {
-      localStorage.setItem('dinero', dinero);
-      localStorage.setItem('dineroPorSegundo', dineroPorSegundo);
-      localStorage.setItem('estiloFondo', estiloFondo);
+    function subirDePiso() {
+      piso++;
+      renderizarTienda();
+      guardar();
+      alert(`¡Bienvenido al piso ${piso}!`);
     }
+
+    // Cargar al iniciar
+    cargar();
+    renderizarTienda();
+    actualizarDinero();
   </script>
 
 </body>
