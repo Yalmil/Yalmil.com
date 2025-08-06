@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dino Jump</title>
+  <title>Dino Jump JS</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      font-family: sans-serif;
       background: #f4f4f4;
-      font-family: Arial, sans-serif;
       overflow: hidden;
       touch-action: manipulation;
+    }
+    #score {
+      padding: 10px;
+      font-size: 18px;
+    }
+    #game-over {
+      font-size: 28px;
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
     }
     #game {
       width: 100vw;
@@ -28,8 +35,8 @@
       height: 50px;
       background: #444;
       position: absolute;
-      bottom: 0;
       left: 50px;
+      bottom: 0;
       border-radius: 10px;
     }
     #cactus {
@@ -40,29 +47,9 @@
       bottom: 0;
       right: -30px;
     }
-    .jump {
-      animation: jump 0.5s ease-out;
-    }
-    @keyframes jump {
-      0%   { bottom: 0; }
-      50%  { bottom: 120px; }
-      100% { bottom: 0; }
-    }
-    #score {
-      padding: 10px;
-      font-size: 18px;
-    }
-    #game-over {
-      font-size: 28px;
-      color: red;
-      text-align: center;
-      margin-top: 20px;
-      display: none;
-    }
   </style>
 </head>
 <body>
-
   <div id="score">Puntos: 0</div>
   <div id="game">
     <div id="dino"></div>
@@ -77,70 +64,78 @@
     const gameOverText = document.getElementById("game-over");
     const gameArea = document.getElementById("game");
 
-    let jumping = false;
     let score = 0;
     let gameRunning = true;
 
+    // Movimiento de salto
+    let isJumping = false;
+    let jumpVelocity = 0;
+    let dinoY = 0;
+
     function jump() {
-      if (jumping) return;
-      jumping = true;
-      dino.classList.add("jump");
-      setTimeout(() => {
-        dino.classList.remove("jump");
-        jumping = false;
-      }, 500);
+      if (isJumping) return;
+      isJumping = true;
+      jumpVelocity = 12;
     }
 
-    // Control por teclado (PC)
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        jump();
+    // Movimiento del cactus
+    let cactusX = window.innerWidth;
+    cactus.style.left = cactusX + "px";
+
+    function updateGame() {
+      if (!gameRunning) return;
+
+      // Físicas del salto
+      if (isJumping || dinoY > 0) {
+        dinoY += jumpVelocity;
+        jumpVelocity -= 0.6; // gravedad
+
+        if (dinoY <= 0) {
+          dinoY = 0;
+          isJumping = false;
+        }
+
+        dino.style.bottom = dinoY + "px";
       }
+
+      // Movimiento del cactus
+      cactusX -= 10;
+      cactus.style.left = cactusX + "px";
+
+      if (cactusX < -30) {
+        cactusX = window.innerWidth + Math.random() * 200;
+        score++;
+        scoreDisplay.textContent = "Puntos: " + score;
+      }
+
+      // Colisión
+      const dinoRect = dino.getBoundingClientRect();
+      const cactusRect = cactus.getBoundingClientRect();
+
+      if (
+        dinoRect.left < cactusRect.right &&
+        dinoRect.right > cactusRect.left &&
+        dinoRect.bottom > cactusRect.top
+      ) {
+        gameRunning = false;
+        gameOverText.style.display = "block";
+        return;
+      }
+
+      requestAnimationFrame(updateGame);
+    }
+
+    // Controles
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") jump();
     });
 
-    // Control por toque (teléfono)
     gameArea.addEventListener("touchstart", () => {
       jump();
     });
 
-    function moveCactus() {
-      let cactusLeft = window.innerWidth;
-      cactus.style.left = cactusLeft + "px";
-
-      const interval = setInterval(() => {
-        if (!gameRunning) return clearInterval(interval);
-        cactusLeft -= 10;
-        cactus.style.left = cactusLeft + "px";
-
-        const dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom"));
-        const dinoLeft = dino.offsetLeft;
-        const dinoRight = dinoLeft + dino.offsetWidth;
-        const cactusRight = cactusLeft + cactus.offsetWidth;
-
-        if (
-          cactusLeft < dinoRight &&
-          cactusRight > dinoLeft &&
-          dinoBottom < 60
-        ) {
-          gameOver();
-          clearInterval(interval);
-        }
-
-        if (cactusLeft < -30) {
-          clearInterval(interval);
-          score++;
-          scoreDisplay.textContent = "Puntos: " + score;
-          setTimeout(moveCactus, Math.random() * 1500 + 800);
-        }
-      }, 20);
-    }
-
-    function gameOver() {
-      gameRunning = false;
-      gameOverText.style.display = "block";
-    }
-
-    moveCactus();
+    // Iniciar
+    requestAnimationFrame(updateGame);
   </script>
 </body>
 </html>
