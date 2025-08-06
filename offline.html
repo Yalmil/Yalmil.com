@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dino Jump</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    #game {
+      width: 100vw;
+      height: 300px;
+      background: #dce2f0;
+      border-bottom: 4px solid #333;
+      position: relative;
+    }
+    #dino {
+      width: 50px;
+      height: 50px;
+      background: #444;
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      border-radius: 10px;
+    }
+    #cactus {
+      width: 30px;
+      height: 60px;
+      background: green;
+      position: absolute;
+      bottom: 0;
+      right: -30px;
+    }
+    .jump {
+      animation: jump 0.5s ease-out;
+    }
+    @keyframes jump {
+      0%   { bottom: 0; }
+      50%  { bottom: 120px; }
+      100% { bottom: 0; }
+    }
+    #score {
+      padding: 10px;
+      font-size: 18px;
+    }
+    #game-over {
+      font-size: 28px;
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="score">Puntos: 0</div>
+  <div id="game">
+    <div id="dino"></div>
+    <div id="cactus"></div>
+  </div>
+  <div id="game-over">¡Perdiste! Recarga para reiniciar.</div>
+
+  <script>
+    const dino = document.getElementById("dino");
+    const cactus = document.getElementById("cactus");
+    const scoreDisplay = document.getElementById("score");
+    const gameOverText = document.getElementById("game-over");
+
+    let jumping = false;
+    let score = 0;
+    let gameRunning = true;
+
+    function jump() {
+      if (jumping) return;
+      jumping = true;
+      dino.classList.add("jump");
+      setTimeout(() => {
+        dino.classList.remove("jump");
+        jumping = false;
+      }, 500);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        jump();
+      }
+    });
+
+    function moveCactus() {
+      let cactusLeft = window.innerWidth;
+      cactus.style.left = cactusLeft + "px";
+
+      const interval = setInterval(() => {
+        if (!gameRunning) return clearInterval(interval);
+        cactusLeft -= 10;
+        cactus.style.left = cactusLeft + "px";
+
+        const dinoBottom = parseInt(window.getComputedStyle(dino).getPropertyValue("bottom"));
+        const dinoLeft = dino.offsetLeft;
+        const dinoRight = dinoLeft + dino.offsetWidth;
+        const cactusRight = cactusLeft + cactus.offsetWidth;
+
+        if (
+          cactusLeft < dinoRight &&
+          cactusRight > dinoLeft &&
+          dinoBottom < 60
+        ) {
+          gameOver();
+          clearInterval(interval);
+        }
+
+        if (cactusLeft < -30) {
+          clearInterval(interval);
+          score++;
+          scoreDisplay.textContent = "Puntos: " + score;
+          setTimeout(moveCactus, Math.random() * 1500 + 800);
+        }
+      }, 20);
+    }
+
+    function gameOver() {
+      gameRunning = false;
+      gameOverText.style.display = "block";
+    }
+
+    moveCactus();
+  </script>
+</body>
+</html>
