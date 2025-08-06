@@ -14,6 +14,7 @@
       background: #f4f4f4;
       font-family: Arial, sans-serif;
       overflow: hidden;
+      touch-action: manipulation;
     }
     #game {
       width: 100vw;
@@ -74,6 +75,7 @@
     const cactus = document.getElementById("cactus");
     const scoreDisplay = document.getElementById("score");
     const gameOverText = document.getElementById("game-over");
+    const gameArea = document.getElementById("game");
 
     let jumping = false;
     let score = 0;
@@ -89,10 +91,16 @@
       }, 500);
     }
 
+    // Control por teclado (PC)
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
         jump();
       }
+    });
+
+    // Control por toque (teléfono)
+    gameArea.addEventListener("touchstart", () => {
+      jump();
     });
 
     function moveCactus() {
