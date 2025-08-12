@@ -58,6 +58,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -70,6 +71,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -82,21 +84,31 @@
       }
     });
 
-    window.guardarCambios = function () {
+    window.guardarCambios = async function () {
       const user = auth.currentUser;
       if (user) {
         const nuevoNombre = document.getElementById("username").value;
         const nuevaFoto = document.getElementById("photoURL").value;
 
-        updateProfile(user, {
-          displayName: nuevoNombre,
-          photoURL: nuevaFoto
-        }).then(() => {
-          alert("Cambios guardados correctamente.");
+        try {
+          // Actualizar el perfil de autenticación
+          await updateProfile(user, {
+            displayName: nuevoNombre,
+            photoURL: nuevaFoto
+          });
+
+          // Guardar datos en Firestore
+          await setDoc(doc(db, "nombres", user.uid), {
+            nombre: nuevoNombre,
+            foto: nuevaFoto,
+            correo: user.email
+          });
+
+          alert("Cambios guardados correctamente en Firebase y base de datos.");
           location.reload();
-        }).catch((error) => {
+        } catch (error) {
           alert("Error al guardar: " + error.message);
-        });
+        }
       }
     }
   </script>
