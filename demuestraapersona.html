@@ -1,235 +1,252 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Capítulos de Dinero</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      text-align: center;
-      background-color: #1a1a1a;
-      color: #fff;
-      padding: 20px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Capítulos de Dinero</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 20px;
+    transition: background-color 0.5s;
+  }
 
-    .money {
-      font-size: 48px;
-      margin: 20px 0;
-      color: #00ff88;
-    }
+  .money {
+    font-size: 48px;
+    margin: 20px 0;
+    color: #00ff88;
+  }
 
-    button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: 0.2s;
-    }
+  button {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s;
+  }
 
-    button:hover {
-      background: #555;
-    }
+  button:hover {
+    background: #555;
+    transform: scale(1.05);
+  }
 
-    .store {
-      margin-top: 30px;
-    }
+  .store {
+    margin-top: 30px;
+  }
 
-    .upgrade {
-      background: #111;
-      border: 1px solid #444;
-      margin: 10px auto;
-      padding: 15px;
-      max-width: 300px;
-      border-radius: 10px;
-    }
+  .upgrade {
+    background: #111;
+    border: 1px solid #444;
+    margin: 10px auto;
+    padding: 15px;
+    max-width: 300px;
+    border-radius: 10px;
+  }
 
-    #nextFloorBtn {
-      display: none;
-      background-color: #00ff88;
-      color: #000;
-    }
+  #nextFloorBtn {
+    display: none;
+    background-color: #00ff88;
+    color: #000;
+  }
 
-    .story {
-      font-size: 18px;
-      background: #222;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px auto;
-      max-width: 600px;
-    }
-  </style>
+  .story {
+    font-size: 18px;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px auto;
+    max-width: 600px;
+  }
+</style>
 </head>
 <body>
 
-  <h1>💰 Tu Dinero</h1>
-  <div class="money" id="moneyDisplay">$0</div>
-  <div class="story" id="historiaTexto"></div>
+<h1>💰 Tu Dinero</h1>
+<div class="money" id="moneyDisplay">$0</div>
+<div class="story" id="historiaTexto"></div>
 
-  <div class="store">
-    <h2>🛒 Puesto de Venta – Capítulo <span id="floorDisplay">1</span></h2>
-    <div id="storeItems"></div>
-    <button id="nextFloorBtn" onclick="subirDePiso()">🔓 Siguiente capítulo ($1500)</button>
-  </div>
+<div class="store">
+  <h2>🛒 Puesto de Venta – Capítulo <span id="floorDisplay">1</span></h2>
+  <div id="storeItems"></div>
+  <button id="nextFloorBtn" onclick="subirDePiso()">🔓 Siguiente capítulo</button>
+</div>
 
-  <script>
-    let dinero = 0;
-    let dineroPorSegundo = 1;
-    let estiloFondo = '#1a1a1a';
-    let piso = 1;
-    let mejorasCompradas = {};
-    let decoracionesCompradas = {};
+<script>
+let dinero = 0;
+let dineroPorSegundo = 1;
+let estiloFondo = '#1a1a1a';
+let piso = 1;
+let mejorasCompradas = {};
+let decoracionesCompradas = {};
 
-    const capitulos = {
-      1: {
-        historia: '💧 Demuestra a Abricraft que está equivocado vendiendo agua.',
-        desbloqueo: 1500,
-        upgrades: [
-          { id: 'agua', nombre: 'Vaso de agua', valor: 1, precio: 10, stock: 5 },
-          { id: 'limonada', nombre: 'Vaso de limonada', valor: 5, precio: 50, stock: 3 }
-        ],
-        decoraciones: [
-          { id: 'stand1', nombre: 'Puesto de cartón', precio: 100, color: '#2a2a2a' },
-          { id: 'stand2', nombre: 'Stand con sombrilla', precio: 120, color: '#4444aa' }
-        ]
-      },
-      2: {
-        historia: '🧮 Channel cree que las calculadoras no se venden. ¡Hazle cambiar de opinión!',
-        desbloqueo: 3000,
-        upgrades: [
-          { id: 'calc1', nombre: 'Calculadora básica', valor: 10, precio: 200, stock: 4 },
-          { id: 'calc2', nombre: 'Calculadora científica', valor: 25, precio: 400, stock: 2 }
-        ],
-        decoraciones: [
-          { id: 'estante', nombre: 'Estante digital', precio: 250, color: '#00cccc' },
-          { id: 'caja', nombre: 'Caja registradora', precio: 200, color: '#9900cc' }
-        ]
-      }
-    };
+const capitulos = {
+  1: {
+    historia: '💧 Demuestra a Abricraft que está equivocado vendiendo agua.',
+    desbloqueo: 1500,
+    upgrades: [
+      { id: 'agua', nombre: 'Vaso de agua', valor: 1, precio: 10, stock: 5 },
+      { id: 'limonada', nombre: 'Vaso de limonada', valor: 5, precio: 50, stock: 3 }
+    ],
+    decoraciones: [
+      { id: 'stand1', nombre: 'Puesto de cartón', precio: 100, color: '#2a2a2a' },
+      { id: 'stand2', nombre: 'Stand con sombrilla', precio: 120, color: '#4444aa' }
+    ]
+  },
+  2: {
+    historia: '🧮 Channel cree que las calculadoras no se venden. ¡Hazle cambiar de opinión!',
+    desbloqueo: 3000,
+    upgrades: [
+      { id: 'calc1', nombre: 'Calculadora básica', valor: 10, precio: 200, stock: 4 },
+      { id: 'calc2', nombre: 'Calculadora científica', valor: 25, precio: 400, stock: 2 }
+    ],
+    decoraciones: [
+      { id: 'estante', nombre: 'Estante digital', precio: 250, color: '#00cccc' },
+      { id: 'caja', nombre: 'Caja registradora', precio: 200, color: '#9900cc' }
+    ]
+  },
+  3: {
+    historia: '🍕 Abre tu pizzería y deja que todos prueben tu receta secreta.',
+    desbloqueo: 6000,
+    upgrades: [
+      { id: 'pizza1', nombre: 'Pizza margarita', valor: 15, precio: 500, stock: 4 },
+      { id: 'pizza2', nombre: 'Pizza pepperoni', valor: 30, precio: 800, stock: 3 }
+    ],
+    decoraciones: [
+      { id: 'horno', nombre: 'Horno de piedra', precio: 700, color: '#b5651d' },
+      { id: 'luces', nombre: 'Luces acogedoras', precio: 400, color: '#ffcc66' }
+    ]
+  },
+  4: {
+    historia: '📱 Lanza tu propia tienda de tecnología y arrasa con las ventas.',
+    desbloqueo: 12000,
+    upgrades: [
+      { id: 'phone', nombre: 'Teléfono básico', valor: 50, precio: 1500, stock: 3 },
+      { id: 'laptop', nombre: 'Laptop gamer', valor: 100, precio: 3000, stock: 2 }
+    ],
+    decoraciones: [
+      { id: 'neon', nombre: 'Luces de neón', precio: 1000, color: '#00ffcc' },
+      { id: 'pared', nombre: 'Pared futurista', precio: 800, color: '#3333ff' }
+    ]
+  }
+};
 
-    function guardar() {
-      localStorage.setItem('dinero', dinero);
-      localStorage.setItem('dineroPorSegundo', dineroPorSegundo);
-      localStorage.setItem('estiloFondo', estiloFondo);
-      localStorage.setItem('piso', piso);
-      localStorage.setItem('mejorasCompradas', JSON.stringify(mejorasCompradas));
-      localStorage.setItem('decoracionesCompradas', JSON.stringify(decoracionesCompradas));
-    }
+function guardar() {
+  localStorage.setItem('dinero', dinero);
+  localStorage.setItem('dineroPorSegundo', dineroPorSegundo);
+  localStorage.setItem('estiloFondo', estiloFondo);
+  localStorage.setItem('piso', piso);
+  localStorage.setItem('mejorasCompradas', JSON.stringify(mejorasCompradas));
+  localStorage.setItem('decoracionesCompradas', JSON.stringify(decoracionesCompradas));
+}
 
-    function cargar() {
-      dinero = parseInt(localStorage.getItem('dinero')) || 0;
-      dineroPorSegundo = parseInt(localStorage.getItem('dineroPorSegundo')) || 1;
-      estiloFondo = localStorage.getItem('estiloFondo') || '#1a1a1a';
-      piso = parseInt(localStorage.getItem('piso')) || 1;
-      mejorasCompradas = JSON.parse(localStorage.getItem('mejorasCompradas')) || {};
-      decoracionesCompradas = JSON.parse(localStorage.getItem('decoracionesCompradas')) || {};
-      document.body.style.backgroundColor = estiloFondo;
-    }
+function cargar() {
+  dinero = parseInt(localStorage.getItem('dinero')) || 0;
+  dineroPorSegundo = parseInt(localStorage.getItem('dineroPorSegundo')) || 1;
+  estiloFondo = localStorage.getItem('estiloFondo') || '#1a1a1a';
+  piso = parseInt(localStorage.getItem('piso')) || 1;
+  mejorasCompradas = JSON.parse(localStorage.getItem('mejorasCompradas')) || {};
+  decoracionesCompradas = JSON.parse(localStorage.getItem('decoracionesCompradas')) || {};
+  document.body.style.backgroundColor = estiloFondo;
+}
 
-    function actualizarDinero() {
-      dinero += dineroPorSegundo;
-      document.getElementById('moneyDisplay').textContent = `$${dinero}`;
-      guardar();
-    }
+function actualizarDinero() {
+  dinero += dineroPorSegundo;
+  document.getElementById('moneyDisplay').textContent = `$${dinero}`;
+  guardar();
+}
+setInterval(actualizarDinero, 1000);
 
-    setInterval(actualizarDinero, 1000);
+function renderizarTienda() {
+  const contenedor = document.getElementById('storeItems');
+  const cap = capitulos[piso];
+  contenedor.innerHTML = '';
+  document.getElementById('historiaTexto').textContent = cap.historia;
 
-    function renderizarTienda() {
-      const contenedor = document.getElementById('storeItems');
-      const cap = capitulos[piso];
-      contenedor.innerHTML = '';
-      document.getElementById('historiaTexto').textContent = cap.historia;
+  let mejoras = cap.upgrades.filter(u => (mejorasCompradas[u.id] || 0) < u.stock);
+  let decoraciones = cap.decoraciones.filter(d => !decoracionesCompradas[d.id]);
 
-      let mejoras = cap.upgrades.filter(u => (mejorasCompradas[u.id] || 0) < u.stock);
-      let decoraciones = cap.decoraciones.filter(d => !decoracionesCompradas[d.id]);
+  mejoras.forEach(u => {
+    const compradas = mejorasCompradas[u.id] || 0;
+    contenedor.innerHTML += `
+      <div class="upgrade">
+        <p><strong>${u.nombre}</strong></p>
+        <p>💵 Precio: $${u.precio} | Stock restante: ${u.stock - compradas}</p>
+        <button onclick="comprarMejora('${u.id}')">Vender</button>
+      </div>
+    `;
+  });
 
-      mejoras.forEach(u => {
-        const compradas = mejorasCompradas[u.id] || 0;
-        let div = document.createElement('div');
-        div.className = 'upgrade';
-        div.innerHTML = `
-          <p><strong>${u.nombre}</strong></p>
-          <p>💵 Precio: $${u.precio} | Stock restante: ${u.stock - compradas}</p>
-          <button onclick="comprarMejora('${u.id}')">Vender</button>
-        `;
-        contenedor.appendChild(div);
-      });
+  decoraciones.forEach(d => {
+    contenedor.innerHTML += `
+      <div class="upgrade">
+        <p><strong>${d.nombre}</strong></p>
+        <p>🎨 Precio: $${d.precio}</p>
+        <button onclick="comprarDecoracion('${d.id}')">Mejorar Puesto</button>
+      </div>
+    `;
+  });
 
-      decoraciones.forEach(d => {
-        let div = document.createElement('div');
-        div.className = 'upgrade';
-        div.innerHTML = `
-          <p><strong>${d.nombre}</strong></p>
-          <p>🎨 Precio: $${d.precio}</p>
-          <button onclick="comprarDecoracion('${d.id}')">Mejorar Puesto</button>
-        `;
-        contenedor.appendChild(div);
-      });
+  const todoComprado = mejoras.length === 0 && decoraciones.length === 0;
+  const puedePagar = dinero >= cap.desbloqueo;
+  document.getElementById('floorDisplay').textContent = piso;
+  document.getElementById('nextFloorBtn').style.display = (todoComprado && capitulos[piso + 1] && puedePagar) ? 'inline-block' : 'none';
+}
 
-      const todoComprado = mejoras.length === 0 && decoraciones.length === 0;
-      const puedePagar = dinero >= cap.desbloqueo;
-
-      document.getElementById('floorDisplay').textContent = piso;
-      document.getElementById('nextFloorBtn').style.display = (todoComprado && capitulos[piso + 1] && puedePagar) ? 'inline-block' : 'none';
-    }
-
-    function comprarMejora(id) {
-      const cap = capitulos[piso];
-      const mejora = cap.upgrades.find(u => u.id === id);
-      if (!mejora) return;
-
-      if (dinero >= mejora.precio && (mejorasCompradas[id] || 0) < mejora.stock) {
-        dinero -= mejora.precio;
-        dineroPorSegundo += mejora.valor;
-        mejorasCompradas[id] = (mejorasCompradas[id] || 0) + 1;
-        actualizarDinero();
-        renderizarTienda();
-        alert(`Vendiste: ${mejora.nombre}`);
-      } else {
-        alert("No tienes suficiente dinero o ya no hay stock.");
-      }
-    }
-
-    function comprarDecoracion(id) {
-      const cap = capitulos[piso];
-      const decoracion = cap.decoraciones.find(d => d.id === id);
-      if (!decoracion) return;
-
-      if (dinero >= decoracion.precio && !decoracionesCompradas[id]) {
-        dinero -= decoracion.precio;
-        estiloFondo = decoracion.color;
-        document.body.style.backgroundColor = estiloFondo;
-        decoracionesCompradas[id] = true;
-        actualizarDinero();
-        renderizarTienda();
-        alert(`Puesto mejorado: ${decoracion.nombre}`);
-      } else {
-        alert("No puedes comprar esta mejora visual.");
-      }
-    }
-
-    function subirDePiso() {
-      if (!capitulos[piso + 1]) return;
-      const costo = capitulos[piso].desbloqueo;
-      if (dinero < costo) {
-        alert("No tienes suficiente dinero para avanzar.");
-        return;
-      }
-      dinero -= costo;
-      piso++;
-      actualizarDinero();
-      renderizarTienda();
-      alert(`¡Nuevo capítulo desbloqueado!`);
-    }
-
-    cargar();
-    renderizarTienda();
+function comprarMejora(id) {
+  const mejora = capitulos[piso].upgrades.find(u => u.id === id);
+  if (!mejora) return;
+  if (dinero >= mejora.precio && (mejorasCompradas[id] || 0) < mejora.stock) {
+    dinero -= mejora.precio;
+    dineroPorSegundo += mejora.valor;
+    mejorasCompradas[id] = (mejorasCompradas[id] || 0) + 1;
     actualizarDinero();
-  </script>
+    renderizarTienda();
+    alert(`Vendiste: ${mejora.nombre}`);
+  } else {
+    alert("No tienes suficiente dinero o ya no hay stock.");
+  }
+}
+
+function comprarDecoracion(id) {
+  const decoracion = capitulos[piso].decoraciones.find(d => d.id === id);
+  if (!decoracion) return;
+  if (dinero >= decoracion.precio && !decoracionesCompradas[id]) {
+    dinero -= decoracion.precio;
+    estiloFondo = decoracion.color;
+    document.body.style.backgroundColor = estiloFondo;
+    decoracionesCompradas[id] = true;
+    actualizarDinero();
+    renderizarTienda();
+    alert(`Puesto mejorado: ${decoracion.nombre}`);
+  } else {
+    alert("No puedes comprar esta mejora visual.");
+  }
+}
+
+function subirDePiso() {
+  const costo = capitulos[piso].desbloqueo;
+  if (dinero < costo) {
+    alert("No tienes suficiente dinero para avanzar.");
+    return;
+  }
+  dinero -= costo;
+  piso++;
+  actualizarDinero();
+  renderizarTienda();
+  alert(`¡Nuevo capítulo desbloqueado!`);
+}
+
+cargar();
+renderizarTienda();
+actualizarDinero();
+</script>
 
 </body>
 </html>
