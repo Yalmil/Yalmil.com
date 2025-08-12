@@ -19,6 +19,11 @@
       color: #00ff88;
     }
 
+    .multiplier {
+      font-size: 18px;
+      color: #ffcc00;
+    }
+
     button {
       background: #333;
       color: #fff;
@@ -52,6 +57,7 @@
       display: none;
       background-color: #00ff88;
       color: #000;
+      font-weight: bold;
     }
 
     .story {
@@ -68,6 +74,7 @@
 
   <h1>💰 Tu Dinero</h1>
   <div class="money" id="moneyDisplay">$0</div>
+  <div class="multiplier" id="multiplierDisplay">Multiplicador: x1</div>
   <div class="story" id="historiaTexto"></div>
 
   <div class="store">
@@ -121,12 +128,14 @@
       multiplicador = parseInt(localStorage.getItem('multiplicador')) || 1;
       rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
       document.body.style.backgroundColor = estiloFondo;
+      document.getElementById('multiplierDisplay').textContent = `Multiplicador: x${multiplicador}`;
     }
 
     function actualizarDinero() {
       dinero += dineroPorSegundo * multiplicador;
       document.getElementById('moneyDisplay').textContent = `$${dinero}`;
       guardar();
+      renderizarTienda();
     }
 
     setInterval(actualizarDinero, 1000);
@@ -174,8 +183,6 @@
     function comprarMejora(id) {
       const cap = capitulos[piso];
       const mejora = cap.upgrades.find(u => u.id === id);
-      if (!mejora) return;
-
       if (dinero >= mejora.precio && (mejorasCompradas[id] || 0) < mejora.stock) {
         dinero -= mejora.precio;
         dineroPorSegundo += mejora.valor;
@@ -190,8 +197,6 @@
     function comprarDecoracion(id) {
       const cap = capitulos[piso];
       const decoracion = cap.decoraciones.find(d => d.id === id);
-      if (!decoracion) return;
-
       if (dinero >= decoracion.precio && !decoracionesCompradas[id]) {
         dinero -= decoracion.precio;
         estiloFondo = decoracion.color;
@@ -205,34 +210,36 @@
     }
 
     function subirDePiso() {
-      if (!capitulos[piso + 1]) return;
       const costo = capitulos[piso].desbloqueo;
-      if (dinero < costo) {
+      if (dinero >= costo) {
+        dinero -= costo;
+        piso++;
+        renderizarTienda();
+        alert(`¡Nuevo capítulo desbloqueado!`);
+      } else {
         alert("No tienes suficiente dinero para avanzar.");
-        return;
       }
-      dinero -= costo;
-      piso++;
-      renderizarTienda();
-      alert(`¡Nuevo capítulo desbloqueado!`);
     }
 
     function hacerRebirth() {
-      if (dinero < capitulos[10].desbloqueo) {
+      if (dinero >= capitulos[10].desbloqueo) {
+        if (confirm("¿Seguro que quieres hacer Rebirth? Perderás todo pero ganarás más dinero por segundo.")) {
+          rebirths++;
+          multiplicador++;
+          dinero = 0;
+          dineroPorSegundo = 1;
+          piso = 1;
+          mejorasCompradas = {};
+          decoracionesCompradas = {};
+          estiloFondo = '#1a1a1a';
+          document.body.style.backgroundColor = estiloFondo;
+          document.getElementById('multiplierDisplay').textContent = `Multiplicador: x${multiplicador}`;
+          alert(`¡Rebirth realizado! Ahora tu multiplicador es x${multiplicador}`);
+          guardar();
+          renderizarTienda();
+        }
+      } else {
         alert("No tienes suficiente dinero para hacer Rebirth.");
-        return;
-      }
-      if (confirm("¿Seguro que quieres hacer Rebirth? Perderás todo pero ganarás más dinero por segundo.")) {
-        rebirths++;
-        multiplicador++;
-        dinero = 0;
-        dineroPorSegundo = 1;
-        piso = 1;
-        mejorasCompradas = {};
-        decoracionesCompradas = {};
-        estiloFondo = '#1a1a1a';
-        alert(`¡Rebirth realizado! Ahora tu multiplicador es x${multiplicador}`);
-        renderizarTienda();
       }
     }
 
