@@ -1,61 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yalmil.com</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #121212;
-      color: #ff6600; /* Naranja neón */
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
+      color: #e5ccff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      background-color: #140022;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #c084fc;
       text-align: center;
-      padding: 20px;
+      position: relative;
+      box-shadow: 0 0 15px #c084fc33;
     }
 
-    #profilePic {
-      width: 100px;
-      height: 100px;
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 12px #c084fc;
+    }
+
+    header h3 {
+      margin: 0.3rem 0;
+      font-weight: 400;
+      color: #e5ccff;
+    }
+
+    .profile-container {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .profile-pic {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      border: 3px solid #ff6600; /* Borde naranja neón */
-      box-shadow: 0 0 15px #ff6600; /* Brillo */
-      cursor: pointer;
-      transition: transform 0.2s ease-in-out;
+      border: 2px solid #c084fc;
+      box-shadow: 0 0 10px #c084fc;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    #profilePic:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 25px #ff6600;
+    .profile-pic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 18px #c084fc;
     }
 
-    h1, p {
-      text-shadow: 0 0 10px #ff6600;
+    .username-display {
+      font-size: 0.75rem;
+      color: #e5ccff;
+      margin-top: 4px;
     }
 
-    button {
-      background-color: #ff6600;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 0 10px #ff6600;
-      transition: all 0.2s ease-in-out;
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
     }
 
-    button:hover {
-      background-color: #ff8533;
-      box-shadow: 0 0 20px #ff6600;
+    main h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #c084fc;
+      text-shadow: 0 0 8px #c084fc;
+    }
+
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .subpage {
+      background: rgba(40, 0, 60, 0.2);
+      backdrop-filter: blur(6px);
+      border: 2px solid #c084fc;
+      border-radius: 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: #e5ccff;
+      box-shadow: 0 0 10px #c084fc55;
+      padding: 1.5rem;
+      font-weight: 500;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .subpage:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 0 20px #c084fc;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #888;
+      background-color: #100015;
+      border-top: 1px solid #321144;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Yalmil Web</h1>
+    <h3 id="bienvenida">THE EPIC DUCK IS COMING!!!!!!!!!</h3>
+  </header>
 
-  <img id="profilePic" src="" alt="Foto de perfil">
-  <h1 id="usernameDisplay">Cargando...</h1>
-  <p id="bienvenida">Conectando...</p>
-  <button id="goToProfile">Ir a mi perfil</button>
+  <main>
+    <h2>Subpáginas</h2>
+    <div class="subpage-list">
+      <a class="subpage" href="formulario">Sugerencias</a>
+      <a class="subpage" href="juegos">Juegos</a>
+      <a class="subpage" href="sepmc">Sepmc</a>
+      <a class="subpage" href="https://letterballslore.fandom.com/es/wiki/Wiki_letterballs">Letterballs wiki</a>
+      <a class="subpage" href="changelog">Changelog</a>
+      <a class="subpage" href="inicio2">Mas subpáginas</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
@@ -82,31 +177,22 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, "nombres", user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         const data = userDoc.exists() ? userDoc.data() : {};
-
-        const username = data.nombre || user.displayName || user.email;
-        const avatarUrl = data.foto || user.photoURL || `https://i.pravatar.cc/100?u=${user.uid}`;
+        const username = data.username || user.email;
+        const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
 
         usernameDisplay.textContent = username;
         profilePic.src = avatarUrl;
         bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;
-
-        profilePic.onclick = () => window.location.href = "perfil.html";
       } else {
         usernameDisplay.textContent = "Invitado";
         bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
-        profilePic.src = "https://i.pravatar.cc/100?u=guest";
-        profilePic.onclick = () => window.location.href = "login.html";
       }
     });
 
     goToProfile.addEventListener('click', () => {
-      if (auth.currentUser) {
-        window.location.href = "perfil.html";
-      } else {
-        window.location.href = "login.html";
-      }
+      window.location.href = "perfil.html";
     });
   </script>
 </body>
