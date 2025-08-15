@@ -1,1 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yalmil.com - Términos de servicio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      background-color: #4d1a00;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #ff8c00;
+      text-align: center;
+      box-shadow: 0 0 12px #ff8c0055;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+    }
+
+    header h3 {
+      margin: 0.5rem 0;
+      font-weight: 400;
+      color: #ffd8a6;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    main h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: #ff8c00;
+      text-shadow: 0 0 6px #ff8c0088;
+    }
+
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .subpage {
+      background: rgba(60, 20, 0, 0.2);
+      backdrop-filter: blur(6px);
+      padding: 1.5rem;
+      border: 2px solid #ff8c00;
+      border-radius: 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: #ffd8a6;
+      font-weight: 500;
+      box-shadow: 0 0 10px #ff8c0055;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .subpage:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px #ff8c00;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #ffb366;
+      background-color: #330800;
+      border-top: 1px solid #662200;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Términos de servicio</h1>
+    <h3 id="bienvenida">Ñ</h3>
+  </header>
+
+  <main>
+    <h2>Uso de datos</h2>
+<h3>Yalmil (yo) puede usar todos los datos y verlos que hayas puesto en la página para lo que quiera</h3>
+  </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.appspot.com",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const profilePic = document.getElementById("profilePic");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const bienvenida = document.getElementById("bienvenida");
+    const goToProfile = document.getElementById("goToProfile");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const data = userDoc.exists() ? userDoc.data() : {};
+        const username = data.username || user.email;
+        const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
+
+        usernameDisplay.textContent = username;
+        profilePic.src = avatarUrl;
+        bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;
+      } else {
+        usernameDisplay.textContent = "Invitado";
+        bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
+      }
+    });
+
+    goToProfile.addEventListener('click', () => {
+      window.location.href = "perfil.html";
+    });
+  </script>
+</body>
+</html>
