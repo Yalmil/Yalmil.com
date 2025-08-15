@@ -33,6 +33,7 @@
       border-bottom: 2px solid #ff8c00;
       text-align: center;
       box-shadow: 0 0 12px #ff8c0055;
+      position: relative;
     }
 
     header h1 {
@@ -46,6 +47,39 @@
       margin: 0.5rem 0;
       font-weight: 400;
       color: #ffd8a6;
+    }
+
+    /* Perfil arriba a la derecha */
+    .profile-container {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px 10px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .profile-container:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-container img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ff8c00;
+    }
+
+    .profile-container span {
+      font-size: 0.9rem;
+      color: #ffd8a6;
+      font-weight: 500;
     }
 
     main {
@@ -105,6 +139,12 @@
   <header>
     <h1>Yalmil Web</h1>
     <h3 id="bienvenida">THE EPIC DUCK IS COMING!!!!!!!!!</h3>
+
+    <!-- Contenedor del perfil -->
+    <div id="profileContainer" class="profile-container" style="display:none;">
+      <img id="profilePic" src="" alt="Perfil">
+      <span id="usernameDisplay"></span>
+    </div>
   </header>
 
   <main>
@@ -124,15 +164,16 @@
   </footer>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
       projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.appspot.com",
+      storageBucket: "databaseloginweb.firebasestorage.app",
       messagingSenderId: "121538864529",
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
@@ -141,29 +182,46 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const profileContainer = document.getElementById("profileContainer");
     const profilePic = document.getElementById("profilePic");
     const usernameDisplay = document.getElementById("usernameDisplay");
     const bienvenida = document.getElementById("bienvenida");
-    const goToProfile = document.getElementById("goToProfile");
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const data = userDoc.exists() ? userDoc.data() : {};
+        const userRef = doc(db, "users", user.uid);
+        let userDoc = await getDoc(userRef);
+
+        // Si no existe, lo creamos con datos por defecto
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            username: "",
+            avatar: ""
+          });
+          userDoc = await getDoc(userRef);
+        }
+
+        const data = userDoc.data();
         const username = data.username || user.email;
         const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
 
-        usernameDisplay.textContent = username;
         profilePic.src = avatarUrl;
+        usernameDisplay.textContent = username;
         bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;
+
+        profileContainer.style.display = "flex";
+        profileContainer.addEventListener("click", () => {
+          window.location.href = "perfil.html";
+        });
       } else {
         usernameDisplay.textContent = "Invitado";
         bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
+        profilePic.src = "https://i.pravatar.cc/100?u=guest";
+        profileContainer.style.display = "flex";
+        profileContainer.addEventListener("click", () => {
+          window.location.href = "perfil.html";
+        });
       }
-    });
-
-    goToProfile.addEventListener('click', () => {
-      window.location.href = "perfil.html";
     });
   </script>
 </body>
