@@ -1,1 +1,479 @@
+<!DOCTYPE html><html lang="es" data-theme="auto">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nebula Lab — Un sitio web en un solo archivo</title>
+  <meta name="description" content="Nebula Lab: landing moderna con tema claro/oscuro, selector de acento, atajos (Ctrl+K), animaciones y extras — todo en HTML+CSS+JS puro." />
+  <meta name="theme-color" content="#00e5ff" id="theme-color-meta" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =============================
+       ⚡ Diseño base & tema
+       ============================= */
+    :root {
+      --bg: #0b0f14;
+      --bg-soft: #0f1621;
+      --text: #e8eef6;
+      --muted: #a6b0c3;
+      --card: #121826cc; /* glass */
+      --border: #263041;
+      --accent: #00e5ff; /* cyan neon */
+      --accent-fg: #00181c;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }/* Tema claro automático si el SO es claro */
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    --bg: #f7f9fc;
+    --bg-soft: #eef2f8;
+    --text: #0f1726;
+    --muted: #495163;
+    --card: #ffffffcc;
+    --border: #d8e0ee;
+    --accent: #0066ff;
+    --accent-fg: #ffffff;
+  }
+}
 
+/* Tema claro/oscuro explícito */
+:root[data-theme="light"] {
+  --bg: #f7f9fc;
+  --bg-soft: #eef2f8;
+  --text: #0f1726;
+  --muted: #495163;
+  --card: #ffffffcc;
+  --border: #d8e0ee;
+  --accent: #0066ff;
+  --accent-fg: #ffffff;
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f14;
+  --bg-soft: #0f1621;
+  --text: #e8eef6;
+  --muted: #a6b0c3;
+  --card: #121826cc;
+  --border: #263041;
+  --accent: #00e5ff;
+  --accent-fg: #00181c;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+/* Fondo animado sutil (conic gradient) */
+.bg-anim {
+  position: fixed; inset: -20vmax; z-index: -2;
+  background: conic-gradient(from 180deg at 50% 50%,
+             rgba(0, 229, 255, .08), transparent 40%,
+             rgba(255, 0, 184, .08), transparent 70%,
+             rgba(255, 208, 0, .08));
+  filter: blur(60px) saturate(120%);
+  animation: spin 30s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Malla de puntos sutil */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: -1;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,0.05));
+  pointer-events: none;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Contenedores */
+.wrap { width: min(1100px, 92vw); margin: 0 auto; }
+header {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(140%) blur(10px);
+  background: linear-gradient(180deg, var(--card), transparent);
+  border-bottom: 1px solid var(--border);
+}
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .3px; }
+.logo {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #ff00b8);
+  box-shadow: 0 6px 16px rgba(0,0,0,.25), 0 0 0 2px #ffffff10 inset;
+}
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.btn, button {
+  background: var(--accent); color: var(--accent-fg);
+  border: none; border-radius: 999px; padding: 10px 14px; font-weight: 600;
+  cursor: pointer; box-shadow: var(--shadow);
+}
+.btn.ghost {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); box-shadow: none;
+}
+.chip { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #ffffff10; border: 1px solid var(--border); }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: center; padding: 60px 0 24px; }
+.hero h1 { font-size: clamp(32px, 5vw, 54px); line-height: 1.05; margin: 0 0 10px; }
+.hero p { font-size: clamp(16px, 2.2vw, 18px); color: var(--muted); margin: 0 0 22px; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px; box-shadow: var(--shadow);
+}
+.hero-card { position: relative; overflow: hidden; }
+.hero-card .orb {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%;
+  right: -30px; bottom: -30px; filter: blur(6px);
+  background: radial-gradient(circle at 60% 40%, var(--accent), transparent 70%);
+  opacity: .6; animation: float 6s ease-in-out infinite;
+}
+@keyframes float { 50% { transform: translateY(-6px); } }
+
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* Secciones */
+section { padding: 36px 0; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid .card h3 { margin: 4px 0 6px; }
+.grid p { color: var(--muted); margin: 0; }
+
+/* Playground */
+.play {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch;
+}
+.preview {
+  display: grid; place-items: center; min-height: 240px; border-radius: var(--radius);
+  background: linear-gradient(135deg, #0000, #0000),
+              radial-gradient(1200px 500px at 100% 0%, color-mix(in oklab, var(--accent) 30%, transparent), transparent),
+              linear-gradient(180deg, var(--bg-soft), var(--bg));
+  border: 1px solid var(--border);
+}
+.preview .big { font-weight: 700; font-size: clamp(34px, 6vw, 56px); letter-spacing: .02em; }
+
+.controls { display: grid; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.swatch {
+  width: 26px; height: 26px; border-radius: 999px; border: 1px solid var(--border); cursor: pointer;
+}
+
+/* Footer */
+footer { padding: 28px 0 60px; color: var(--muted); border-top: 1px dashed var(--border); margin-top: 24px; }
+
+/* Responsive */
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .play { grid-template-columns: 1fr; } .grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+/* Apariciones suaves */
+.reveal { opacity: 0; transform: translateY(10px); transition: .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Modal (Palette) */
+.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; }
+.modal.open { display: flex; }
+.modal .backdrop { position: absolute; inset: 0; background: #0008; backdrop-filter: blur(4px); }
+.modal .box { position: relative; width: min(720px, 92vw); border-radius: 14px; border: 1px solid var(--border); background: var(--card); box-shadow: var(--shadow); padding: 14px; }
+.modal input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff0a; color: var(--text); font-size: 16px; }
+.modal .results { margin-top: 10px; max-height: 50vh; overflow: auto; display: grid; gap: 8px; }
+.modal .result { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #ffffff06; cursor: pointer; }
+.kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; padding: 2px 6px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; background: #ffffff10; }
+
+/* Confetti */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.piece { position: absolute; width: 8px; height: 14px; opacity: .9; transform: translateY(-100px) rotate(0deg); animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+  </style>
+</head>
+<body>
+  <div class="bg-anim" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>  <header>
+    <div class="wrap nav">
+      <div class="brand" aria-label="Nebula Lab">
+        <div class="logo" role="img" aria-label="Logotipo"></div>
+        <span>Nebula Lab</span>
+        <span class="chip" title="Atajo">Ctrl/⌘+K</span>
+      </div>
+      <div class="nav-actions">
+        <button class="btn ghost" id="themeBtn" aria-pressed="false" title="Cambiar tema">🌗 Tema</button>
+        <button class="btn" id="openPalette" title="Abrir paleta (Ctrl/⌘+K)">🔎 Buscar</button>
+      </div>
+    </div>
+  </header>  <main class="wrap">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1 class="reveal">Construye ideas a velocidad luz</h1>
+        <p class="reveal">Un ejemplo de sitio 100% HTML+CSS+JS con tema claro/oscuro, selector de color, animaciones suaves y un pequeño <em>playground</em> para jugar con el acento.
+        Sin dependencias. Copiar, pegar y listo.</p>
+        <div class="row reveal">
+          <a href="#proyectos" class="btn">Ver módulos</a>
+          <a href="#play" class="btn ghost">Probar playground</a>
+        </div>
+        <div class="badges reveal" aria-label="Tecnologías usadas">
+          <span class="chip">HTML5</span>
+          <span class="chip">CSS3</span>
+          <span class="chip">JavaScript</span>
+          <span class="chip">Accesible</span>
+        </div>
+      </div>
+      <div class="hero-card card reveal" role="img" aria-label="Tarjeta de vista previa con brillo">
+        <div style="display:grid; gap:10px">
+          <div style="display:flex; align-items:center; gap:10px">
+            <div class="logo"></div>
+            <div>
+              <strong>Nebula UI</strong>
+              <div style="color:var(--muted); font-size:13px">Componentes mínimos, estética limpia</div>
+            </div>
+          </div>
+          <div style="height:10px; background:linear-gradient(90deg, var(--accent), #ff00b8, #ffd000); border-radius:999px"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+            <div class="card" style="padding:12px">
+              <div style="font-size:13px; color:var(--muted);">Estado</div>
+              <div style="font-weight:700">Listo para copiar</div>
+            </div>
+            <div class="card" style="padding:12px">
+              <div style="font-size:13px; color:var(--muted);">Tamaño</div>
+              <div style="font-weight:700"><span id="kb">—</span> KB</div>
+            </div>
+          </div>
+        </div>
+        <div class="orb" aria-hidden="true"></div>
+      </div>
+    </section><!-- Proyectos / módulos -->
+<section id="proyectos">
+  <h2 class="reveal">Módulos incluidos</h2>
+  <div class="grid">
+    <article class="card reveal">
+      <h3>🎨 Tema & acento</h3>
+      <p>Interruptor claro/oscuro con persistencia y selector de color de acento basado en variables CSS.</p>
+    </article>
+    <article class="card reveal">
+      <h3>⌨️ Paleta (Ctrl/⌘+K)</h3>
+      <p>Abre una búsqueda rápida para saltar a secciones. Todo con JavaScript vanilla.</p>
+    </article>
+    <article class="card reveal">
+      <h3>🪄 Apariciones suaves</h3>
+      <p>IntersectionObserver para animaciones sutiles al hacer <em>scroll</em>.</p>
+    </article>
+  </div>
+</section>
+
+<!-- Playground -->
+<section id="play" class="play">
+  <div class="preview card reveal">
+    <div class="big" id="previewText">Hola, Nebula ✨</div>
+  </div>
+  <div class="controls reveal">
+    <div class="card">
+      <h3>Colores de acento</h3>
+      <div class="row" role="listbox" aria-label="Selecciona un color de acento" id="swatches">
+        <button class="swatch" style="background:#00e5ff" aria-label="Cian" data-color="#00e5ff"></button>
+        <button class="swatch" style="background:#22c55e" aria-label="Verde" data-color="#22c55e"></button>
+        <button class="swatch" style="background:#ff4d4d" aria-label="Rojo" data-color="#ff4d4d"></button>
+        <button class="swatch" style="background:#ffd000" aria-label="Amarillo" data-color="#ffd000"></button>
+        <button class="swatch" style="background:#8b5cf6" aria-label="Violeta" data-color="#8b5cf6"></button>
+        <button class="swatch" style="background:#0066ff" aria-label="Azul" data-color="#0066ff"></button>
+        <button class="swatch" style="background:#ff00b8" aria-label="Magenta" data-color="#ff00b8"></button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Tema</h3>
+      <div class="row">
+        <button class="btn ghost" data-theme="auto">Auto</button>
+        <button class="btn ghost" data-theme="light">Claro</button>
+        <button class="btn ghost" data-theme="dark">Oscuro</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Extras</h3>
+      <p>Prueba el atajo <span class="kbd">Ctrl/⌘+K</span> para abrir la paleta. Escribe “play” o “módulos”.
+      También existe un huevo de pascua 🎉</p>
+    </div>
+  </div>
+</section>
+
+  </main>  <footer class="wrap">
+    <div class="row" style="justify-content:space-between; align-items:center">
+      <div>© <span id="year"></span> Nebula Lab — Hecho con ♥ en HTML+CSS+JS.</div>
+      <div>Repo (falso) · <a href="#" aria-disabled="true" onclick="return false;">/nebula</a></div>
+    </div>
+  </footer>  <!-- Modal Paleta -->  <div class="modal" id="palette" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+    <div class="backdrop" data-close></div>
+    <div class="box">
+      <input type="text" id="paletteInput" placeholder="Buscar secciones o comandos…" aria-label="Buscar" autofocus>
+      <div class="results" id="paletteResults"></div>
+    </div>
+  </div>  <!-- Contenedor Confetti -->  <div class="confetti" id="confetti" aria-hidden="true"></div>  <script>
+    // =============================
+    // 🔧 Utilidades
+    // =============================
+    const $ = (q, el=document) => el.querySelector(q);
+    const $$ = (q, el=document) => [...el.querySelectorAll(q)];
+    const setCSSVar = (name, value) => document.documentElement.style.setProperty(name, value);
+
+    // Peso aproximado del documento
+    (function calcKB(){
+      try { const kb = (new Blob([document.documentElement.outerHTML]).size/1024).toFixed(1); $('#kb').textContent = kb; } catch(e){}
+    })();
+
+    // Año en footer
+    $('#year').textContent = new Date().getFullYear();
+
+    // =============================
+    // 🎨 Tema & Acento con persistencia
+    // =============================
+    const THEME_KEY = 'nebula-theme';
+    const ACCENT_KEY = 'nebula-accent';
+
+    function applyTheme(mode){
+      const root = document.documentElement;
+      root.setAttribute('data-theme', mode);
+      localStorage.setItem(THEME_KEY, mode);
+      // Sincroniza el meta theme-color para móviles
+      const isDark = getComputedStyle(root).getPropertyValue('--bg').trim().startsWith('#0');
+      const meta = document.getElementById('theme-color-meta');
+      meta.setAttribute('content', isDark ? '#0b0f14' : '#f7f9fc');
+    }
+
+    function applyAccent(color){
+      setCSSVar('--accent', color);
+      localStorage.setItem(ACCENT_KEY, color);
+      // Ajusta el contraste del texto del botón según el color elegido
+      const c = color.replace('#','');
+      const r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+      const luminance = (0.299*r+0.587*g+0.114*b)/255; // 0 oscuro, 1 claro
+      setCSSVar('--accent-fg', luminance > .6 ? '#00181c' : '#ffffff');
+    }
+
+    // Cargar preferencia guardada
+    (function initPrefs(){
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'auto';
+      applyTheme(savedTheme);
+      const savedAccent = localStorage.getItem(ACCENT_KEY);
+      if(savedAccent) applyAccent(savedAccent);
+    })();
+
+    // Botones de tema
+    $('#themeBtn').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : current === 'light' ? 'auto' : 'dark';
+      applyTheme(next);
+    });
+    $$('[data-theme]').forEach(btn => btn.addEventListener('click', () => applyTheme(btn.dataset.theme)));
+
+    // Swatches
+    $('#swatches').addEventListener('click', e => {
+      const btn = e.target.closest('.swatch');
+      if(!btn) return;
+      applyAccent(btn.dataset.color);
+    });
+
+    // Vista previa con color de acento actual reflejado en texto
+    const preview = $('#previewText');
+    const obsAccent = new MutationObserver(() => { preview.style.textShadow = `0 0 18px var(--accent)`; });
+    obsAccent.observe(document.documentElement, { attributes:true, attributeFilter:['style'] });
+
+    // =============================
+    // 👀 Apariciones al hacer scroll
+    // =============================
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) e.target.classList.add('in');
+    }, { threshold: .1 });
+    $$('.reveal').forEach(el => io.observe(el));
+
+    // =============================
+    // ⌨️ Paleta de comandos (Ctrl/⌘+K)
+    // =============================
+    const palette = $('#palette');
+    const input = $('#paletteInput');
+    const results = $('#paletteResults');
+    const ITEMS = [
+      {label:'Ir a: Inicio', hash:'#top'},
+      {label:'Ir a: Módulos', hash:'#proyectos'},
+      {label:'Ir a: Playground', hash:'#play'},
+      {label:'Cambiar tema: Claro', action:() => applyTheme('light')},
+      {label:'Cambiar tema: Oscuro', action:() => applyTheme('dark')},
+      {label:'Cambiar tema: Auto', action:() => applyTheme('auto')},
+    ];
+
+    function openPalette(){
+      palette.classList.add('open');
+      palette.setAttribute('aria-hidden','false');
+      input.value = '';
+      renderResults(ITEMS);
+      setTimeout(() => input.focus(), 30);
+    }
+    function closePalette(){
+      palette.classList.remove('open');
+      palette.setAttribute('aria-hidden','true');
+    }
+
+    function renderResults(items){
+      results.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'result';
+        div.textContent = item.label;
+        div.tabIndex = 0;
+        div.addEventListener('click', () => select(item));
+        div.addEventListener('keydown', e => { if(e.key==='Enter') select(item); });
+        results.appendChild(div);
+      });
+    }
+
+    function select(item){
+      closePalette();
+      if(item.hash) location.hash = item.hash;
+      if(item.action) item.action();
+    }
+
+    input?.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      const filtered = ITEMS.filter(i => i.label.toLowerCase().includes(q));
+      renderResults(filtered.length ? filtered : [{label:'No hay resultados'}]);
+    });
+
+    $('#openPalette').addEventListener('click', openPalette);
+    palette.addEventListener('click', e => { if(e.target.hasAttribute('data-close')) closePalette(); });
+    window.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        (palette.classList.contains('open') ? closePalette : openPalette)();
+      }
+      if (e.key === 'Escape' && palette.classList.contains('open')) closePalette();
+    });
+
+    // =============================
+    // 🎉 Huevo de pascua (Konami) -> Confetti
+    // =============================
+    const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let buffer = [];
+    window.addEventListener('keydown', e => {
+      buffer.push(e.key);
+      if (buffer.length > KONAMI.length) buffer.shift();
+      if (KONAMI.every((k,i) => buffer[i] === k)) triggerConfetti();
+    });
+
+    function triggerConfetti(){
+      const container = $('#confetti');
+      container.innerHTML = '';
+      const N = 80;
+      for(let i=0;i<N;i++){
+        const d = document.createElement('div');
+        d.className = 'piece';
+        d.style.left = Math.random()*100 + 'vw';
+        d.sty
