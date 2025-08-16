@@ -1,1 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Píxel Board</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: white;
+    }
+    #login {
+      margin-top: 20px;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(50, 10px);
+      grid-template-rows: repeat(50, 10px);
+      margin: 20px auto;
+      width: 500px;
+      height: 500px;
+      border: 2px solid white;
+      transform-origin: center center;
+    }
+    .pixel {
+      width: 10px;
+      height: 10px;
+      background: white;
+      border: 1px solid #222;
+      cursor: pointer;
+    }
+    #controls {
+      margin: 10px;
+      display: none;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    #colors button {
+      width: 30px;
+      height: 30px;
+      border: none;
+      margin: 2px;
+      cursor: pointer;
+    }
+    #cooldown {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Píxel Board</h1>
 
+  <!-- Login -->
+  <div id="login">
+    <button id="googleLogin">Iniciar sesión con Google</button>
+    <p id="user"></p>
+  </div>
+
+  <!-- Controles -->
+  <div id="controls">
+    <div id="colors"></div>
+    <button id="zoomIn">Zoom +</button>
+    <button id="zoomOut">Zoom -</button>
+    <p id="cooldown"></p>
+  </div>
+
+  <!-- Tablero -->
+  <div id="board"></div>
+
+  <!-- Firebase -->
+  <script type="module">
+    // Importaciones Firebase v9+ (modular)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+    // Configuración Firebase (tuya)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Referencias HTML
+    const loginBtn = document.getElementById("googleLogin");
+    const userDisplay = document.getElementById("user");
+    const controls = document.getElementById("controls");
+    const board = document.getElementById("board");
+    const cooldownDisplay = document.getElementById("cooldown");
+
+    // Login con Google
+    const provider = new GoogleAuthProvider();
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error("Error en login:", err);
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userDisplay.textContent = `Bienvenido, ${user.displayName}`;
+        controls.style.display = "block";
+        loginBtn.style.display = "none";
+      }
+    });
+
+    // Crear tablero 50x50
+    let selectedPixel = null;
+    const pixelDivs = [];
+
+    for (let y = 0; y < 50; y++) {
+      for (let x = 0; x < 50; x++) {
+        const div = document.createElement("div");
+        div.className = "pixel";
+        board.appendChild(div);
+        pixelDivs.push(div);
+
+        // Escuchar cambios en tiempo real
+        const pixelRef = ref(db, `board/${x}_${y}`);
+        onValue(pixelRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.color) {
+            div.style.background = data.color;
+          }
+        });
+
+        // Selección de pixel
+        div.addEventListener("click", () => {
+          selectedPixel = { x, y, div };
+        });
+      }
+    }
+
+    // Colores preestablecidos
+    const colors = ["red", "blue", "green", "yellow", "black", "purple", "orange"];
+    let currentColor = colors[0];
+    const colorsDiv = document.getElementById("colors");
+
+    colors.forEach(c => {
+      const btn = document.createElement("button");
+      btn.style.background = c;
+      btn.addEventListener("click", () => currentColor = c);
+      colorsDiv.appendChild(btn);
+    });
+
+    // Función pintar pixel en DB
+    async function paintPixel(x, y, color) {
+      const pixelRef = ref(db, `board/${x}_${y}`);
+      await set(pixelRef, { color });
+    }
+
+    // Cooldown pintar
+    let canPaint = true;
+    function startCooldown() {
+      canPaint = false;
+      let timeLeft = 10;
+      cooldownDisplay.textContent = `Espera ${timeLeft}s`;
+      const timer = setInterval(() => {
+        timeLeft--;
+        cooldownDisplay.textContent = `Espera ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          cooldownDisplay.textContent = "Listo para pintar";
+          canPaint = true;
+        }
+      }, 1000);
+    }
+
+    // Pintar con click y cooldown
+    board.addEventListener("dblclick", () => {
+      if (!auth.currentUser) {
+        alert("Primero inicia sesión.");
+        return;
+      }
+      if (!selectedPixel) {
+        alert("Selecciona un pixel primero.");
+        return;
+      }
+      if (canPaint) {
+        paintPixel(selectedPixel.x, selectedPixel.y, currentColor);
+        startCooldown();
+      } else {
+        alert("Debes esperar antes de pintar otro pixel.");
+      }
+    });
+
+    // Zoom
+    let scale = 1;
+    document.getElementById("zoomIn").addEventListener("click", () => {
+      scale += 0.2;
+      board.style.transform = `scale(${scale})`;
+    });
+    document.getElementById("zoomOut").addEventListener("click", () => {
+      if (scale > 0.4) {
+        scale -= 0.2;
+        board.style.transform = `scale(${scale})`;
+      }
+    });
+  </script>
+</body>
+  </html>
