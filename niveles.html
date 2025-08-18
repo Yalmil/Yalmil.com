@@ -1,169 +1,177 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo – Lights Out</title>
+  <title>Apks</title>
+  <meta name="theme-color" content="#111827" />
   <style>
-    :root{
-      --bg:#0d1117; --panel:#161b22; --accent:#3b82f6; --text:#e6edf3; --muted:#9aa7b2;
-      --green:#22c55e; --red:#ef4444;
+    :root {
+      --bg: #0b0f1a;
+      --card: #111827;
+      --accent: #22c55e;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --ring: #34d39955;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; display:grid; place-items:center; gap:24px;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-      background:radial-gradient(90vmax 90vmax at 10% -10%, #112 0%, transparent 60%),
-                 radial-gradient(90vmax 90vmax at 110% 110%, #121c2b 0%, transparent 60%), var(--bg);
-      color:var(--text);
+    * { box-sizing: border-box }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 20% -10%, #1f2937 0%, transparent 50%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
     }
-    .card{
-      background:linear-gradient(180deg, #18202c, #121821);
-      border:1px solid #1f2835; border-radius:16px; padding:20px; box-shadow:0 4px 30px rgba(0,0,0,.25);
-      width:min(92vw,780px);
+    header {
+      padding: 28px 20px 8px;
+      text-align: center;
     }
-    h1{margin:.2rem 0 1rem; font-size:1.4rem; font-weight:700}
-    .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px}
-    .controls label{font-size:.9rem; color:var(--muted)}
-    select,button{
-      background:var(--panel); color:var(--text); border:1px solid #263142; border-radius:10px;
-      padding:10px 12px; font-weight:600; cursor:pointer; transition:.2s transform ease, .2s opacity ease;
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0.4px;
+      text-shadow: 0 2px 16px #000;
     }
-    button:hover{transform:translateY(-1px)}
-    button:active{transform:translateY(0)}
-    button.primary{border-color:var(--accent)}
-    #status{margin-left:auto; font-size:.9rem; color:var(--muted)}.grid{display:grid; gap:8px; justify-content:center; margin:auto; padding:10px}
-.cell{
-  width:56px; height:56px; border-radius:10px; border:1px solid #243042; display:grid; place-items:center;
-  font-weight:700; user-select:none; cursor:pointer; transition:filter .15s ease, transform .06s ease;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);
-}
-.cell:active{transform:scale(.98)}
-.green{background:linear-gradient(180deg, #1fb968, var(--green));}
-.red{background:linear-gradient(180deg, #e85a5a, var(--red));}
-.footer{margin-top:14px; font-size:.9rem; color:var(--muted); text-align:center}
-.win{color:#22d3ee; font-weight:700}
-
+    main {
+      padding: 20px;
+      display: grid;
+      place-items: center;
+    }
+    .grid {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      border: 1px solid #1f2937;
+      border-radius: 20px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #334155;
+      box-shadow: 0 16px 40px rgba(0,0,0,.45);
+    }
+    .icon {
+      font-size: 32px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .title {
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0 0 6px;
+    }
+    .desc {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      background: #0b1220;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .2s ease;
+      user-select: none;
+    }
+    .download:focus-visible { outline: 3px solid var(--ring) }
+    .download:hover { border-color: #334155 }
+    .download:active { transform: translateY(1px) }
+    .badge {
+      padding: 4px 8px;
+      background: #042b17;
+      border: 1px solid #094c2b;
+      color: #c7f9d4;
+      font-size: 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+      padding: 18px 0 28px;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Lights Out – pulsa un cuadro y sus vecinos cambian</h1>
-    <div class="controls">
-      <label for="size">Tamaño:</label>
-      <select id="size">
-        <option value="3">3×3</option>
-        <option value="4">4×4</option>
-        <option value="5" selected>5×5</option>
-        <option value="6">6×6</option>
-        <option value="7">7×7</option>
-      </select>
-      <button id="random" class="primary">Aleatorizar</button>
-      <button id="reset">Reiniciar</button>
-      <span id="status">Objetivo: dejar todo en <strong>verde</strong></span>
+  <header>
+    <h1>Apks</h1>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Tarjeta: Among Us -->
+      <article class="card" role="group" aria-labelledby="apk-amongus-title">
+        <div class="icon" aria-hidden="true">🎮</div>
+        <h2 id="apk-amongus-title" class="title">Among us</h2>
+        <p class="desc">Toca para descargar el archivo APK.</p>
+
+        <!-- Enlace directo al APK -->
+        <!-- Coloca tu archivo en la misma carpeta con el nombre among-us.apk -->
+        <a id="dl-amongus"
+           class="download"
+           href="among-us.apk"
+           download
+           rel="noopener">
+          <span>Descargar</span>
+          <span class="badge">APK</span>
+        </a>
+      </article>
     </div>
-    <div id="grid" class="grid"></div>
-    <div class="footer">
-      Al hacer clic en una celda, cambia su estado y el de sus <em>vecinos ortogonales</em> (arriba, abajo, izquierda y derecha). <span id="win" class="win" hidden>¡Completado!</span>
-    </div>
-  </div>  <script>
-    // ----- Estado del tablero -----
-    let N = 5;
-    let gridState = []; // true = verde, false = rojo
+  </main>
 
-    const gridEl = document.getElementById('grid');
-    const sizeSel = document.getElementById('size');
-    const btnRandom = document.getElementById('random');
-    const btnReset = document.getElementById('reset');
-    const winEl = document.getElementById('win');
+  <footer>
+    © <span id="year"></span> • Página de descargas
+  </footer>
 
-    function initState(n){
-      gridState = Array.from({length:n}, () => Array.from({length:n}, () => true)); // todo verde
-    }
+  <script>
+    // Rellena el año del pie de página
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    function inBounds(r,c){
-      return r>=0 && c>=0 && r<N && c<N;
-    }
+    // Mejora: si el navegador ignora 'download' (p.ej., algunos Android),
+    // forzamos la descarga creando un "a" temporal cuando se hace click.
+    const link = document.getElementById('dl-amongus');
+    link.addEventListener('click', function (e) {
+      // Si el atributo download funciona, no hacemos nada extra.
+      // De lo contrario, intentamos forzar la descarga.
+      // Nota: esto solo funciona si el archivo está en el mismo origen.
+      try {
+        // Si el navegador descarga por sí solo, este código no molesta.
+        // Si no, creamos un enlace temporal para "forzar" la descarga.
+        const href = this.getAttribute('href');
+        // Si no hay extensión .apk, no hacemos el fallback.
+        if (!href || !href.endsWith('.apk')) return;
 
-    function toggle(r,c){
-      // Cambia una celda si está dentro del tablero
-      if(!inBounds(r,c)) return;
-      gridState[r][c] = !gridState[r][c];
-    }
-
-    function press(r,c){
-      // Al presionar, cambia la celda y sus vecinos ortogonales
-      toggle(r,c);
-      toggle(r-1,c); // arriba
-      toggle(r+1,c); // abajo
-      toggle(r,c-1); // izquierda
-      toggle(r,c+1); // derecha
-      draw();
-      checkWin();
-    }
-
-    function draw(){
-      // Renderiza classes según el estado
-      const cells = gridEl.children;
-      for(let r=0; r<N; r++){
-        for(let c=0; c<N; c++){
-          const idx = r*N + c;
-          const el = cells[idx];
-          el.classList.toggle('green', gridState[r][c]);
-          el.classList.toggle('red', !gridState[r][c]);
-        }
+        // Fallback: crear un enlace temporal con download y hacer click programático
+        const tmp = document.createElement('a');
+        tmp.href = href;
+        tmp.setAttribute('download', '');
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+      } catch (_) {
+        // Silencioso: si falla, el navegador hará navegación normal al archivo.
       }
-    }
-
-    function buildGrid(n){
-      N = n;
-      gridEl.style.gridTemplateColumns = `repeat(${N}, 56px)`;
-      gridEl.innerHTML = '';
-      for(let r=0; r<N; r++){
-        for(let c=0; c<N; c++){
-          const div = document.createElement('button');
-          div.type = 'button';
-          div.className = 'cell';
-          div.addEventListener('click', () => press(r,c));
-          gridEl.appendChild(div);
-        }
-      }
-      initState(N);
-      draw();
-      winEl.hidden = true;
-    }
-
-    function randomize(){
-      for(let r=0; r<N; r++){
-        for(let c=0; c<N; c++){
-          gridState[r][c] = Math.random() > 0.5; // aleatorio
-        }
-      }
-      draw();
-      winEl.hidden = true;
-    }
-
-    function reset(){
-      initState(N);
-      draw();
-      winEl.hidden = true;
-    }
-
-    function checkWin(){
-      // Ganas si todo está en verde (true)
-      for(let r=0; r<N; r++){
-        for(let c=0; c<N; c++){
-          if(!gridState[r][c]){ winEl.hidden = true; return; }
-        }
-      }
-      winEl.hidden = false;
-    }
-
-    // Eventos UI
-    sizeSel.addEventListener('change', e => buildGrid(parseInt(e.target.value,10)));
-    btnRandom.addEventListener('click', randomize);
-    btnReset.addEventListener('click', reset);
-
-    // Inicio
-    buildGrid(N);
-  </script></body>
+    });
+  </script>
+</body>
 </html>
