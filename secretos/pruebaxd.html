@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cuadro Mágico - Puzzle</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f1724; --accent:#00f6c3; --muted:#7a8aa3;
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,Arial,Segoe UI,Roboto,Helvetica, sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071019 0%, #081422 60%);color:#e6eef6}
+    .wrap{max-width:980px;margin:28px auto;padding:20px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    header h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:8px;align-items:center}
+    button,select{background:var(--card);color:inherit;border:1px solid rgba(255,255,255,0.05);padding:8px 12px;border-radius:10px;cursor:pointer}
+    button:hover{transform:translateY(-2px)}
+    .board-wrap{margin-top:20px;display:flex;gap:20px;align-items:flex-start}
+    .board{background:rgba(255,255,255,0.03);padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+    table{border-collapse:collapse}
+    td{padding:6px}
+    .cell{width:56px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:18px}
+    input.cell-input{width:100%;height:100%;border-radius:8px;background:transparent;border:2px solid rgba(255,255,255,0.04);text-align:center;color:inherit;font-weight:700;font-size:18px}
+    input.cell-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 16px rgba(0,246,195,0.08)}
+    .stats{flex:1}
+    .hint{color:var(--muted);font-size:14px;margin-top:8px}
+    .level-display{background:linear-gradient(90deg,#062b2a,#083044);padding:12px;border-radius:10px}
+    .small{font-size:13px;color:var(--muted)}
+    .message{margin-top:14px;padding:10px;border-radius:8px}
+    .ok{background:rgba(3,80,60,0.25);color:#9ff3d6}
+    .bad{background:rgba(102,10,10,0.15);color:#ffb4b4}
+    footer{margin-top:22px;color:var(--muted);font-size:13px}
+    @media(max-width:720px){.board-wrap{flex-direction:column;align-items:stretch}.cell{width:44px;height:44px} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Cuadro Mágico — Resuélvelo y sube de nivel</h1>
+      <div class="controls">
+        <label class="small">Tamaño: 
+          <select id="sizeSelect">
+            <option value="3">3 x 3</option>
+            <option value="5">5 x 5</option>
+            <option value="7">7 x 7</option>
+          </select>
+        </label>
+        <button id="newBtn">Nuevo</button>
+        <button id="checkBtn">Comprobar</button>
+        <button id="hintBtn">Pista</button>
+      </div>
+    </header><div class="board-wrap">
+  <div class="board" id="board"> <!-- tabla generada -->
+  </div>
+
+  <aside class="stats">
+    <div class="level-display">
+      <div class="small">Nivel actual</div>
+      <div style="font-size:24px;font-weight:800" id="level">1</div>
+      <div class="hint" id="progress">Resuelve para subir. Cada nivel sube dificultad.</div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="small">Reglas</div>
+      <p class="small">Llena los números que faltan. En un cuadro mágico la suma de cada fila, columna y diagonales principales es igual (la constante mágica). Usa sólo los números del 1 a n^2 sin repeticiones.</p>
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="small">Historial</div>
+      <div id="history" class="small">-</div>
+    </div>
+
+    <div id="message" class="message" style="display:none"></div>
+  </aside>
+</div>
+
+<footer>
+  Controles: Nuevo genera un tablero nuevo. Comprobar valida tu solución. Pista rellena una celda que falte (te resta dificultad futura). ¡Buena suerte!
+</footer>
+
+  </div>  <script>
+    // --- Utilidades para generar cuadro mágico (método siamés para n impar) ---
+    function generateMagicSquare(n){
+      if(n%2===0) throw new Error('Sólo soporta n impar');
+      const sq = Array.from({length:n},()=>Array(n).fill(0));
+      let num = 1; let i = 0; let j = Math.floor(n/2);
+      while(num <= n*n){
+        sq[i][j]=num;
+        num++;
+        let ni = (i-1+n)%n;
+        let nj = (j+1)%n;
+        if(sq[ni][nj]!==0){
+          i = (i+1)%n; // bajar una fila
+        } else { i=ni; j=nj; }
+      }
+      return sq;
+    }
+
+    // Randomiza rotaciones/reflexiones para variar puzzles
+    function transformSquare(square){
+      const n = square.length;
+      let arr = square.map(r=>r.slice());
+      const ops = [
+        s=>s, // identidad
+        rotate90,
+        rotate180,
+        rotate270,
+        reflectHoriz,
+        reflectVert,
+        (s)=>reflectHoriz(rotate90(s)),
+        (s)=>reflectVert(rotate90(s))
+      ];
+      const chosen = ops[Math.floor(Math.random()*ops.length)];
+      return chosen(arr);
+
+      function rotate90(s){
+        const m = Array.from({length:n},()=>Array(n).fill(0));
+        for(let r=0;r<n;r++) for(let c=0;c<n;c++) m[c][n-1-r]=s[r][c];
+        return m;
+      }
+      function rotate180(s){return rotate90(rotate90(s));}
+      function rotate270(s){return rotate90(rotate180(s));}
+      function reflectHoriz(s){return s.slice().reverse();}
+      function reflectVert(s){return s.map(r=>r.slice().reverse());}
+    }
+
+    // --- Lógica del juego ---
+    let level = 1;
+    const state = {n:3, solution:[], visible:[], blanks:[], startTime:0, attempts:0};
+
+    const boardEl = document.getElementById('board');
+    const levelEl = document.getElementById('level');
+    const historyEl = document.getElementById('history');
+    const messageEl = document.getElementById('message');
+    const sizeSelect = document.getElementById('sizeSelect');
+
+    function startNew(n=null){
+      state.attempts = 0;
+      state.n = n || parseInt(sizeSelect.value,10);
+      // scale difficulty: number of blanks grows with level
+      const baseBlanksRatio = 0.35; // base fraction blank
+      const extraPerLevel = 0.06; // increases per level
+      const capRatio = 0.85;
+      const ratio = Math.min(baseBlanksRatio + (level-1)*extraPerLevel, capRatio);
+
+      const sol = transformSquare(generateMagicSquare(state.n));
+      state.solution = sol;
+      // Flatten indices and pick visible cells randomly
+      const total = state.n*state.n;
+      const blanksCount = Math.min(total-1, Math.max(1, Math.floor(total*ratio)));
+      const indices = Array.from({length:total},(_,i)=>i);
+      shuffle(indices);
+      state.blanks = indices.slice(0,blanksCount).sort((a,b)=>a-b); // indexes hidden
+      state.visible = Array(total).fill(false);
+      for(let i=0;i<total;i++) state.visible[i] = !state.blanks.includes(i);
+      renderBoard();
+      state.startTime = Date.now();
+      showMessage('', '');
+      updateProgress();
+    }
+
+    function renderBoard(){
+      const n = state.n;
+      const tbl = document.createElement('table');
+      tbl.setAttribute('aria-label','Cuadro magico');
+      for(let r=0;r<n;r++){
+        const tr = document.createElement('tr');
+        for(let c=0;c<n;c++){
+          const td = document.createElement('td');
+          const idx = r*n+c;
+          const cell = document.createElement('div');
+          cell.className='cell';
+          if(state.visible[idx]){
+            cell.textContent = state.solution[r][c];
+            cell.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+            cell.style.border = '1px solid rgba(255,255,255,0.03)';
+          } else {
+            const input = document.createElement('input');
+            input.className='cell-input';
+            input.type='number';
+            input.min=1; input.max=state.n*state.n;
+            input.dataset.idx = idx;
+            input.addEventListener('input', ()=>{ sanitizeInput(input); });
+            input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkSolution(); });
+            td.appendChild(input);
+          }
+          td.appendChild(cell);
+          tr.appendChild(td);
+        }
+        tbl.appendChild(tr);
+      }
+      // Clear and append
+      boardEl.innerHTML='';
+      boardEl.appendChild(tbl);
+    }
+
+    function sanitizeInput(input){
+      // keep value within bounds and integer
+      let v = input.value.replace(/[^0-9\-]/g,'');
+      if(v==='') return;
+      v = parseInt(v,10);
+      if(isNaN(v)) { input.value=''; return; }
+      if(v<1) v=1; if(v>state.n*state.n) v=state.n*state.n;
+      input.value = v;
+    }
+
+    function checkSolution(){
+      state.attempts++;
+      const n = state.n;
+      const inputs = boardEl.querySelectorAll('input.cell-input');
+      const user = Array.from({length:n},()=>Array(n).fill(null));
+      let ok = true;
+      // fill from visible and inputs
+      for(let r=0;r<n;r++){
+        for(let c=0;c<n;c++){
+          const idx = r*n+c;
+          if(state.visible[idx]){ user[r][c] = state.solution[r][c]; }
+          else {
+            const input = boardEl.querySelector('input[data-idx="'+idx+'"]');
+            if(!input || input.value==='') { ok=false; user[r][c]=null; continue; }
+            user[r][c] = parseInt(input.value,10);
+          }
+        }
+      }
+      if(!ok){ showMessage('Completa todas las casillas antes de comprobar.', 'bad'); return false; }
+      // Check numbers uniqueness and range
+      const flat = user.flat();
+      const expected = new Set(Array.from({length:n*n},(_,i)=>i+1));
+      const seen = new Set(flat);
+      if(seen.size !== n*n || ![...seen].every(x=>expected.has(x))){ showMessage('Usa todos los números del 1 al '+(n*n)+' sin repeticiones.', 'bad'); return false; }
+      // Check magic constant
+      const magic = (n*(n*n+1))/2;
+      // rows
+      for(let r=0;r<n;r++){
+        const s = user[r].reduce((a,b)=>a+b,0);
+        if(s!==magic){ showMessage('Hay errores en las filas/columnas/diagonales. Sigue intentando.', 'bad'); return false; }
+      }
+      // cols
+      for(let c=0;c<n;c++){
+        let s=0; for(let r=0;r<n;r++) s+=user[r][c]; if(s!==magic){ showMessage('Hay errores en las filas/columnas/diagonales. Sigue intentando.', 'bad'); return false; }
+      }
+      // diagonals
+      let d1=0,d2=0; for(let i=0;i<n;i++){ d1+=user[i][i]; d2+=user[i][n-1-i]; }
+      if(d1!==magic || d2!==magic){ showMessage('Hay errores en las filas/columnas/diagonales. Sigue intentando.', 'bad'); return false; }
+
+      // Si llegó aquí, está bien
+      const timeTaken = Math.floor((Date.now()-state.startTime)/1000);
+      showMessage('¡Correcto! Nivel superado en '+timeTaken+'s. Siguiente nivel activado.', 'ok');
+      level++; levelEl.textContent = level;
+      addHistory('Nivel '+(level-1)+' resuelto en '+timeTaken+'s, intentos: '+state.attempts);
+      // subir dificultad: si tamaño seleccionado es menor que max, aumentar tamaño cada 3 niveles
+      if(level%3===0){ // promote size if possible
+        const sizes = [3,5,7]; let cur = parseInt(sizeSelect.value,10);
+        const i = sizes.indexOf(cur);
+        if(i < sizes.length-1) sizeSelect.value = sizes[i+1];
+      }
+      // nuevo puzzle automático
+      setTimeout(()=> startNew(), 900);
+      return true;
+    }
+
+    function giveHint(){
+      // Fill one of the blanks for the player
+      const blanks = state.blanks.filter(idx=>{
+        // check if input is empty or wrong
+        const input = boardEl.querySelector('input[data-idx="'+idx+'"]');
+        return input && (input.value==='' || parseInt(input.value,10)!==state.solution[Math.floor(idx/state.n)][idx%state.n]);
+      });
+      if(blanks.length===0){ showMessage('No hay casillas disponibles para ayudar.', 'bad'); return; }
+      const pick = blanks[Math.floor(Math.random()*blanks.length)];
+      const r = Math.floor(pick/state.n), c = pick%state.n;
+      const input = boardEl.querySelector('input[data-idx="'+pick+'"]');
+      input.value = state.solution[r][c];
+      // Mark that we gave a hint: reduce next difficulty increase slightly
+      // (We'll store a soft penalty by reducing level gain: we will subtract 0.5 level worth of difficulty effect)
+      showMessage('Pista: una casilla rellenada. Ten en cuenta que usar pistas reduce dificultad futura.', 'ok');
+    }
+
+    function addHistory(text){
+      const prev = historyEl.textContent.trim();
+      historyEl.textContent = (prev==='-'? text : (text+' • '+prev));
+    }
+
+    function showMessage(text, kind){
+      if(!text){ messageEl.style.display='none'; messageEl.textContent=''; return; }
+      messageEl.style.display='block'; messageEl.textContent = text;
+      messageEl.className = 'message ' + (kind==='ok'? 'ok' : 'bad');
+    }
+
+    function updateProgress(){
+      const n = state.n; const magic = (n*(n*n+1))/2;
+      document.getElementById('progress').textContent = 'Constante mágica: '+magic+' — tamaño: '+n+'x'+n+' — blanks: '+state.blanks.length;
+    }
+
+    // --- Helpers ---
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } }
+
+    // --- Wire UI ---
+    document.getElementById('newBtn').addEventListener('click', ()=> startNew());
+    document.getElementById('checkBtn').addEventListener('click', ()=> checkSolution());
+    document.getElementById('hintBtn').addEventListener('click', ()=> giveHint());
+    sizeSelect.addEventListener('change', ()=> startNew());
+
+    // Init
+    startNew(3);
+  </script></body>
+</html>
