@@ -66,10 +66,7 @@ h2{
   place-items: center;
 }
 
-/* Mars SVG style */
 .mars svg{ width:48px; height:48px; }
-
-/* Ben10 badge */
 .ben-badge{
   font-weight:700;
   font-size:0.95rem;
@@ -80,8 +77,6 @@ h2{
   box-shadow: 0 4px 10px rgba(0,0,0,0.35) inset;
   letter-spacing:0.5px;
 }
-
-/* Dirt block SVG */
 .dirt svg{ width:48px; height:48px; image-rendering: pixelated; }
 
 .meta{
@@ -110,26 +105,22 @@ a.link{
 }
 
 a.link:hover{ text-decoration: underline; }
-
 .small{font-size:0.86rem; color:#ffeedb; opacity:0.95}
 
-/* responsive */
 @media (max-width:480px){
   .item{ padding:0.7rem; gap:8px }
   .icon{ width:40px;height:40px; }
   .icon svg{ width:40px;height:40px }
 }
-
   </style>
 </head>
 <body>
   <div class="container">
     <h2>📒 Servidores recomendados</h2><div class="list">
 
-  <!-- Aure: muestra Marte + enlace clickeable -->
+  <!-- Aure -->
   <div class="item">
     <div class="icon mars" aria-hidden="true">
-      <!-- simple Mars-like SVG -->
       <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Marte">
         <circle cx="32" cy="32" r="30" fill="#ff5c33" />
         <g opacity="0.18" fill="#b33a1f">
@@ -146,61 +137,7 @@ a.link:hover{ text-decoration: underline; }
     </div>
   </div>
 
-  <!-- second Aure entry -->
+  <!-- Aure 2 -->
   <div class="item">
     <div class="icon mars" aria-hidden="true">
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Marte">
-        <circle cx="32" cy="32" r="30" fill="#ff5c33" />
-        <g opacity="0.18" fill="#b33a1f">
-          <path d="M14 40c6-6 18-10 30-8 6 1 8 5 8 5s-12 10-26 12c-8 1-12-6-12-9z"/>
-        </g>
-      </svg>
-    </div>
-    <div class="meta">
-      <div class="name"><strong>Aure</strong></div>
-      <div class="small"><a class="link" href="https://discord.gg/ScHNbvNdSU" target="_blank" rel="noopener">https://discord.gg/ScHNbvNdSU</a></div>
-    </div>
-  </div>
-
-  <!-- Ben10: badge that says Ben 10 + enlace -->
-  <div class="item">
-    <div class="icon" aria-hidden="true">
-      <div class="ben-badge">Ben 10</div>
-    </div>
-    <div class="meta">
-      <div class="name"><strong>Ben10</strong></div>
-      <div class="small"><a class="link" href="https://discord.gg/3X3F6tyDVU" target="_blank" rel="noopener">https://discord.gg/3X3F6tyDVU</a></div>
-    </div>
-  </div>
-
-  <!-- Abricraft: muestra bloque de tierra tipo Minecraft + enlace -->
-  <div class="item">
-    <div class="icon dirt" aria-hidden="true">
-      <!-- simple "dirt block" SVG (pixel-style) -->
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bloque de tierra">
-        <!-- top (grass) -->
-        <rect x="0" y="0" width="64" height="16" fill="#3ea33c" />
-        <!-- soil base -->
-        <rect x="0" y="16" width="64" height="48" fill="#8a5a2b" />
-        <!-- darker pixels to suggest pixel art -->
-        <g fill="#6b3f20" opacity="0.9">
-          <rect x="6" y="22" width="6" height="6" />
-          <rect x="18" y="28" width="6" height="6" />
-          <rect x="34" y="22" width="6" height="6" />
-          <rect x="46" y="30" width="8" height="6" />
-          <rect x="10" y="36" width="8" height="6" />
-        </g>
-        <rect x="0" y="0" width="64" height="64" fill-opacity="0" stroke="#2f1f14" stroke-width="0.5" />
-      </svg>
-    </div>
-    <div class="meta">
-      <div class="name"><strong>Abricraft</strong> <span style="font-size:0.85rem;color:#ffd9b3;margin-left:6px;">(Abrilag)</span></div>
-      <div class="small"><a class="link" href="https://discord.gg/64UAMGFZxJ" target="_blank" rel="noopener">https://discord.gg/64UAMGFZxJ</a></div>
-    </div>
-  </div>
-
-</div>
-
-  </div>
-</body>
-</html>
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000
