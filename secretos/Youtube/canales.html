@@ -1,79 +1,201 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Changelog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servidores - Yalmil.com</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');* { box-sizing: border-box; }
+html,body{height:100%;}
 
-    * {
-      box-sizing: border-box;
-    }
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg,#0b0710 0%, #1a0b00 100%);
+  color: #fff8e6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
 
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f);
-      color: #e5ccff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      animation: fadeIn 1s ease-out;
-    }
+.container{
+  width: 100%;
+  max-width: 720px;
+  background: linear-gradient(180deg, rgba(255,160,60,0.06), rgba(0,0,0,0.15));
+  border: 2px solid rgba(255,140,0,0.25);
+  border-radius: 16px;
+  padding: 1.6rem;
+  box-shadow: 0 10px 30px rgba(255,140,0,0.08), 0 2px 6px rgba(0,0,0,0.6);
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+h2{
+  margin: 0 0 1rem 0;
+  font-size: 1.75rem;
+  color: #ffb366;
+  text-align: center;
+  text-shadow: 0 4px 18px rgba(255,140,0,0.12);
+}
 
-    .container {
-      background: rgba(40, 0, 60, 0.2);
-      backdrop-filter: blur(6px);
-      border: 2px solid #c084fc;
-      border-radius: 1.5rem;
-      padding: 2rem;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 0 20px #c084fc88;
-    }
+.list{
+  display: grid;
+  gap: 0.75rem;
+}
 
-    h2 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: #c084fc;
-      text-shadow: 0 0 8px #c084fc;
-    }
+.item{
+  background: rgba(0,0,0,0.35);
+  border-radius: 10px;
+  padding: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255,140,0,0.08);
+}
 
-    .editable {
-      min-height: 200px;
-      padding: 1rem;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      outline: none;
-      font-size: 1rem;
-      border: 1px solid #c084fc88;
-      overflow-y: auto;
-    }
+/* icons area */
+.icon{
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+}
 
-    .editable:focus {
-      box-shadow: 0 0 10px #c084fcaa;
-      border-color: #c084fc;
-    }
+/* Mars SVG style */
+.mars svg{ width:48px; height:48px; }
+
+/* Ben10 badge */
+.ben-badge{
+  font-weight:700;
+  font-size:0.95rem;
+  padding:6px 8px;
+  border-radius:8px;
+  background:linear-gradient(180deg,#7be23a,#4aa019);
+  color:#072100;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.35) inset;
+  letter-spacing:0.5px;
+}
+
+/* Dirt block SVG */
+.dirt svg{ width:48px; height:48px; image-rendering: pixelated; }
+
+.meta{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.name{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:1rem;
+  color:#ffd9b3;
+}
+
+a.link{
+  color:#ffd9b3;
+  text-decoration: none;
+  background: linear-gradient(90deg, rgba(255,140,0,0.06), rgba(255,200,120,0.02));
+  padding:6px 8px;
+  border-radius:6px;
+  border:1px solid rgba(255,140,0,0.08);
+  display:inline-block;
+}
+
+a.link:hover{ text-decoration: underline; }
+
+.small{font-size:0.86rem; color:#ffeedb; opacity:0.95}
+
+/* responsive */
+@media (max-width:480px){
+  .item{ padding:0.7rem; gap:8px }
+  .icon{ width:40px;height:40px; }
+  .icon svg{ width:40px;height:40px }
+}
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📒 Servidores recomendados</h2>
-    <div class="editable" contenteditable="false">
-      <h3>Aure: https://discord.gg/ASn3Wgmgph</h3>
-      <h3>Aure: https://discord.gg/ScHNbvNdSU</h3>
-      <h3>Ben10: https://discord.gg/3X3F6tyDVU</h3>
-      <h3>Abricraft: https://discord.gg/64UAMGFZxJ</h3>
+    <h2>📒 Servidores recomendados</h2><div class="list">
+
+  <!-- Aure: muestra Marte + enlace clickeable -->
+  <div class="item">
+    <div class="icon mars" aria-hidden="true">
+      <!-- simple Mars-like SVG -->
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Marte">
+        <circle cx="32" cy="32" r="30" fill="#ff5c33" />
+        <g opacity="0.18" fill="#b33a1f">
+          <path d="M14 40c6-6 18-10 30-8 6 1 8 5 8 5s-12 10-26 12c-8 1-12-6-12-9z"/>
+          <circle cx="20" cy="22" r="3"/>
+          <circle cx="38" cy="14" r="2"/>
+        </g>
+        <circle cx="46" cy="44" r="3" fill="#fff3e6" opacity="0.06" />
+      </svg>
     </div>
+    <div class="meta">
+      <div class="name"><strong>Aure</strong></div>
+      <div class="small"><a class="link" href="https://discord.gg/ASn3Wgmgph" target="_blank" rel="noopener">https://discord.gg/ASn3Wgmgph</a></div>
+    </div>
+  </div>
+
+  <!-- second Aure entry -->
+  <div class="item">
+    <div class="icon mars" aria-hidden="true">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Marte">
+        <circle cx="32" cy="32" r="30" fill="#ff5c33" />
+        <g opacity="0.18" fill="#b33a1f">
+          <path d="M14 40c6-6 18-10 30-8 6 1 8 5 8 5s-12 10-26 12c-8 1-12-6-12-9z"/>
+        </g>
+      </svg>
+    </div>
+    <div class="meta">
+      <div class="name"><strong>Aure</strong></div>
+      <div class="small"><a class="link" href="https://discord.gg/ScHNbvNdSU" target="_blank" rel="noopener">https://discord.gg/ScHNbvNdSU</a></div>
+    </div>
+  </div>
+
+  <!-- Ben10: badge that says Ben 10 + enlace -->
+  <div class="item">
+    <div class="icon" aria-hidden="true">
+      <div class="ben-badge">Ben 10</div>
+    </div>
+    <div class="meta">
+      <div class="name"><strong>Ben10</strong></div>
+      <div class="small"><a class="link" href="https://discord.gg/3X3F6tyDVU" target="_blank" rel="noopener">https://discord.gg/3X3F6tyDVU</a></div>
+    </div>
+  </div>
+
+  <!-- Abricraft: muestra bloque de tierra tipo Minecraft + enlace -->
+  <div class="item">
+    <div class="icon dirt" aria-hidden="true">
+      <!-- simple "dirt block" SVG (pixel-style) -->
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bloque de tierra">
+        <!-- top (grass) -->
+        <rect x="0" y="0" width="64" height="16" fill="#3ea33c" />
+        <!-- soil base -->
+        <rect x="0" y="16" width="64" height="48" fill="#8a5a2b" />
+        <!-- darker pixels to suggest pixel art -->
+        <g fill="#6b3f20" opacity="0.9">
+          <rect x="6" y="22" width="6" height="6" />
+          <rect x="18" y="28" width="6" height="6" />
+          <rect x="34" y="22" width="6" height="6" />
+          <rect x="46" y="30" width="8" height="6" />
+          <rect x="10" y="36" width="8" height="6" />
+        </g>
+        <rect x="0" y="0" width="64" height="64" fill-opacity="0" stroke="#2f1f14" stroke-width="0.5" />
+      </svg>
+    </div>
+    <div class="meta">
+      <div class="name"><strong>Abricraft</strong> <span style="font-size:0.85rem;color:#ffd9b3;margin-left:6px;">(Abrilag)</span></div>
+      <div class="small"><a class="link" href="https://discord.gg/64UAMGFZxJ" target="_blank" rel="noopener">https://discord.gg/64UAMGFZxJ</a></div>
+    </div>
+  </div>
+
+</div>
+
   </div>
 </body>
 </html>
