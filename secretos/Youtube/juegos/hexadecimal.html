@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Hexadecimal - Texto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-container {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .output-container {
+            margin-top: 25px;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #f6f9ff, #e8f2ff);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            word-wrap: break-word;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .result.updated::before {
+            left: 100%;
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .status.hex {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #d63384;
+            border: 2px solid #f8d7da;
+        }
+
+        .status.text {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #198754;
+            border: 2px solid #d1e7dd;
+        }
+
+        .status.empty {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .clear-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            textarea, .result {
+                min-height: 100px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Conversor Hex ↔ Texto</h1>
+        
+        <div class="input-container">
+            <label for="input">Introduce tu texto o código hexadecimal:</label>
+            <textarea id="input" placeholder="Escribe aquí... Por ejemplo: 'Hola mundo' o '486f6c61206d756e646f'"></textarea>
+        </div>
+        
+        <div class="status empty" id="status">Esperando entrada...</div>
+        
+        <div class="output-container">
+            <label>Resultado:</label>
+            <div class="result" id="result">El resultado aparecerá aquí...</div>
+        </div>
+        
+        <button class="clear-btn" onclick="clearAll()">🗑️ Limpiar</button>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+
+        // Función para verificar si un string es hexadecimal válido
+        function isValidHex(str) {
+            // Eliminar espacios en blanco
+            str = str.replace(/\s/g, '');
+            // Verificar si tiene longitud par y solo contiene caracteres hex
+            return /^[0-9A-Fa-f]*$/.test(str) && str.length > 0 && str.length % 2 === 0;
+        }
+
+        // Función para convertir texto a hexadecimal
+        function textToHex(text) {
+            let hex = '';
+            for (let i = 0; i < text.length; i++) {
+                hex += text.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+            return hex.toUpperCase();
+        }
+
+        // Función para convertir hexadecimal a texto
+        function hexToText(hex) {
+            // Eliminar espacios en blanco
+            hex = hex.replace(/\s/g, '');
+            let text = '';
+            try {
+                for (let i = 0; i < hex.length; i += 2) {
+                    const hexByte = hex.substr(i, 2);
+                    const charCode = parseInt(hexByte, 16);
+                    text += String.fromCharCode(charCode);
+                }
+                return text;
+            } catch (error) {
+                return 'Error al convertir hexadecimal';
+            }
+        }
+
+        // Función para actualizar el resultado
+        function updateResult() {
+            const inputValue = input.value.trim();
+            
+            if (inputValue === '') {
+                result.textContent = 'El resultado aparecerá aquí...';
+                status.textContent = 'Esperando entrada...';
+                status.className = 'status empty';
+                return;
+            }
+
+            // Agregar efecto visual
+            result.classList.add('updated');
+            setTimeout(() => result.classList.remove('updated'), 600);
+
+            if (isValidHex(inputValue)) {
+                // Es hexadecimal, convertir a texto
+                const converted = hexToText(inputValue);
+                result.textContent = converted;
+                status.textContent = '📥 Hexadecimal detectado → Convertido a texto';
+                status.className = 'status hex';
+            } else {
+                // Es texto normal, convertir a hexadecimal
+                const converted = textToHex(inputValue);
+                result.textContent = converted;
+                status.textContent = '📤 Texto detectado → Convertido a hexadecimal';
+                status.className = 'status text';
+            }
+        }
+
+        // Función para limpiar todo
+        function clearAll() {
+            input.value = '';
+            result.textContent = 'El resultado aparecerá aquí...';
+            status.textContent = 'Esperando entrada...';
+            status.className = 'status empty';
+            input.focus();
+        }
+
+        // Event listener para actualizar en tiempo real
+        input.addEventListener('input', updateResult);
+        input.addEventListener('paste', () => {
+            // Pequeño delay para permitir que el paste se complete
+            setTimeout(updateResult, 10);
+        });
+
+        // Enfocar el textarea al cargar la página
+        window.addEventListener('load', () => {
+            input.focus();
+        });
+    </script>
+</body>
+                                                                            </html>
