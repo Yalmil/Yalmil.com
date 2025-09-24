@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador y Previsualizador HTML</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        #htmlInput {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #f8f9fa;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #htmlInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .validate-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .validate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .validate-btn:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .status.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .status.valid {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .status.invalid {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .status.empty {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .preview-section {
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .preview-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .preview-label {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .preview-label::before {
+            content: "👁️";
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .preview-container {
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: white;
+            min-height: 300px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 400px;
+            border: none;
+            background: white;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .loading::before {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e1e5e9;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-details {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #d32f2f;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            #htmlInput {
+                min-height: 150px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Validador HTML</h1>
+            <p>Valida tu código HTML y ve una vista previa en tiempo real</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <label for="htmlInput" class="input-label">Introduce tu código HTML:</label>
+                <div class="input-container">
+                    <textarea 
+                        id="htmlInput" 
+                        placeholder="Pega aquí tu código HTML... Por ejemplo:
+&lt;div&gt;
+    &lt;h1&gt;¡Hola Mundo!&lt;/h1&gt;
+    &lt;p&gt;Este es un párrafo de ejemplo.&lt;/p&gt;
+&lt;/div&gt;"
+                    ></textarea>
+                </div>
+                <button class="validate-btn" onclick="validateHTML()">✨ Validar y Previsualizar</button>
+            </div>
+
+            <div id="status" class="status"></div>
+
+            <div id="previewSection" class="preview-section">
+                <div class="preview-label">Vista Previa</div>
+                <div class="preview-container">
+                    <iframe id="previewFrame" class="preview-frame" sandbox="allow-same-origin"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let validationTimeout;
+
+        // Auto-validación mientras se escribe (con debounce)
+        document.getElementById('htmlInput').addEventListener('input', function() {
+            clearTimeout(validationTimeout);
+            validationTimeout = setTimeout(validateHTML, 1000);
+        });
+
+        function validateHTML() {
+            const input = document.getElementById('htmlInput').value.trim();
+            const status = document.getElementById('status');
+            const previewSection = document.getElementById('previewSection');
+            const previewFrame = document.getElementById('previewFrame');
+
+            // Limpiar estado anterior
+            status.className = 'status';
+            previewSection.classList.remove('show');
+
+            if (input === '') {
+                showStatus('Por favor, introduce código HTML', 'empty');
+                return;
+            }
+
+            // Validación básica de HTML
+            const validation = validateHTMLSyntax(input);
+            
+            if (validation.isValid) {
+                showStatus('✅ HTML válido - Generando vista previa...', 'valid');
+                showPreview(input);
+            } else {
+                showStatus('❌ HTML inválido - Revisa la sintaxis', 'invalid', validation.errors);
+            }
+        }
+
+        function validateHTMLSyntax(html) {
+            const errors = [];
+            let isValid = true;
+
+            try {
+                // Crear un elemento temporal para probar el HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+
+                // Verificar si el HTML se parseó correctamente
+                if (tempDiv.innerHTML !== html.trim()) {
+                    // El navegador corrigió algo automáticamente
+                }
+
+                // Validaciones básicas
+                if (!html.includes('<') || !html.includes('>')) {
+                    isValid = false;
+                    errors.push('No se detectaron etiquetas HTML válidas');
+                }
+
+                // Verificar etiquetas no cerradas (validación básica)
+                const openTags = html.match(/<[^\/][^>]*>/g) || [];
+                const closeTags = html.match(/<\/[^>]*>/g) || [];
+                
+                // Filtrar etiquetas auto-cerradas
+                const selfClosingTags = ['img', 'br', 'hr', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed', 'source', 'track', 'wbr'];
+                const openTagsFiltered = openTags.filter(tag => {
+                    const tagName = tag.match(/<([^\s>]+)/)[1].toLowerCase();
+                    return !selfClosingTags.includes(tagName) && !tag.endsWith('/>');
+                });
+
+                if (openTagsFiltered.length > closeTags.length) {
+                    errors.push('Posibles etiquetas sin cerrar detectadas');
+                }
+
+            } catch (error) {
+                isValid = false;
+                errors.push('Error de sintaxis: ' + error.message);
+            }
+
+            return { isValid, errors };
+        }
+
+        function showStatus(message, type, errors = []) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type} show`;
+
+            if (errors.length > 0) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-details';
+                errorDiv.textContent = 'Detalles: ' + errors.join(', ');
+                status.appendChild(errorDiv);
+            }
+        }
+
+        function showPreview(html) {
+            const previewSection = document.getElementById('previewSection');
+            const previewFrame = document.getElementById('previewFrame');
+            
+            // Crear documento HTML completo para la vista previa
+            const fullHTML = `
+                <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Vista Previa</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6;
+                            color: #333;
+                        }
+                        * { box-sizing: border-box; }
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                </body>
+                </html>
+            `;
+
+            // Mostrar loading
+            previewFrame.style.opacity = '0.5';
+            
+            // Escribir HTML en el iframe
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            doc.open();
+            doc.write(fullHTML);
+            doc.close();
+
+            // Mostrar la sección de vista previa
+            setTimeout(() => {
+                previewSection.classList.add('show');
+                previewFrame.style.opacity = '1';
+            }, 300);
+        }
+
+        // Validar automáticamente si hay contenido inicial
+        window.addEventListener('load', function() {
+            const input = document.getElementById('htmlInput').value.trim();
+            if (input) {
+                validateHTML();
+            }
+        });
+    </script>
+</body>
+  </html>
