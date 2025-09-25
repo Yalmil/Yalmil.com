@@ -387,6 +387,13 @@
             img.onload = function() {
                 canvas.width = img.width;
                 canvas.height = img.height;
+                
+                // Para JPG, llenar con fondo blanco primero
+                if (targetFormat === 'jpg' || targetFormat === 'jpeg') {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
                 ctx.drawImage(img, 0, 0);
 
                 let mimeType = 'image/' + targetFormat;
@@ -395,13 +402,61 @@
                 }
 
                 canvas.toBlob(function(blob) {
-                    downloadFile(blob, newFileName);
-                    hideLoading();
-                    showSuccess();
+                    if (blob) {
+                        downloadFile(blob, newFileName);
+                        hideLoading();
+                        showSuccess();
+                    } else {
+                        console.error('Error al crear el blob');
+                        hideLoading();
+                        alert('Error al convertir la imagen');
+                    }
                 }, mimeType, 0.9);
             };
 
-            img.src = URL.createObjectURL(file);
+            img.onerror = function() {
+                console.error('Error al cargar la imagen');
+                hideLoading();
+                alert('Error al cargar la imagen');
+            };
+
+            // Importante: crear URL del archivo y asignarlo después de definir onload
+            const imageUrl = URL.createObjectURL(file);
+            img.src = imageUrl;
+            
+            // Limpiar la URL después de usar
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Para JPG, llenar con fondo blanco primero
+                if (targetFormat === 'jpg' || targetFormat === 'jpeg') {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
+                ctx.drawImage(img, 0, 0);
+
+                let mimeType = 'image/' + targetFormat;
+                if (targetFormat === 'jpg' || targetFormat === 'jpeg') {
+                    mimeType = 'image/jpeg';
+                }
+
+                canvas.toBlob(function(blob) {
+                    if (blob) {
+                        downloadFile(blob, newFileName);
+                        hideLoading();
+                        showSuccess();
+                    } else {
+                        console.error('Error al crear el blob');
+                        hideLoading();
+                        alert('Error al convertir la imagen');
+                    }
+                }, mimeType, 0.9);
+                
+                // Limpiar la URL
+                URL.revokeObjectURL(imageUrl);
+            };
         }
 
         function simulateConversion(fileName, format) {
