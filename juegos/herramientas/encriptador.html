@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Texto Multi-Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        #textInput {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        #textInput:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .system-section {
+            margin-bottom: 30px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .system-section.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #systemSelect {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #systemSelect:enabled:hover {
+            border-color: #667eea;
+        }
+
+        #systemSelect:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateY(20px);
+        }
+
+        .result-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #result {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #f8f9fa;
+            resize: vertical;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Conversor de Texto</h1>
+        
+        <div class="input-section">
+            <label for="textInput">Ingresa tu texto:</label>
+            <textarea id="textInput" placeholder="Escribe aquí el texto que quieres convertir..."></textarea>
+        </div>
+
+        <div class="system-section" id="systemSection">
+            <label for="systemSelect">Selecciona el sistema de codificación:</label>
+            <select id="systemSelect" disabled>
+                <option value="">-- Primero ingresa un texto --</option>
+                <option value="base64">Base64</option>
+                <option value="hex">Hexadecimal</option>
+                <option value="binary">Binario</option>
+                <option value="octal">Octal</option>
+                <option value="ascii">ASCII (códigos)</option>
+                <option value="url">URL Encode</option>
+                <option value="html">HTML Entities</option>
+                <option value="unicode">Unicode Escape</option>
+                <option value="rot13">ROT13</option>
+                <option value="morse">Código Morse</option>
+                <option value="base32">Base32</option>
+                <option value="md5">MD5 Hash</option>
+                <option value="sha1">SHA-1 Hash</option>
+                <option value="sha256">SHA-256 Hash</option>
+                <option value="reverse">Texto Invertido</option>
+                <option value="caesar">César (desplazamiento 3)</option>
+                <option value="atbash">Cifrado Atbash</option>
+                <option value="leetspeak">Leet Speak (1337)</option>
+            </select>
+            <p class="info-text pulse">⬆️ Escribe texto arriba para desbloquear las opciones</p>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <label for="result">Resultado:</label>
+            <textarea id="result" readonly></textarea>
+            <button class="copy-btn" onclick="copyResult()">📋 Copiar Resultado</button>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const systemSelect = document.getElementById('systemSelect');
+        const systemSection = document.getElementById('systemSection');
+        const result = document.getElementById('result');
+        const resultSection = document.getElementById('resultSection');
+
+        // Funciones de conversión
+        const conversions = {
+            base64: (text) => btoa(unescape(encodeURIComponent(text))),
+            hex: (text) => Array.from(new TextEncoder().encode(text))
+                .map(b => b.toString(16).padStart(2, '0')).join(''),
+            binary: (text) => Array.from(new TextEncoder().encode(text))
+                .map(b => b.toString(2).padStart(8, '0')).join(' '),
+            octal: (text) => Array.from(new TextEncoder().encode(text))
+                .map(b => b.toString(8)).join(' '),
+            ascii: (text) => Array.from(text).map(c => c.charCodeAt(0)).join(' '),
+            url: (text) => encodeURIComponent(text),
+            html: (text) => text.replace(/[&<>"']/g, (match) => {
+                const entities = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'};
+                return entities[match];
+            }),
+            unicode: (text) => Array.from(text).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(''),
+            rot13: (text) => text.replace(/[a-zA-Z]/g, (c) => 
+                String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)),
+            morse: (text) => {
+                const morse = {
+                    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+                    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+                    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+                    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+                    'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+                    '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+                    '8': '---..', '9': '----.', ' ': '/'
+                };
+                return text.toUpperCase().split('').map(c => morse[c] || c).join(' ');
+            },
+            base32: (text) => {
+                const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+                const bytes = new TextEncoder().encode(text);
+                let result = '';
+                let buffer = 0;
+                let bitsLeft = 0;
+                
+                for (let byte of bytes) {
+                    buffer = (buffer << 8) | byte;
+                    bitsLeft += 8;
+                    while (bitsLeft >= 5) {
+                        result += alphabet[(buffer >> (bitsLeft - 5)) & 31];
+                        bitsLeft -= 5;
+                    }
+                }
+                if (bitsLeft > 0) {
+                    result += alphabet[(buffer << (5 - bitsLeft)) & 31];
+                }
+                return result;
+            },
+            md5: async (text) => {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                const hashBuffer = await crypto.subtle.digest('MD5', data).catch(() => null);
+                if (!hashBuffer) return 'MD5 no soportado en este navegador';
+                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+            sha1: async (text) => {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+            sha256: async (text) => {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+            reverse: (text) => text.split('').reverse().join(''),
+            caesar: (text) => text.replace(/[a-zA-Z]/g, (c) => 
+                String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 3) ? c : c - 23)),
+            atbash: (text) => text.replace(/[a-zA-Z]/g, (c) => 
+                String.fromCharCode((c <= 'Z' ? 90 : 122) - (c.charCodeAt(0) - (c <= 'Z' ? 65 : 97)))),
+            leetspeak: (text) => {
+                const leet = {'a': '4', 'e': '3', 'i': '1', 'o': '0', 's': '5', 't': '7', 'l': '1'};
+                return text.toLowerCase().replace(/[aeiostl]/g, c => leet[c]);
+            }
+        };
+
+        // Habilitar selector cuando hay texto
+        textInput.addEventListener('input', () => {
+            const hasText = textInput.value.trim().length > 0;
+            systemSelect.disabled = !hasText;
+            systemSection.classList.toggle('enabled', hasText);
+            
+            if (hasText) {
+                systemSelect.innerHTML = `
+                    <option value="">-- Selecciona un sistema --</option>
+                    <option value="base64">Base64</option>
+                    <option value="hex">Hexadecimal</option>
+                    <option value="binary">Binario</option>
+                    <option value="octal">Octal</option>
+                    <option value="ascii">ASCII (códigos)</option>
+                    <option value="url">URL Encode</option>
+                    <option value="html">HTML Entities</option>
+                    <option value="unicode">Unicode Escape</option>
+                    <option value="rot13">ROT13</option>
+                    <option value="morse">Código Morse</option>
+                    <option value="base32">Base32</option>
+                    <option value="md5">MD5 Hash</option>
+                    <option value="sha1">SHA-1 Hash</option>
+                    <option value="sha256">SHA-256 Hash</option>
+                    <option value="reverse">Texto Invertido</option>
+                    <option value="caesar">César (desplazamiento 3)</option>
+                    <option value="atbash">Cifrado Atbash</option>
+                    <option value="leetspeak">Leet Speak (1337)</option>
+                `;
+            } else {
+                systemSelect.innerHTML = '<option value="">-- Primero ingresa un texto --</option>';
+                resultSection.classList.remove('show');
+            }
+        });
+
+        // Convertir cuando se selecciona un sistema
+        systemSelect.addEventListener('change', async () => {
+            const text = textInput.value.trim();
+            const system = systemSelect.value;
+            
+            if (!text || !system) {
+                resultSection.classList.remove('show');
+                return;
+            }
+
+            try {
+                const converter = conversions[system];
+                if (typeof converter === 'function') {
+                    const converted = await converter(text);
+                    result.value = converted;
+                    resultSection.classList.add('show');
+                } else {
+                    result.value = 'Error: Sistema no encontrado';
+                    resultSection.classList.add('show');
+                }
+            } catch (error) {
+                result.value = 'Error en la conversión: ' + error.message;
+                resultSection.classList.add('show');
+            }
+        });
+
+        // Función para copiar el resultado
+        function copyResult() {
+            result.select();
+            result.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ ¡Copiado!';
+            btn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+            }, 2000);
+        }
+    </script>
+</body>
+                  </html>
