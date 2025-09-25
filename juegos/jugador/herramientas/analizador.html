@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Código</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .title {
+            text-align: center;
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .textarea-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid;
+            transform: translateX(-10px);
+            opacity: 0;
+            animation: slideInRight 0.5s ease-out forwards;
+        }
+
+        .result-card:nth-child(1) { animation-delay: 0.1s; }
+        .result-card:nth-child(2) { animation-delay: 0.2s; }
+        .result-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .language-card { border-left-color: #48bb78; }
+        .functionality-card { border-left-color: #4299e1; }
+        .errors-card { border-left-color: #f56565; }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-content {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .error-list {
+            list-style: none;
+        }
+
+        .error-item {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            color: #c53030;
+        }
+
+        .no-errors {
+            color: #38a169;
+            font-weight: 500;
+        }
+
+        .language-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .confidence {
+            font-size: 12px;
+            color: #718096;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔍 Analizador de Código</h1>
+        
+        <div class="input-section">
+            <div class="textarea-container">
+                <textarea id="codeInput" placeholder="Pega tu código aquí para analizarlo..."></textarea>
+            </div>
+            <button class="analyze-btn" onclick="analyzeCode()">
+                Analizar Código
+            </button>
+        </div>
+
+        <div id="results" class="results">
+            <div class="result-card language-card">
+                <div class="result-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                        <path d="M2 17L12 22L22 17"/>
+                        <path d="M2 12L12 17L22 12"/>
+                    </svg>
+                    Lenguaje de Programación
+                </div>
+                <div id="languageResult" class="result-content"></div>
+            </div>
+
+            <div class="result-card functionality-card">
+                <div class="result-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                    </svg>
+                    Funcionalidad Detectada
+                </div>
+                <div id="functionalityResult" class="result-content"></div>
+            </div>
+
+            <div class="result-card errors-card">
+                <div class="result-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M10.29 3.86L1.82 18A2 2 0 003.54 21H20.46A2 2 0 0022.18 18L13.71 3.86A2 2 0 0010.29 3.86Z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Análisis de Errores
+                </div>
+                <div id="errorsResult" class="result-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analyzeCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            
+            if (!code) {
+                alert('Por favor, introduce algún código para analizar.');
+                return;
+            }
+
+            const language = detectLanguage(code);
+            const functionality = detectFunctionality(code);
+            const errors = detectErrors(code, language);
+
+            displayResults(language, functionality, errors);
+        }
+
+        function detectLanguage(code) {
+            const patterns = {
+                'JavaScript': {
+                    patterns: [/function\s+\w+\s*\(/, /const\s+\w+\s*=/, /let\s+\w+\s*=/, /var\s+\w+\s*=/, /=>\s*{/, /console\.log\s*\(/, /document\./, /window\./, /addEventListener/],
+                    weight: [3, 2, 2, 1, 3, 2, 3, 2, 2]
+                },
+                'Python': {
+                    patterns: [/def\s+\w+\s*\(/, /import\s+\w+/, /from\s+\w+\s+import/, /print\s*\(/, /if\s+\w+.*:/, /for\s+\w+\s+in/, /class\s+\w+.*:/, /#.*/, /\bself\b/],
+                    weight: [3, 2, 2, 2, 2, 2, 3, 1, 2]
+                },
+                'Java': {
+                    patterns: [/public\s+class\s+\w+/, /public\s+static\s+void\s+main/, /System\.out\.println/, /private\s+\w+/, /public\s+\w+/, /import\s+java\./, /\/\*[\s\S]*?\*\//, /\/\/.*$/m],
+                    weight: [4, 4, 3, 2, 2, 3, 1, 1]
+                },
+                'C++': {
+                    patterns: [/#include\s*</, /int\s+main\s*\(/, /std::/, /cout\s*<</, /cin\s*>>/, /namespace\s+\w+/, /class\s+\w+\s*{/, /\/\/.*$/m],
+                    weight: [3, 4, 3, 3, 3, 2, 3, 1]
+                },
+                'HTML': {
+                    patterns: [/<html[^>]*>/, /<head[^>]*>/, /<body[^>]*>/, /<div[^>]*>/, /<p[^>]*>/, /<script[^>]*>/, /<style[^>]*>/, /<!DOCTYPE/i],
+                    weight: [4, 3, 3, 2, 2, 2, 2, 3]
+                },
+                'CSS': {
+                    patterns: [/\w+\s*{[^}]*}/, /\.\w+\s*{/, /#\w+\s*{/, /@media/, /background-color\s*:/, /margin\s*:/, /padding\s*:/, /font-size\s*:/],
+                    weight: [3, 3, 3, 2, 2, 2, 2, 2]
+                },
+                'PHP': {
+                    patterns: [/<\?php/, /\$\w+\s*=/, /echo\s+/, /function\s+\w+\s*\(/, /class\s+\w+/, /include\s+/, /require\s+/, /\?>$/],
+                    weight: [4, 3, 2, 2, 3, 2, 2, 2]
+                },
+                'SQL': {
+                    patterns: [/SELECT\s+.*\s+FROM/i, /INSERT\s+INTO/i, /UPDATE\s+.*\s+SET/i, /DELETE\s+FROM/i, /CREATE\s+TABLE/i, /ALTER\s+TABLE/i, /WHERE\s+/i, /JOIN\s+/i],
+                    weight: [4, 3, 3, 3, 4, 3, 2, 2]
+                }
+            };
+
+            let scores = {};
+            
+            for (let [lang, data] of Object.entries(patterns)) {
+                scores[lang] = 0;
+                data.patterns.forEach((pattern, index) => {
+                    if (pattern.test(code)) {
+                        scores[lang] += data.weight[index];
+                    }
+                });
+            }
+
+            const maxScore = Math.max(...Object.values(scores));
+            const detectedLang = Object.keys(scores).find(key => scores[key] === maxScore);
+            const confidence = Math.min(95, Math.max(30, (maxScore / 10) * 100));
+
+            return { language: detectedLang || 'Desconocido', confidence: Math.round(confidence) };
+        }
+
+        function detectFunctionality(code) {
+            const functionalities = [];
+
+            // Detección de funcionalidades web
+            if (/document\.|getElementById|querySelector|addEventListener|innerHTML|createElement/i.test(code)) {
+                functionalities.push('Manipulación del DOM - Página Web Interactiva');
+            }
+            
+            if (/<html|<head|<body|<div|<p|<h\d>/i.test(code)) {
+                functionalities.push('Estructura HTML - Página Web');
+            }
+
+            if (/fetch\s*\(|XMLHttpRequest|axios|ajax/i.test(code)) {
+                functionalities.push('Peticiones HTTP - Cliente Web/API');
+            }
+
+            // Discord bots
+            if (/discord\.js|Discord|client\.on|message\.reply|bot\./i.test(code)) {
+                functionalities.push('Bot de Discord');
+            }
+
+            // APIs y servidores
+            if (/express|app\.get|app\.post|res\.send|app\.listen|router\./i.test(code)) {
+                functionalities.push('Servidor Web/API REST');
+            }
+
+            if (/Flask|Django|@app\.route|render_template/i.test(code)) {
+                functionalities.push('Aplicación Web (Backend Python)');
+            }
+
+            // Base de datos
+            if (/SELECT|INSERT|UPDATE|DELETE|CREATE TABLE|mysql|mongodb|sqlite/i.test(code)) {
+                functionalities.push('Gestión de Base de Datos');
+            }
+
+            // Juegos y gráficos
+            if (/canvas|webgl|three\.js|game|player|enemy|score/i.test(code)) {
+                functionalities.push('Juego/Aplicación Gráfica');
+            }
+
+            // Machine Learning
+            if (/tensorflow|pytorch|sklearn|pandas|numpy|matplotlib/i.test(code)) {
+                functionalities.push('Machine Learning/Análisis de Datos');
+            }
+
+            // Mobile
+            if (/React Native|Flutter|ionic|cordova|android|ios/i.test(code)) {
+                functionalities.push('Aplicación Móvil');
+            }
+
+            return functionalities.length > 0 ? functionalities : ['Funcionalidad general de programación'];
+        }
+
+        function detectErrors(code, languageInfo) {
+            const errors = [];
+            const language = languageInfo.language.toLowerCase();
+
+            // Errores comunes de JavaScript
+            if (language === 'javascript') {
+                if (/console\.log\s*\([^)]*[^;]$/m.test(code)) {
+                    errors.push('Posible falta de punto y coma después de console.log');
+                }
+                if (/function\s+\w+\s*\([^)]*\)\s*{[^}]*}[^;]/m.test(code)) {
+                    errors.push('Las declaraciones de función no necesitan punto y coma al final');
+                }
+                if (/\bvar\b/.test(code)) {
+                    errors.push('Considera usar "let" o "const" en lugar de "var"');
+                }
+            }
+
+            // Errores comunes de Python
+            if (language === 'python') {
+                if (/^\s*if\s+.*[^:]$/m.test(code)) {
+                    errors.push('Las declaraciones if en Python deben terminar con dos puntos (:)');
+                }
+                if (/print\s+[^(]/.test(code)) {
+                    errors.push('En Python 3, print debe usarse como función: print()');
+                }
+            }
+
+            // Errores comunes de HTML
+            if (language === 'html') {
+                if (!/<\/html>/i.test(code) && /<html/i.test(code)) {
+                    errors.push('Etiqueta HTML de cierre </html> faltante');
+                }
+                if (!/<\/body>/i.test(code) && /<body/i.test(code)) {
+                    errors.push('Etiqueta BODY de cierre </body> faltante');
+                }
+            }
+
+            // Errores generales
+            if (/\(\s*\)/.test(code) && /function|def|void/.test(code)) {
+                // Paréntesis vacíos en funciones (no siempre es error)
+            }
+
+            // Detectar paréntesis desbalanceados
+            const openParens = (code.match(/\(/g) || []).length;
+            const closeParens = (code.match(/\)/g) || []).length;
+            if (openParens !== closeParens) {
+                errors.push(`Paréntesis desbalanceados: ${openParens} abren, ${closeParens} cierran`);
+            }
+
+            // Detectar llaves desbalanceadas
+            const openBraces = (code.match(/{/g) || []).length;
+            const closeBraces = (code.match(/}/g) || []).length;
+            if (openBraces !== closeBraces) {
+                errors.push(`Llaves desbalanceadas: ${openBraces} abren, ${closeBraces} cierran`);
+            }
+
+            return errors;
+        }
+
+        function displayResults(language, functionality, errors) {
+            // Mostrar lenguaje
+            document.getElementById('languageResult').innerHTML = `
+                <span class="language-tag">${language.language}</span>
+                <span class="confidence">Confianza: ${language.confidence}%</span>
+            `;
+
+            // Mostrar funcionalidad
+            const funcList = functionality.map(func => `<li>• ${func}</li>`).join('');
+            document.getElementById('functionalityResult').innerHTML = `<ul>${funcList}</ul>`;
+
+            // Mostrar errores
+            if (errors.length === 0) {
+                document.getElementById('errorsResult').innerHTML = '<div class="no-errors">✅ No se detectaron errores obvios</div>';
+            } else {
+                const errorList = errors.map(error => `<div class="error-item">⚠️ ${error}</div>`).join('');
+                document.getElementById('errorsResult').innerHTML = errorList;
+            }
+
+            // Mostrar resultados con animación
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+                          </html>
