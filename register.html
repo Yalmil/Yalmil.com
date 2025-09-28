@@ -5,240 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta property="og:title" content="Registrarse en Yalmil.com" />
   <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
-  <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png?ex=68ca3722&is=68c8e5a2&hm=07f22424a0679c8804e496afa5e5b30a88ee8a14283e8da8fc607166fcf20f08&" type="image/png">
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png" type="image/png">
     
   <title>Registro</title>
   <style>
+    /* --- Tus estilos originales --- */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f);
-      color: #e5ccff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      animation: fadeIn 1s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 20px #c084fc88; }
-      50% { box-shadow: 0 0 30px #c084fc, 0 0 40px #c084fc66; }
-    }
-
-    @keyframes buttonHover {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1.02); }
-    }
-
-    .container {
-      background: rgba(40, 0, 60, 0.2);
-      backdrop-filter: blur(6px);
-      border: 2px solid #c084fc;
-      border-radius: 1.5rem;
-      padding: 2.5rem;
-      width: 90%;
-      max-width: 420px;
-      box-shadow: 0 0 20px #c084fc88;
-      animation: pulse 3s infinite;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 2.2rem;
-      margin-bottom: 1rem;
-      color: #c084fc;
-      text-shadow: 0 0 8px #c084fc;
-    }
-
-    .subtitle {
-      text-align: center;
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
-      color: #e5ccff88;
-    }
-
-    .social-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .social-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .social-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .social-button:hover::before {
-      left: 100%;
-    }
-
-    .social-button:hover {
-      animation: buttonHover 0.3s ease;
-      filter: brightness(1.1);
-    }
-
-    .github {
-      background: linear-gradient(135deg, #24292e, #1a1e22);
-      color: white;
-      box-shadow: 0 4px 15px rgba(36, 41, 46, 0.4);
-    }
-
-    .github:hover {
-      background: linear-gradient(135deg, #2f363d, #24292e);
-      box-shadow: 0 6px 20px rgba(36, 41, 46, 0.6);
-    }
-
-    .google {
-      background: linear-gradient(135deg, #db4437, #c23321);
-      color: white;
-      box-shadow: 0 4px 15px rgba(219, 68, 55, 0.4);
-    }
-
-    .google:hover {
-      background: linear-gradient(135deg, #e55245, #db4437);
-      box-shadow: 0 6px 20px rgba(219, 68, 55, 0.6);
-    }
-
-    .twitter {
-      background: linear-gradient(135deg, #1da1f2, #0d8bd9);
-      color: white;
-      box-shadow: 0 4px 15px rgba(29, 161, 242, 0.4);
-    }
-
-    .twitter:hover {
-      background: linear-gradient(135deg, #1a91da, #1da1f2);
-      box-shadow: 0 6px 20px rgba(29, 161, 242, 0.6);
-    }
-
-    .social-icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 12px;
-      filter: brightness(1.2);
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 2rem 0;
-      color: #e5ccff66;
-      font-size: 0.9rem;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, transparent, #c084fc44, transparent);
-    }
-
-    .divider span {
-      margin: 0 1rem;
-    }
-
-    .login-link {
-      color: #e5ccff;
-      display: block;
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      padding: 0.5rem;
-      border-radius: 8px;
-    }
-
-    .login-link:hover {
-      color: #c084fc;
-      background: rgba(192, 132, 252, 0.1);
-      transform: translateY(-2px);
-    }
-
-    .terms-link {
-      color: #e5ccff66;
-      display: block;
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .terms-link:hover {
-      color: #c084fc88;
-    }
-
-    /* Responsive design */
-    @media (max-width: 480px) {
-      .container {
-        padding: 2rem;
-        margin: 1rem;
-      }
-      
-      h2 {
-        font-size: 1.8rem;
-      }
-      
-      .social-button {
-        padding: 14px 20px;
-        font-size: 0.95rem;
-      }
-    }
+    body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .container { background:rgba(40,0,60,0.2); backdrop-filter:blur(6px); border:2px solid #c084fc; border-radius:1.5rem; padding:2.5rem; width:90%; max-width:420px; box-shadow:0 0 20px #c084fc88; }
+    h2 { text-align:center; font-size:2.2rem; margin-bottom:1rem; color:#c084fc; }
+    .subtitle { text-align:center; font-size:0.95rem; margin-bottom:2rem; color:#e5ccff88; }
+    .social-buttons { display:flex; flex-direction:column; gap:1rem; }
+    .social-button { display:flex; align-items:center; justify-content:center; padding:12px 20px; border:none; border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer; transition:all .3s ease; color:white; }
+    .google { background:linear-gradient(135deg,#db4437,#c23321); box-shadow:0 4px 15px rgba(219,68,55,.4); }
+    .google:hover { background:linear-gradient(135deg,#e55245,#db4437); box-shadow:0 6px 20px rgba(219,68,55,.6); }
+    .social-icon { width:20px; height:20px; margin-right:12px; filter:brightness(1.2); }
+    .login-link { color:#e5ccff; display:block; text-align:center; margin-top:1.5rem; font-size:.9rem; text-decoration:none; }
+    .login-link:hover { color:#c084fc; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Registro</h2>
-    <p class="subtitle">Únete usando tu red social favorita</p>
+    <p class="subtitle">Únete usando tu cuenta de Google</p>
     
     <div class="social-buttons">
-      <button class="social-button github" onclick="loginWithGithub()">
-        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-        </svg>
-        Continuar con GitHub
-      </button>
-
-      <button class="social-button google" onclick="loginWithGoogle()">
+      <button class="social-button google" id="googleLoginBtn">
         <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -247,136 +42,49 @@
         </svg>
         Continuar con Google
       </button>
-
-      <button class="social-button twitter" onclick="loginWithTwitter()">
-        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-        </svg>
-        Continuar con Twitter
-      </button>
-    </div>
-
-    <div class="divider">
-      <span>o</span>
     </div>
 
     <a href="login" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
-    <a href="terminos" class="terms-link">Al registrarte aceptas los términos de servicio</a>
+    <a href="terminos" class="login-link">Al registrarte aceptas los términos de servicio</a>
   </div>
 
-  <script>
-    // Función para GitHub OAuth
-    function loginWithGithub() {
-      // Configuración OAuth para GitHub
-      const githubClientId = 'TU_GITHUB_CLIENT_ID'; // Reemplazar con tu Client ID real
-      const redirectUri = encodeURIComponent(window.location.origin + '/auth/github/callback');
-      const scope = 'user:email';
-      
-      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${redirectUri}&scope=${scope}`;
-      
-      // Crear popup para OAuth
-      const popup = window.open(
-        githubAuthUrl,
-        'github-login',
-        'width=600,height=600,scrollbars=yes,resizable=yes'
-      );
-      
-      // Monitorear el popup
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          // Verificar si el usuario se autenticó exitosamente
-          checkAuthStatus();
-        }
-      }, 1000);
-    }
+  <script type="module">
+    // Importar SDK de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    // Función para Google OAuth
-    function loginWithGoogle() {
-      // Configuración OAuth para Google
-      const googleClientId = '121538864529-qmm48nbh3gim2kiassu4eo89nh628451.apps.googleusercontent.com'; // Reemplazar con tu Client ID real
-      const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
-      const scope = 'openid email profile';
-      
-      const googleAuthUrl = `https://accounts.google.com/oauth2/authorize?client_id=${googleClientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&access_type=offline`;
-      
-      // Crear popup para OAuth
-      const popup = window.open(
-        googleAuthUrl,
-        'google-login',
-        'width=600,height=600,scrollbars=yes,resizable=yes'
-      );
-      
-      // Monitorear el popup
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          checkAuthStatus();
-        }
-      }, 1000);
-    }
+    // Configuración de Firebase (pon tus datos)
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROYECTO.firebaseapp.com",
+      projectId: "TU_PROYECTO_ID",
+      storageBucket: "TU_PROYECTO.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
 
-    // Función para Twitter OAuth
-    function loginWithTwitter() {
-      // Configuración OAuth para Twitter/X
-      const twitterClientId = 'TU_TWITTER_CLIENT_ID'; // Reemplazar con tu Client ID real
-      const redirectUri = encodeURIComponent(window.location.origin + '/auth/twitter/callback');
-      const scope = 'tweet.read users.read';
-      
-      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${twitterClientId}&redirect_uri=${redirectUri}&scope=${scope}&state=state123&code_challenge=challenge&code_challenge_method=plain`;
-      
-      // Crear popup para OAuth
-      const popup = window.open(
-        twitterAuthUrl,
-        'twitter-login',
-        'width=600,height=600,scrollbars=yes,resizable=yes'
-      );
-      
-      // Monitorear el popup
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          checkAuthStatus();
-        }
-      }, 1000);
-    }
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    // Función para verificar el estado de autenticación
-    function checkAuthStatus() {
-      // Aquí implementarías la lógica para verificar si el usuario se autenticó
-      // Por ejemplo, hacer una llamada a tu backend para verificar la sesión
-      fetch('/api/auth/status')
-        .then(response => response.json())
-        .then(data => {
-          if (data.authenticated) {
-            window.location.href = 'inicio.html';
-          }
+    // Botón login con Google
+    document.getElementById("googleLoginBtn").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          alert(`Bienvenido ${user.displayName}`);
+          console.log("Usuario:", user);
+          window.location.href = "inicio.html"; // redirigir después del login
         })
-        .catch(error => {
-          console.log('Error verificando autenticación:', error);
+        .catch((error) => {
+          console.error("Error en login:", error);
+          alert("Error al iniciar sesión con Google");
         });
-    }
-
-    // Efectos visuales adicionales
-    document.addEventListener('DOMContentLoaded', function() {
-      const socialButtons = document.querySelectorAll('.social-button');
-      
-      socialButtons.forEach((button, index) => {
-        button.style.animationDelay = `${index * 0.1}s`;
-        button.style.animation = 'fadeIn 0.6s ease-out forwards';
-      });
     });
 
-    // Manejo de mensajes del popup (para OAuth callbacks)
-    window.addEventListener('message', function(event) {
-      if (event.origin !== window.location.origin) return;
-      
-      if (event.data.type === 'oauth_success') {
-        window.location.href = 'inicio.html';
-      } else if (event.data.type === 'oauth_error') {
-        alert('Error en la autenticación: ' + event.data.error);
-      }
-    });
+    // Ejemplo de logout opcional
+    // signOut(auth);
   </script>
 </body>
 </html>
