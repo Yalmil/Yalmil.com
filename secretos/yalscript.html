@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YalScript/YlmScript Interpreter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #ff6b00, #ff8533);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(255, 107, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 107, 0, 0.8);
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .editor-panel, .output-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: rgba(255, 107, 0, 0.2);
+            padding: 0.8rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.3);
+        }
+
+        .code-editor {
+            flex: 1;
+            background: #0d0d0d;
+            border: none;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 1rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .code-editor:focus {
+            box-shadow: inset 0 0 10px rgba(255, 107, 0, 0.3);
+        }
+
+        .output-frame {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        .controls {
+            padding: 1rem;
+            background: rgba(255, 107, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b00, #ff8533);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+            background: linear-gradient(45deg, #ff8533, #ffaa66);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .functions-info {
+            background: rgba(255, 107, 0, 0.1);
+            padding: 1rem;
+            margin: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b00;
+        }
+
+        .functions-info h3 {
+            color: #ff6b00;
+            margin-bottom: 0.5rem;
+        }
+
+        .functions-info ul {
+            list-style: none;
+            color: #cccccc;
+        }
+
+        .functions-info li {
+            margin: 0.3rem 0;
+            padding-left: 1rem;
+        }
+
+        .functions-info li:before {
+            content: "▶ ";
+            color: #ff6b00;
+            margin-right: 0.5rem;
+        }
+
+        /* Plantilla CSS Neon Naranja */
+        .neon-template {
+            background: radial-gradient(circle at center, #1a0a00, #0a0a0a);
+            color: #ff6b00;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .neon-template h1, .neon-template h2, .neon-template h3, 
+        .neon-template h4, .neon-template h5, .neon-template h6 {
+            text-shadow: 
+                0 0 5px #ff6b00,
+                0 0 10px #ff6b00,
+                0 0 15px #ff6b00,
+                0 0 20px #ff6b00,
+                0 0 35px #ff6b00,
+                0 0 40px #ff6b00;
+            margin: 1rem 0;
+            animation: neonGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonGlow {
+            from {
+                text-shadow: 
+                    0 0 5px #ff6b00,
+                    0 0 10px #ff6b00,
+                    0 0 15px #ff6b00,
+                    0 0 20px #ff6b00,
+                    0 0 35px #ff6b00,
+                    0 0 40px #ff6b00;
+            }
+            to {
+                text-shadow: 
+                    0 0 2px #ff6b00,
+                    0 0 5px #ff6b00,
+                    0 0 8px #ff6b00,
+                    0 0 12px #ff6b00,
+                    0 0 18px #ff6b00,
+                    0 0 25px #ff6b00;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>YalScript/YlmScript Interpreter</h1>
+    </div>
+
+    <div class="functions-info">
+        <h3>Funciones Disponibles:</h3>
+        <ul>
+            <li><strong>&lt;Title&gt;</strong> = -inicio (Define el título de la página)</li>
+            <li><strong>&lt;H1&gt;</strong> = -texto1 (Encabezado nivel 1)</li>
+            <li><strong>&lt;H2&gt;</strong> = -texto2 (Encabezado nivel 2)</li>
+            <li><strong>&lt;H3&gt;</strong> = -texto3 (Encabezado nivel 3, etc.)</li>
+            <li><strong>&lt;p&gt;</strong> = -parrafo (Crear párrafo)</li>
+            <li><strong>&lt;a&gt;</strong> = -link URL texto (Crear enlace)</li>
+            <li><strong>&lt;ul&gt;</strong> = -lista ul + -item (Crear lista)</li>
+            <li><strong>Plantillas:</strong> -template (naranja), -templateblue, -templategreen, -templatered, -templatepurple, -templategray</li>
+            <li><strong>Neón:</strong> -neon on/off (predeterminado: on)</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="editor-panel">
+            <div class="panel-header">Editor YalScript/YlmScript</div>
+            <textarea class="code-editor" id="codeEditor" placeholder="Escribe tu código YalScript/YlmScript aquí...
+
+Ejemplo:
+-inicio Mi Página Web
+-texto1 Bienvenido
+-parrafo Este es un párrafo de ejemplo
+-texto2 Enlaces y Listas
+-link https://google.com Ir a Google
+-lista ul
+-item Primer elemento
+-item Segundo elemento
+-item Tercer elemento
+-templateblue
+-neon off">Escribe tu código YalScript/YlmScript aquí...
+
+Ejemplo:
+-inicio Mi Página Web
+-texto1 Bienvenido
+-parrafo Este es un párrafo de ejemplo
+-texto2 Enlaces y Listas
+-link https://google.com Ir a Google
+-lista ul
+-item Primer elemento
+-item Segundo elemento
+-item Tercer elemento
+-templateblue
+-neon off</textarea>
+            <div class="controls">
+                <button class="btn" onclick="interpretCode()">▶ Ejecutar</button>
+                <button class="btn" onclick="clearEditor()">🗑 Limpiar</button>
+                <button class="btn" onclick="downloadHTML()">📥 Descargar HTML</button>
+            </div>
+        </div>
+
+        <div class="output-panel">
+            <div class="panel-header">Resultado HTML</div>
+            <iframe class="output-frame" id="outputFrame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        class YalScriptInterpreter {
+            constructor() {
+                this.variables = {};
+                this.templateColor = null;
+                this.neonEffect = true; // predeterminado: on
+                this.title = 'Mi Página';
+                this.content = [];
+                this.currentList = null;
+                this.colorSchemes = {
+                    orange: { primary: '#ff6b00', secondary: '#ffaa66', bg1: '#1a0a00', bg2: '#0a0a0a' },
+                    blue: { primary: '#00aaff', secondary: '#66ccff', bg1: '#001a33', bg2: '#000a1a' },
+                    green: { primary: '#00ff88', secondary: '#66ffaa', bg1: '#001a0f', bg2: '#000a05' },
+                    red: { primary: '#ff3366', secondary: '#ff6699', bg1: '#1a0a0f', bg2: '#0a0005' },
+                    purple: { primary: '#aa00ff', secondary: '#cc66ff', bg1: '#1a001a', bg2: '#0a000a' },
+                    gray: { primary: '#aaaaaa', secondary: '#cccccc', bg1: '#1a1a1a', bg2: '#0a0a0a' }
+                };
+            }
+
+            interpret(code) {
+                this.reset();
+                const lines = code.split('\n').filter(line => line.trim() !== '');
+                
+                for (let line of lines) {
+                    this.processLine(line.trim());
+                }
+                
+                return this.generateHTML();
+            }
+
+            reset() {
+                this.variables = {};
+                this.templateColor = null;
+                this.neonEffect = true;
+                this.title = 'Mi Página';
+                this.content = [];
+                this.currentList = null;
+            }
+
+            processLine(line) {
+                // Ignorar comentarios (líneas que empiecen con //)
+                if (line.startsWith('//')) return;
+
+                // Procesar -inicio (Title)
+                if (line.startsWith('-inicio ')) {
+                    this.title = line.substring(8).trim();
+                    this.finishCurrentList();
+                    return;
+                }
+
+                // Procesar plantillas
+                if (line === '-template') {
+                    this.templateColor = 'orange';
+                    this.finishCurrentList();
+                    return;
+                }
+                if (line === '-templateblue') {
+                    this.templateColor = 'blue';
+                    this.finishCurrentList();
+                    return;
+                }
+                if (line === '-templategreen') {
+                    this.templateColor = 'green';
+                    this.finishCurrentList();
+                    return;
+                }
+                if (line === '-templatered') {
+                    this.templateColor = 'red';
+                    this.finishCurrentList();
+                    return;
+                }
+                if (line === '-templatepurple') {
+                    this.templateColor = 'purple';
+                    this.finishCurrentList();
+                    return;
+                }
+                if (line === '-templategray') {
+                    this.templateColor = 'gray';
+                    this.finishCurrentList();
+                    return;
+                }
+
+                // Procesar efecto neón
+                if (line === '-neon on') {
+                    this.neonEffect = true;
+                    return;
+                }
+                if (line === '-neon off') {
+                    this.neonEffect = false;
+                    return;
+                }
+
+                // Procesar -parrafo
+                if (line.startsWith('-parrafo ')) {
+                    const text = line.substring(9).trim();
+                    this.finishCurrentList();
+                    this.content.push({
+                        type: 'paragraph',
+                        text: text
+                    });
+                    return;
+                }
+
+                // Procesar -link
+                if (line.startsWith('-link ')) {
+                    const parts = line.substring(6).trim().split(' ');
+                    if (parts.length >= 2) {
+                        const url = parts[0];
+                        const text = parts.slice(1).join(' ');
+                        this.finishCurrentList();
+                        this.content.push({
+                            type: 'link',
+                            url: url,
+                            text: text
+                        });
+                    }
+                    return;
+                }
+
+                // Procesar -lista ul
+                if (line === '-lista ul') {
+                    this.finishCurrentList();
+                    this.currentList = {
+                        type: 'list',
+                        listType: 'ul',
+                        items: []
+                    };
+                    return;
+                }
+
+                // Procesar -item
+                if (line.startsWith('-item ')) {
+                    const text = line.substring(6).trim();
+                    if (this.currentList) {
+                        this.currentList.items.push(text);
+                    }
+                    return;
+                }
+
+                // Procesar -texto1, -texto2, etc. (H1, H2, etc.)
+                const textoMatch = line.match(/^-texto(\d+)\s+(.+)$/);
+                if (textoMatch) {
+                    const level = parseInt(textoMatch[1]);
+                    const text = textoMatch[2].trim();
+                    this.finishCurrentList();
+                    this.content.push({
+                        type: 'heading',
+                        level: level,
+                        text: text
+                    });
+                    return;
+                }
+
+                // Si no coincide con ningún patrón, ignorar o mostrar error
+                if (line.startsWith('-') && line.length > 1) {
+                    console.warn(`Comando no reconocido: ${line}`);
+                }
+            }
+
+            finishCurrentList() {
+                if (this.currentList) {
+                    this.content.push(this.currentList);
+                    this.currentList = null;
+                }
+            }
+
+            generateHTML() {
+                // Finalizar cualquier lista pendiente
+                this.finishCurrentList();
+                
+                let html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${this.title}</title>`;
+
+                if (this.templateColor) {
+                    const colors = this.colorSchemes[this.templateColor];
+                    html += `
+    <style>
+        body {
+            background: radial-gradient(circle at center, ${colors.bg1}, ${colors.bg2});
+            color: ${colors.primary};
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 2rem;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {`;
+                    
+                    if (this.neonEffect) {
+                        html += `
+            text-shadow: 
+                0 0 5px ${colors.primary},
+                0 0 10px ${colors.primary},
+                0 0 15px ${colors.primary},
+                0 0 20px ${colors.primary},
+                0 0 35px ${colors.primary},
+                0 0 40px ${colors.primary};
+            animation: neonGlow 2s ease-in-out infinite alternate;`;
+                    } else {
+                        html += `
+            text-shadow: none;`;
+                    }
+                    
+                    html += `
+            margin: 1rem 0;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 1rem 0;`;
+                    
+                    if (this.neonEffect) {
+                        html += `
+            text-shadow: 0 0 3px ${colors.primary};`;
+                    } else {
+                        html += `
+            text-shadow: none;`;
+                    }
+                    
+                    html += `
+        }
+
+        a {
+            color: ${colors.secondary};
+            text-decoration: none;`;
+                    
+                    if (this.neonEffect) {
+                        html += `
+            text-shadow: 0 0 5px ${colors.secondary};`;
+                    } else {
+                        html += `
+            text-shadow: none;`;
+                    }
+                    
+                    html += `
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: ${colors.primary};`;
+                    
+                    if (this.neonEffect) {
+                        html += `
+            text-shadow: 0 0 10px ${colors.primary};`;
+                    } else {
+                        html += `
+            text-shadow: none;
+            opacity: 0.8;`;
+                    }
+                    
+                    html += `
+        }
+
+        ul {
+            text-align: left;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        li {
+            margin: 0.5rem 0;`;
+                    
+                    if (this.neonEffect) {
+                        html += `
+            text-shadow: 0 0 3px ${colors.primary};`;
+                    } else {
+                        html += `
+            text-shadow: none;`;
+                    }
+                    
+                    html += `
+        }`;
+
+                    if (this.neonEffect) {
+                        html += `
+
+        @keyframes neonGlow {
+            from {
+                text-shadow: 
+                    0 0 5px ${colors.primary},
+                    0 0 10px ${colors.primary},
+                    0 0 15px ${colors.primary},
+                    0 0 20px ${colors.primary},
+                    0 0 35px ${colors.primary},
+                    0 0 40px ${colors.primary};
+            }
+            to {
+                text-shadow: 
+                    0 0 2px ${colors.primary},
+                    0 0 5px ${colors.primary},
+                    0 0 8px ${colors.primary},
+                    0 0 12px ${colors.primary},
+                    0 0 18px ${colors.primary},
+                    0 0 25px ${colors.primary};
+            }
+        }`;
+                    }
+                    
+                    html += `
+    </style>`;
+                }
+
+                html += `
+</head>
+<body>`;
+
+                // Generar contenido
+                for (let item of this.content) {
+                    if (item.type === 'heading') {
+                        html += `
+    <h${item.level}>${item.text}</h${item.level}>`;
+                    } else if (item.type === 'paragraph') {
+                        html += `
+    <p>${item.text}</p>`;
+                    } else if (item.type === 'link') {
+                        html += `
+    <p><a href="${item.url}" target="_blank">${item.text}</a></p>`;
+                    } else if (item.type === 'list') {
+                        html += `
+    <${item.listType}>`;
+                        for (let listItem of item.items) {
+                            html += `
+        <li>${listItem}</li>`;
+                        }
+                        html += `
+    </${item.listType}>`;
+                    }
+                }
+
+                html += `
+</body>
+</html>`;
+
+                return html;
+            }
+        }
+
+        // Instancia global del intérprete
+        const interpreter = new YalScriptInterpreter();
+
+        function interpretCode() {
+            const code = document.getElementById('codeEditor').value;
+            const html = interpreter.interpret(code);
+            
+            const iframe = document.getElementById('outputFrame');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(html);
+            iframeDoc.close();
+        }
+
+        function clearEditor() {
+            document.getElementById('codeEditor').value = '';
+            const iframe = document.getElementById('outputFrame');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write('<html><body style="font-family: Arial; text-align: center; padding: 2rem; color: #6
