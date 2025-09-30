@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friendle</title>
+    <title>Wordle de Amigos</title>
     <style>
         * {
             margin: 0;
@@ -206,7 +206,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Friendle</h1>
+        <h1>🎮 Wordle de Amigos</h1>
         <p class="subtitle">¡Adivina quién es el amigo del día!</p>
 
         <div class="input-container">
@@ -249,7 +249,12 @@
             { nombre: "Eron", raza: "Humano", año: "2024", youtuber: "No", color: "Negro" },
             { nombre: "Lu", raza: "Humano", año: "2025", youtuber: "No", color: "Blanco" },
             { nombre: "Dear", raza: "Minecraft", año: "2022", youtuber: "No", color: "Azul" },
-            { nombre: "Kaisser", raza: "Humano", año: "2023/2024", youtuber: "Sí", color: "Negro" }
+            { nombre: "Kaisser", raza: "Humano", año: "2023/2024", youtuber: "Sí", color: "Negro" },
+            { nombre: "Milenial", raza: "Meme", año: "2024", youtuber: "No", color: "Rojo" },
+            { nombre: "Ben10", raza: "Meme", año: "2023", youtuber: "No", color: "Verde" },
+            { nombre: "Cartoon", raza: "Desconocido", año: "2024", youtuber: "Razonable", color: "Rojo" },
+            { nombre: "Alxbc", raza: "Película/Anime", año: "2024", youtuber: "No", color: "Negro" },
+            { nombre: "Fabi", raza: "Meme", año: "2025", youtuber: "Razonable", color: "Amarillo" }
         ];
 
         let amigoDelDia = null;
@@ -262,7 +267,7 @@
             const seed = hoy.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const index = seed % amigos.length;
             amigoDelDia = amigos[index];
-            console.log("Amigo del día seleccionado (para debug):", amigoDelDia.nombre);
+            console.log("Amigo del día seleccionado:", amigoDelDia.nombre);
         }
 
         // Autocompletado
