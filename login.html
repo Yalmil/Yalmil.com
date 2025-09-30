@@ -12,7 +12,6 @@
     
   <title>Registro</title>
   <style>
-    /* --- Tus estilos originales --- */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
     .container { background:rgba(40,0,60,0.2); backdrop-filter:blur(6px); border:2px solid #c084fc; border-radius:1.5rem; padding:2.5rem; width:90%; max-width:420px; box-shadow:0 0 20px #c084fc88; }
@@ -43,19 +42,22 @@
         Continuar con Google
       </button>
     </div>
-    
+
+    <a href="login" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
     <a href="terminos" class="login-link">Al registrarte aceptas los términos de servicio</a>
   </div>
 
   <script type="module">
     // Importar SDK de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    // Configuración de Firebase (pon tus datos)
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
       projectId: "databaseloginweb",
       storageBucket: "databaseloginweb.firebasestorage.app",
       messagingSenderId: "121538864529",
@@ -66,24 +68,32 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    const db = getDatabase(app);
 
     // Botón login con Google
     document.getElementById("googleLoginBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
+
+          // Guardar en la base de datos
+          set(ref(db, "usuarios/" + user.uid), {
+            nombre: user.displayName,
+            email: user.email,
+            fotoPerfil: user.photoURL
+          });
+
           alert(`Bienvenido ${user.displayName}`);
           console.log("Usuario:", user);
-          window.location.href = "inicio.html"; // redirigir después del login
+
+          // Redirigir
+          window.location.href = "inicio.html";
         })
         .catch((error) => {
           console.error("Error en login:", error);
           alert("Error al iniciar sesión con Google");
         });
     });
-
-    // Ejemplo de logout opcional
-    // signOut(auth);
   </script>
 </body>
 </html>
