@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papea Abrilags - El Juego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .game-area {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(180deg, #87ceeb 0%, #98d8e8 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            cursor: crosshair;
+            border: 3px solid #667eea;
+        }
+
+        .abrilag {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: transform 0.1s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .abrilag:hover {
+            transform: scale(1.1);
+        }
+
+        .abrilag:active {
+            transform: scale(0.9);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes explosion {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .explosion {
+            position: absolute;
+            color: #ffeb3b;
+            font-size: 3em;
+            pointer-events: none;
+            animation: explosion 0.5s ease-out;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 40px;
+        }
+
+        .victory {
+            color: #4caf50;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        #timer {
+            font-size: 1.5em;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Papea Abrilags 🎮</h1>
+        <p class="subtitle">¡Demuestra que Saanty está equivocado!</p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">PUNTUACIÓN</div>
+                <div id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">TIEMPO</div>
+                <div id="timer">30</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">RÉCORD</div>
+                <div id="highscore">0</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea"></div>
+
+        <button class="button" id="startBtn">Iniciar Juego</button>
+        
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const highscoreDisplay = document.getElementById('highscore');
+        const startBtn = document.getElementById('startBtn');
+        const messageDisplay = document.getElementById('message');
+
+        let score = 0;
+        let timeLeft = 30;
+        let gameActive = false;
+        let spawnInterval;
+        let timerInterval;
+        let highscore = localStorage.getItem('highscore') || 0;
+
+        highscoreDisplay.textContent = highscore;
+
+        const abrilagEmojis = ['🍔', '🍕', '🌮', '🍗', '🍟', '🌭', '🥙', '🍖'];
+
+        function createAbrilag() {
+            if (!gameActive) return;
+
+            const abrilag = document.createElement('div');
+            abrilag.className = 'abrilag';
+            abrilag.textContent = abrilagEmojis[Math.floor(Math.random() * abrilagEmojis.length)];
+            
+            const maxX = gameArea.clientWidth - 80;
+            const maxY = gameArea.clientHeight - 80;
+            
+            abrilag.style.left = Math.random() * maxX + 'px';
+            abrilag.style.top = Math.random() * maxY + 'px';
+            
+            abrilag.addEventListener('click', function(e) {
+                if (!gameActive) return;
+                
+                score++;
+                scoreDisplay.textContent = score;
+                
+                const explosion = document.createElement('div');
+                explosion.className = 'explosion';
+                explosion.textContent = '💥';
+                explosion.style.left = e.clientX - gameArea.getBoundingClientRect().left + 'px';
+                explosion.style.top = e.clientY - gameArea.getBoundingClientRect().top + 'px';
+                gameArea.appendChild(explosion);
+                
+                setTimeout(() => explosion.remove(), 500);
+                
+                abrilag.remove();
+            });
+            
+            gameArea.appendChild(abrilag);
+            
+            setTimeout(() => {
+                if (abrilag.parentNode) {
+                    abrilag.remove();
+                }
+            }, 2000);
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            gameActive = true;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            messageDisplay.textContent = '';
+            messageDisplay.className = 'message';
+            startBtn.textContent = 'Juego en curso...';
+            startBtn.disabled = true;
+            
+            gameArea.innerHTML = '';
+            
+            spawnInterval = setInterval(createAbrilag, 800);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(spawnInterval);
+            clearInterval(timerInterval);
+            gameArea.innerHTML = '';
+            startBtn.textContent = 'Jugar de Nuevo';
+            startBtn.disabled = false;
+            
+            if (score > highscore) {
+                highscore = score;
+                localStorage.setItem('highscore', highscore);
+                highscoreDisplay.textContent = highscore;
+                messageDisplay.innerHTML = '🎉 ¡NUEVO RÉCORD! 🎉<br>¡Saanty definitivamente estaba equivocado!';
+                messageDisplay.className = 'message victory';
+            } else if (score >= 20) {
+                messageDisplay.textContent = '¡Excelente! ¡Has demostrado tu punto!';
+                messageDisplay.className = 'message victory';
+            } else if (score >= 10) {
+                messageDisplay.textContent = '¡Buen trabajo! Sigue así.';
+            } else {
+                messageDisplay.textContent = '¡Inténtalo de nuevo! Puedes hacerlo mejor.';
+            }
+        }
+
+        startBtn.addEventListener('click', startGame);
+    </script>
+</body>
+                  </html>
