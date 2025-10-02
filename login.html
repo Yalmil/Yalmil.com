@@ -3,14 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta property="og:title" content="Registrarse en Yalmil.com" />
-  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
-  <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png" type="image/png">
-    
-  <title>Registro</title>
+  <title>Iniciar sesión</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
@@ -48,12 +41,11 @@
   </div>
 
   <script type="module">
-    // Importar SDK de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    // Configuración de Firebase
+    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
@@ -64,35 +56,31 @@
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getDatabase(app);
 
-    // Botón login con Google
     document.getElementById("googleLoginBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
 
-          // Guardar datos en la base de datos
-          update(ref(db, "usuarios/" + user.uid), {
+          // Guardar datos y esperar confirmación
+          return update(ref(db, "usuarios/" + user.uid), {
             nombre: user.displayName,
             gmail: user.email,
             fotoPerfil: user.photoURL,
             ultimaConexion: new Date().toISOString()
+          }).then(() => {
+            alert(`Bienvenido ${user.displayName}`);
+            console.log("✅ Datos guardados en DB:", user.uid);
+            window.location.href = "inicio.html";
           });
-
-          alert(`Bienvenido ${user.displayName}`);
-          console.log("Usuario:", user);
-
-          // Redirigir
-          window.location.href = "inicio.html";
         })
         .catch((error) => {
-          console.error("Error en login:", error);
-          alert("Error al iniciar sesión con Google");
+          console.error("❌ Error en login/DB:", error);
+          alert("Error al iniciar sesión con Google o guardar en la base de datos");
         });
     });
   </script>
