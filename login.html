@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iniciar sesión</title>
+  <title>Registro</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
@@ -42,7 +42,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     // Configuración Firebase
@@ -61,12 +61,22 @@
     const provider = new GoogleAuthProvider();
     const db = getDatabase(app);
 
+    // Verificar si ya está logueado
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("✅ Usuario ya autenticado:", user.uid);
+        window.location.href = "inicio.html";
+      } else {
+        console.log("ℹ️ No hay sesión iniciada, se muestra login normal.");
+      }
+    });
+
     document.getElementById("googleLoginBtn").addEventListener("click", () => {
       signInWithPopup(auth, provider)
         .then((result) => {
           const user = result.user;
 
-          // Guardar datos y esperar confirmación
+          // Guardar datos y redirigir
           return update(ref(db, "usuarios/" + user.uid), {
             nombre: user.displayName,
             gmail: user.email,
