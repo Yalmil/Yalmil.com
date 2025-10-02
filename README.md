@@ -1,2 +1,2 @@
 # Yalmil.com
-## *Yalmil.com es un sitio hecho por yalmil para poder encontrar todas su páginas Webs fácilmente*
+## *Yalmil.com es un sitio web para nsc*
