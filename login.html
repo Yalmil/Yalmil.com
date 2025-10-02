@@ -51,7 +51,7 @@
     // Importar SDK de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     // Configuración de Firebase
     const firebaseConfig = {
@@ -76,11 +76,12 @@
         .then((result) => {
           const user = result.user;
 
-          // Guardar en la base de datos
-          set(ref(db, "usuarios/" + user.uid), {
+          // Guardar datos en la base de datos
+          update(ref(db, "usuarios/" + user.uid), {
             nombre: user.displayName,
-            email: user.email,
-            fotoPerfil: user.photoURL
+            gmail: user.email,
+            fotoPerfil: user.photoURL,
+            ultimaConexion: new Date().toISOString()
           });
 
           alert(`Bienvenido ${user.displayName}`);
