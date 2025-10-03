@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yalgui (Broma)</title>
+<style>
+  :root{
+    --bg:#071017; --panel:#0b2430; --accent:#00ffd5; --muted:#98a6ad;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background:linear-gradient(180deg,#041018 0%, #07152a 70%); color:#e6f6f5;
+    height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .app{width:100%; max-width:1000px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05)); border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.6); overflow:hidden; display:grid; grid-template-columns: 1fr 360px;}
+  .left{padding:22px;}
+  h1{margin:0 0 8px 0; font-size:20px; letter-spacing:0.6px}
+  .console{background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.1)); border:1px solid rgba(255,255,255,0.03); padding:12px; border-radius:8px; height:420px; overflow:auto; font-family: "Courier New", monospace; font-size:13px;}
+  .controls{display:flex; gap:8px; margin-top:12px}
+  .btn{background:var(--panel); color:var(--accent); border:1px solid rgba(0,255,213,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600}
+  .right{background:linear-gradient(180deg,#051e2a, #02131a); padding:18px; border-left:1px solid rgba(255,255,255,0.02); display:flex; flex-direction:column; gap:12px}
+  .card{background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.02)}
+  .small{font-size:12px; color:var(--muted)}
+  .badge{display:inline-block; padding:6px 8px; border-radius:999px; background:rgba(0,255,213,0.06); color:var(--accent); font-weight:700}
+  #confetti{position:fixed; pointer-events:none; left:0; right:0; top:0; bottom:0;}
+  .neon{filter:drop-shadow(0 0 8px rgba(0,255,213,0.12))}
+</style>
+</head>
+<body>
+<div class="app neon">
+  <div class="left">
+    <h1>Yalgui - modo broma</h1>
+    <div class="small">Disclaimer: esto es solo una broma. No ofrece hacks ni da ventajas reales.</div>
+    <div id="console" class="console"></div>
+
+    <div class="controls">
+      <button class="btn" onclick="runCmd('scan')">scan</button>
+      <button class="btn" onclick="runCmd('exploit')">exploit</button>
+      <button class="btn" onclick="runCmd('party')">party</button>
+      <button class="btn" onclick="runCmd('badge')">give-badge</button>
+      <button class="btn" onclick="runCmd('random')">random</button>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <div class="small">Estado</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+        <div><div class="badge" id="coolPoints">COOL: 0</div></div>
+        <div class="small" id="status">idle</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="small">Top bromistas</div>
+      <ol id="leaders" style="margin:8px 0 0 16px; padding:0; list-style:decimal">
+        <li>Yalmil (1000)</li>
+        <li>ElPro (900)</li>
+        <li>Lu (800)</li>
+      </ol>
+    </div>
+
+    <div class="card" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div class="small">Efectos</div>
+      <div style="margin-top:10px; display:flex; gap:8px">
+        <button class="btn" onclick="toggleSound()">sonido</button>
+        <button class="btn" onclick="downloadLog()">exportar log</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+const consoleEl = document.getElementById('console');
+const statusEl = document.getElementById('status');
+const coolEl = document.getElementById('coolPoints');
+let cool = 0;
+let logs = [];
+
+function pushLog(t, txt){
+  const time = new Date().toLocaleTimeString();
+  logs.push({time, t, txt});
+  const p = document.createElement('div');
+  p.innerHTML = `<span style="color:#7bd3c6">[${time}]</span> ${txt}`;
+  consoleEl.appendChild(p);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+// typing effect
+async function typeLine(text, speed=6){
+  const line = document.createElement('div');
+  consoleEl.appendChild(line);
+  for(let i=0;i<text.length;i++){
+    line.innerText = text.slice(0,i+1);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+    await new Promise(r=>setTimeout(r, speed));
+  }
+  consoleEl.appendChild(document.createElement('div'));
+}
+
+function runCmd(cmd){
+  statusEl.innerText = 'procesando ' + cmd;
+  if(cmd==='scan') doScan();
+  else if(cmd==='exploit') doExploit();
+  else if(cmd==='party') doParty();
+  else if(cmd==='badge') giveBadge();
+  else doRandom();
+}
+
+async function doScan(){
+  pushLog('info','Iniciando escaneo inocente...');
+  await typeLine('yalgui> iniciando scan en 3...2...1',8);
+  const fake = [
+    'Encontrado: 1 admin con sueño',
+    'Encontrado: 3 cofres con memes',
+    'Encontrado: 1 zombie con sombrero',
+    'Encontrado: 7 blocks de tierra bailando'
+  ];
+  for(let i=0;i<fake.length;i++){
+    await new Promise(r=>setTimeout(r,600));
+    pushLog('scan', fake[i]);
+  }
+  pushLog('ok','Escaneo completado. Nada peligroso detectado. Solo buena vibra.');
+  statusEl.innerText = 'idle';
+  cool += 10; updateCool();
+}
+
+async function doExploit(){
+  pushLog('warn','exploit lanzado (modo broma)...');
+  await typeLine('yalgui> exploit -harmless --colorize',6);
+  // efecto visual: cambia colores del body por un segundo
+  const old = document.body.style.background;
+  document.body.style.transition = 'background 0.6s';
+  document.body.style.background = 'linear-gradient(90deg,#0d0730,#0a2b3a)';
+  setTimeout(()=>{ document.body.style.background = old; },1200);
+  pushLog('ok','Exploit aplicado: paleta neón activada por espectáculo.');
+  statusEl.innerText = 'idle';
+  cool += 25; updateCool();
+  confettiBurst();
+}
+
+function doParty(){
+  pushLog('party','Activando modo party...');
+  awaitBounce();
+  pushLog('ok','Modo party finalizado. Todos bailan. (Solo en pantalla.)');
+  cool += 50; updateCool();
+  confettiBurst(80);
+}
+
+function giveBadge(){
+  pushLog('meta','Otorgando badge: "No Hacker, Solo Estilo"');
+  const leaders = document.getElementById('leaders');
+  const li = document.createElement('li');
+  li.textContent = 'Tú (broma)';
+  leaders.appendChild(li);
+  cool += 5; updateCool();
+}
+
+function doRandom(){
+  const a = ['Has sido marcado como "Leyenda local".','Se te bloqueó por exceso de carisma.','Se detecta WiFi con olor a pizza.'];
+  const pick = a[Math.floor(Math.random()*a.length)];
+  pushLog('rand', pick);
+  cool += 3; updateCool();
+}
+
+function updateCool(){
+  coolEl.innerText = 'COOL: ' + cool;
+}
+
+/* sound */
+let audioOn = false;
+function toggleSound(){
+  if(!audioOn){
+    const ctx = new AudioContext();
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = 880;
+    o.connect(ctx.destination);
+    o.start();
+    setTimeout(()=>{ o.stop(); ctx.close(); },150);
+    audioOn = true;
+    pushLog('sound','Sonido corto reproducido.');
+  } else {
+    pushLog('sound','Sonido ya reproducido antes. (no se repite)');
+  }
+}
+
+/* export log as text file */
+function downloadLog(){
+  const txt = logs.map(l=>`[${l.time}] ${l.t.toUpperCase()} - ${l.txt}`).join('\\n');
+  const blob = new Blob([txt], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'yalgui-log.txt'; a.click();
+  URL.revokeObjectURL(url);
+  pushLog('file','Registro exportado.');
+}
+
+/* simple confetti */
+function confettiBurst(amount=30){
+  const c = document.getElementById('confetti');
+  c.width = innerWidth; c.height = innerHeight;
+  const ctx = c.getContext('2d');
+  const pieces = [];
+  for(let i=0;i<amount;i++){
+    pieces.push({
+      x: Math.random()*c.width,
+      y: -10 - Math.random()*200,
+      r: 6+Math.random()*8,
+      vx: -3 + Math.random()*6,
+      vy: 2 + Math.random()*4,
+      color: `hsl(${Math.random()*360} 80% 60%)`
+    });
+  }
+  let t=0;
+  const loop = ()=> {
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const p of pieces){
+      p.x += p.vx; p.y += p.vy;
+      p.vy += 0.08;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r, p.r*0.6, 0,0,Math.PI*2); ctx.fill();
+    }
+    t++;
+    if(t<150) requestAnimationFrame(loop);
+    else ctx.clearRect(0,0,c.width,c.height);
+  };
+  loop();
+}
+
+/* some playful bounce animation */
+function awaitBounce(){ 
+  const el = document.querySelector('.app'); 
+  el.style.transform = 'scale(1.02) rotate(-0.6deg)';
+  setTimeout(()=> el.style.transform = '', 700);
+}
+
+/* initial message */
+pushLog('boot','Yalgui broma cargado. Presiona un botón para comenzar.');
+</script>
+</body>
+  </html>
