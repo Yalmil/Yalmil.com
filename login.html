@@ -1,87 +1,34 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login con Firebase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta property="og:title" content="Registrarse en Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png" type="image/png">
+    
+  <title>Registro</title>
+  <title>Iniciar sesión</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #0a0a0a, #003333);
-      color: white;
-    }
-
-    .login-container {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2em;
-      border-radius: 20px;
-      text-align: center;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-    }
-
-    h2 {
-      margin-bottom: 1em;
-    }
-
-    button {
-      background-color: #00ffaa;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-    }
-
-    button:hover {
-      background-color: #00cc88;
-      transform: scale(1.05);
-    }
-
-    .loader {
-      display: none;
-      margin-top: 1em;
-      font-size: 14px;
-      opacity: 0.7;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="login-container">
-    <h2>Iniciar sesión</h2>
-    <p>Usa tu cuenta de Google para continuar</p>
-    <button id="loginBtn">Iniciar con Google</button>
-    <p class="loader" id="loader">Iniciando sesión...</p>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+@@ -48,12 +41,11 @@ <h2>Registro</h2>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
-    // Importar funciones de Firebase
+    // Importar SDK de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     // Configuración de Firebase
+    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
-      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
-      projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.firebasestorage.app",
-      messagingSenderId: "121538864529",
+@@ -64,35 +56,31 @@ <h2>Registro</h2>
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
 
@@ -91,39 +38,37 @@
     const provider = new GoogleAuthProvider();
     const db = getDatabase(app);
 
-    const loginBtn = document.getElementById('loginBtn');
-    const loader = document.getElementById('loader');
+    // Botón login con Google
+    document.getElementById("googleLoginBtn").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
 
-    // Detectar sesión activa
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Ya está logueado → redirigir
-        window.location.href = "inicio.html";
-      }
-    });
+          // Guardar datos en la base de datos
+          update(ref(db, "usuarios/" + user.uid), {
+          // Guardar datos y esperar confirmación
+          return update(ref(db, "usuarios/" + user.uid), {
+            nombre: user.displayName,
+            gmail: user.email,
+            fotoPerfil: user.photoURL,
+            ultimaConexion: new Date().toISOString()
+          }).then(() => {
+            alert(`Bienvenido ${user.displayName}`);
+            console.log("✅ Datos guardados en DB:", user.uid);
+            window.location.href = "inicio.html";
+          });
 
-    // Evento del botón de login
-    loginBtn.addEventListener('click', async () => {
-      loader.style.display = "block";
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
+          alert(`Bienvenido ${user.displayName}`);
+          console.log("Usuario:", user);
 
-        // Guardar datos en la database
-        await set(ref(db, "usuarios/" + user.uid), {
-          nombre: user.displayName,
-          correo: user.email,
-          foto: user.photoURL
+          // Redirigir
+          window.location.href = "inicio.html";
+        })
+        .catch((error) => {
+          console.error("Error en login:", error);
+          alert("Error al iniciar sesión con Google");
+          console.error("❌ Error en login/DB:", error);
+          alert("Error al iniciar sesión con Google o guardar en la base de datos");
         });
-
-        // Redirigir
-        window.location.href = "inicio.html";
-      } catch (error) {
-        alert("Error al iniciar sesión: " + error.message);
-      } finally {
-        loader.style.display = "none";
-      }
     });
   </script>
-</body>
-</html>
