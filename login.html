@@ -2,169 +2,127 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Iniciar sesión</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login con Firebase</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
 
     body {
       margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg,#0a0a0a,#1a001f);
-      color: #e5ccff;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-    }
-
-    .container {
-      background: rgba(40,0,60,0.2);
-      backdrop-filter: blur(6px);
-      border: 2px solid #c084fc;
-      border-radius: 1.5rem;
-      padding: 2.5rem;
-      width: 90%;
-      max-width: 420px;
-      box-shadow: 0 0 20px #c084fc88;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 2.2rem;
-      margin-bottom: 1rem;
-      color: #c084fc;
-    }
-
-    .subtitle {
-      text-align: center;
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
-      color: #e5ccff88;
-    }
-
-    .social-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .social-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all .3s ease;
+      background: linear-gradient(135deg, #0a0a0a, #003333);
       color: white;
     }
 
-    .google {
-      background: linear-gradient(135deg,#db4437,#c23321);
-      box-shadow: 0 4px 15px rgba(219,68,55,.4);
-    }
-
-    .google:hover {
-      background: linear-gradient(135deg,#e55245,#db4437);
-      box-shadow: 0 6px 20px rgba(219,68,55,.6);
-    }
-
-    .social-icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 12px;
-      filter: brightness(1.2);
-    }
-
-    .login-link {
-      color: #e5ccff;
-      display: block;
+    .login-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2em;
+      border-radius: 20px;
       text-align: center;
-      margin-top: 1.5rem;
-      font-size: .9rem;
-      text-decoration: none;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
     }
 
-    .login-link:hover {
-      color: #c084fc;
+    h2 {
+      margin-bottom: 1em;
+    }
+
+    button {
+      background-color: #00ffaa;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background-color: #00cc88;
+      transform: scale(1.05);
+    }
+
+    .loader {
+      display: none;
+      margin-top: 1em;
+      font-size: 14px;
+      opacity: 0.7;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Iniciar sesión</h2>
-    <p class="subtitle">Únete usando tu cuenta de Google</p>
-      
-    <div class="social-buttons">
-      <button class="social-button google" id="googleLoginBtn">
-        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        Continuar con Google
-      </button>
-    </div>
 
-    <a href="login.html" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
-    <a href="terminos.html" class="login-link">Al registrarte aceptas los términos de servicio</a>
+  <div class="login-container">
+    <h2>Iniciar sesión</h2>
+    <p>Usa tu cuenta de Google para continuar</p>
+    <button id="loginBtn">Iniciar con Google</button>
+    <p class="loader" id="loader">Iniciando sesión...</p>
   </div>
 
+  <!-- Firebase SDK -->
   <script type="module">
+    // Importar funciones de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    // Configuración Firebase
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
       databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
       projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.appspot.com", /* <- corregido */
+      storageBucket: "databaseloginweb.firebasestorage.app",
       messagingSenderId: "121538864529",
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
 
+    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getDatabase(app);
 
-    // Verificar si ya está logueado
+    const loginBtn = document.getElementById('loginBtn');
+    const loader = document.getElementById('loader');
+
+    // Detectar sesión activa
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("✅ Usuario ya autenticado:", user.uid);
+        // Ya está logueado → redirigir
         window.location.href = "inicio.html";
       }
     });
 
-    // Login con Google
-    document.getElementById("googleLoginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
+    // Evento del botón de login
+    loginBtn.addEventListener('click', async () => {
+      loader.style.display = "block";
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
 
-          return update(ref(db, "usuarios/" + user.uid), {
-            nombre: user.displayName,
-            gmail: user.email,
-            fotoPerfil: user.photoURL,
-            ultimaConexion: new Date().toISOString()
-          });
-        })
-        .then(() => {
-          alert("Bienvenido 🚀");
-          window.location.href = "inicio.html";
-        })
-        .catch((error) => {
-          console.error("❌ Error en login/DB:", error);
-          alert("Error al iniciar sesión con Google o guardar en la base de datos");
+        // Guardar datos en la database
+        await set(ref(db, "usuarios/" + user.uid), {
+          nombre: user.displayName,
+          correo: user.email,
+          foto: user.photoURL
         });
+
+        // Redirigir
+        window.location.href = "inicio.html";
+      } catch (error) {
+        alert("Error al iniciar sesión: " + error.message);
+      } finally {
+        loader.style.display = "none";
+      }
     });
   </script>
 </body>
