@@ -6,17 +6,97 @@
   <title>Iniciar sesión</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    body { margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(135deg,#0a0a0a,#1a001f); color:#e5ccff; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-    .container { background:rgba(40,0,60,0.2); backdrop-filter:blur(6px); border:2px solid #c084fc; border-radius:1.5rem; padding:2.5rem; width:90%; max-width:420px; box-shadow:0 0 20px #c084fc88; }
-    h2 { text-align:center; font-size:2.2rem; margin-bottom:1rem; color:#c084fc; }
-    .subtitle { text-align:center; font-size:0.95rem; margin-bottom:2rem; color:#e5ccff88; }
-    .social-buttons { display:flex; flex-direction:column; gap:1rem; }
-    .social-button { display:flex; align-items:center; justify-content:center; padding:12px 20px; border:none; border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer; transition:all .3s ease; color:white; }
-    .google { background:linear-gradient(135deg,#db4437,#c23321); box-shadow:0 4px 15px rgba(219,68,55,.4); }
-    .google:hover { background:linear-gradient(135deg,#e55245,#db4437); box-shadow:0 6px 20px rgba(219,68,55,.6); }
-    .social-icon { width:20px; height:20px; margin-right:12px; filter:brightness(1.2); }
-    .login-link { color:#e5ccff; display:block; text-align:center; margin-top:1.5rem; font-size:.9rem; text-decoration:none; }
-    .login-link:hover { color:#c084fc; }
+    body { 
+      margin: 0; 
+      font-family: 'Poppins', sans-serif; 
+      background: linear-gradient(135deg, #0a0a0a, #1a001f); 
+      color: #e5ccff; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+    }
+    .container { 
+      background: rgba(40, 0, 60, 0.2); 
+      backdrop-filter: blur(6px); 
+      border: 2px solid #c084fc; 
+      border-radius: 1.5rem; 
+      padding: 2.5rem; 
+      width: 90%; 
+      max-width: 420px; 
+      box-shadow: 0 0 20px #c084fc88; 
+    }
+    h2 { 
+      text-align: center; 
+      font-size: 2.2rem; 
+      margin-bottom: 1rem; 
+      color: #c084fc; 
+    }
+    .subtitle { 
+      text-align: center; 
+      font-size: 0.95rem; 
+      margin-bottom: 2rem; 
+      color: #e5ccff88; 
+    }
+    .social-buttons { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1rem; 
+    }
+    .social-button { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 12px; 
+      font-weight: 600; 
+      font-size: 1rem; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      color: white; 
+    }
+    .social-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .google { 
+      background: linear-gradient(135deg, #db4437, #c23321); 
+      box-shadow: 0 4px 15px rgba(219, 68, 55, 0.4); 
+    }
+    .google:hover:not(:disabled) { 
+      background: linear-gradient(135deg, #e55245, #db4437); 
+      box-shadow: 0 6px 20px rgba(219, 68, 55, 0.6); 
+      transform: translateY(-2px);
+    }
+    .social-icon { 
+      width: 20px; 
+      height: 20px; 
+      margin-right: 12px; 
+      filter: brightness(1.2); 
+    }
+    .login-link { 
+      color: #e5ccff; 
+      display: block; 
+      text-align: center; 
+      margin-top: 1.5rem; 
+      font-size: 0.9rem; 
+      text-decoration: none; 
+      transition: color 0.3s ease;
+    }
+    .login-link:hover { 
+      color: #c084fc; 
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+      color: #c084fc;
+      font-size: 0.9rem;
+    }
+    .loading.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -36,8 +116,10 @@
       </button>
     </div>
 
-    <a href="login" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
-    <a href="terminos" class="login-link">Al registrarte aceptas los términos de servicio</a>
+    <div class="loading" id="loadingMsg">Procesando...</div>
+
+    <a href="login.html" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
+    <a href="terminos.html" class="login-link">Al registrarte aceptas los términos de servicio</a>
   </div>
 
   <script type="module">
@@ -61,37 +143,57 @@
     const provider = new GoogleAuthProvider();
     const db = getDatabase(app);
 
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const loadingMsg = document.getElementById("loadingMsg");
+
     // Verificar si ya está logueado
     onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("✅ Usuario ya autenticado:", user.uid);
         window.location.href = "inicio.html";
       } else {
-        console.log("ℹ️ No hay sesión iniciada, se muestra login normal.");
+        console.log("ℹ️ No hay sesión iniciada");
       }
     });
 
-    document.getElementById("googleLoginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
+    // Login con Google
+    googleLoginBtn.addEventListener("click", async () => {
+      googleLoginBtn.disabled = true;
+      loadingMsg.classList.add("active");
 
-          // Guardar datos y redirigir
-          return update(ref(db, "usuarios/" + user.uid), {
-            nombre: user.displayName,
-            gmail: user.email,
-            fotoPerfil: user.photoURL,
-            ultimaConexion: new Date().toISOString()
-          }).then(() => {
-            alert(`Bienvenido ${user.displayName}`);
-            console.log("✅ Datos guardados en DB:", user.uid);
-            window.location.href = "inicio.html";
-          });
-        })
-        .catch((error) => {
-          console.error("❌ Error en login/DB:", error);
-          alert("Error al iniciar sesión con Google o guardar en la base de datos");
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        // Guardar datos en la base de datos
+        await update(ref(db, "usuarios/" + user.uid), {
+          nombre: user.displayName,
+          gmail: user.email,
+          fotoPerfil: user.photoURL,
+          ultimaConexion: new Date().toISOString()
         });
+
+        console.log("✅ Datos guardados en DB:", user.uid);
+        alert(`¡Bienvenido ${user.displayName}!`);
+        window.location.href = "inicio.html";
+
+      } catch (error) {
+        console.error("❌ Error:", error);
+        
+        // Mensajes de error más específicos
+        let errorMsg = "Error al iniciar sesión";
+        if (error.code === "auth/popup-closed-by-user") {
+          errorMsg = "Ventana de inicio de sesión cerrada";
+        } else if (error.code === "auth/cancelled-popup-request") {
+          errorMsg = "Solicitud cancelada";
+        } else if (error.code === "auth/network-request-failed") {
+          errorMsg = "Error de conexión. Verifica tu internet";
+        }
+        
+        alert(errorMsg);
+        googleLoginBtn.disabled = false;
+        loadingMsg.classList.remove("active");
+      }
     });
   </script>
 </body>
