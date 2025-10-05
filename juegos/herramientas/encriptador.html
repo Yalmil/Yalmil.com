@@ -5,131 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conversor de Texto Multi-Sistema</title>
   <style>
-    :root {
-      --bg-light: linear-gradient(135deg, #dfe9f3, #ffffff);
-      --bg-dark: linear-gradient(135deg, #1a1a2e, #16213e);
-      --glass-light: rgba(255, 255, 255, 0.7);
-      --glass-dark: rgba(25, 25, 35, 0.6);
-      --text-light: #222;
-      --text-dark: #f5f5f5;
-      --accent: linear-gradient(45deg, #00c6ff, #0072ff);
-      --success: linear-gradient(45deg, #28a745, #20c997);
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      transition: all 0.3s ease;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg-light);
-      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
       padding: 20px;
-      transition: background 0.5s ease;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: var(--bg-dark);
-        color: var(--text-dark);
-      }
-    }
-
-    .container {
-      background: var(--glass-light);
-      backdrop-filter: blur(12px);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      width: 100%;
-      max-width: 850px;
-      animation: fadeIn 0.7s ease-out;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .container {
-        background: var(--glass-dark);
-      }
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background: rgba(60, 20, 0, 0.3);
+      backdrop-filter: blur(8px);
+      border: 2px solid #ff8c00;
+      border-radius: 1rem;
+      box-shadow: 0 0 25px #ff8c0055;
+      padding: 2rem;
+      max-width: 800px;
+      width: 100%;
+      animation: popIn 0.5s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     h1 {
       text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 30px;
-      background: var(--accent);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 2rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+      margin-bottom: 2rem;
     }
 
     label {
       display: block;
       font-weight: 600;
+      color: #ffb366;
       margin-bottom: 10px;
-      font-size: 1.1em;
     }
 
     textarea, select {
       width: 100%;
       padding: 15px;
-      border-radius: 12px;
-      border: 2px solid rgba(0,0,0,0.1);
-      font-size: 16px;
-      background: rgba(255,255,255,0.8);
-      resize: vertical;
+      border: 2px solid #ff8c00;
+      border-radius: 0.8rem;
+      background: rgba(50, 10, 0, 0.3);
+      color: #ffd8a6;
+      font-size: 1em;
       outline: none;
+      transition: 0.3s;
     }
 
     textarea:focus, select:focus {
-      border-color: #0072ff;
-      box-shadow: 0 0 8px rgba(0,114,255,0.3);
-      background: white;
+      border-color: #ffb366;
+      box-shadow: 0 0 10px #ff8c0077;
+      background: rgba(60, 20, 0, 0.4);
     }
 
-    @media (prefers-color-scheme: dark) {
-      textarea, select {
-        background: rgba(20,20,30,0.8);
-        border: 2px solid rgba(255,255,255,0.1);
-        color: var(--text-dark);
-      }
-    }
-
-    .input-section, .system-section, .result-section {
-      margin-bottom: 25px;
-    }
-
-    .system-section {
-      opacity: 0.5;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .system-section.enabled {
-      opacity: 1;
-      pointer-events: auto;
+    select:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .info-text {
       text-align: center;
+      color: #ffb366;
       font-style: italic;
-      opacity: 0.7;
-      margin-top: 8px;
-      font-size: 0.95em;
-    }
-
-    .pulse {
+      margin-top: 10px;
+      opacity: 0.8;
       animation: pulse 2s infinite;
     }
 
@@ -139,9 +100,10 @@
     }
 
     .result-section {
+      margin-top: 2rem;
       opacity: 0;
       transform: translateY(10px);
-      transition: all 0.4s ease;
+      transition: all 0.3s ease;
     }
 
     .result-section.show {
@@ -149,46 +111,34 @@
       transform: translateY(0);
     }
 
-    #result {
-      font-family: 'Courier New', monospace;
-      background: rgba(255,255,255,0.85);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      #result {
-        background: rgba(30,30,40,0.85);
-      }
-    }
-
     .copy-btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 35px;
+      margin-top: 1rem;
+      padding: 12px 25px;
+      background: linear-gradient(45deg, #ff8c00, #ffb366);
+      color: #331400;
       font-weight: 600;
-      font-size: 16px;
-      border-radius: 25px;
-      background: var(--success);
-      color: white;
       border: none;
+      border-radius: 2rem;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px #ff8c0044;
     }
 
     .copy-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 18px rgba(40,167,69,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px #ff8c0077;
     }
 
     .copy-btn:active {
-      transform: scale(1);
+      transform: translateY(0);
     }
 
     @media (max-width: 600px) {
       .container {
-        padding: 25px;
+        padding: 1.5rem;
       }
       h1 {
-        font-size: 2rem;
+        font-size: 1.6rem;
       }
     }
   </style>
@@ -206,8 +156,26 @@
       <label for="systemSelect">Selecciona el sistema de codificación:</label>
       <select id="systemSelect" disabled>
         <option value="">-- Primero ingresa un texto --</option>
+        <option value="base64">Base64</option>
+        <option value="hex">Hexadecimal</option>
+        <option value="binary">Binario</option>
+        <option value="octal">Octal</option>
+        <option value="ascii">ASCII (códigos)</option>
+        <option value="url">URL Encode</option>
+        <option value="html">HTML Entities</option>
+        <option value="unicode">Unicode Escape</option>
+        <option value="rot13">ROT13</option>
+        <option value="morse">Código Morse</option>
+        <option value="base32">Base32</option>
+        <option value="md5">MD5 Hash</option>
+        <option value="sha1">SHA-1 Hash</option>
+        <option value="sha256">SHA-256 Hash</option>
+        <option value="reverse">Texto Invertido</option>
+        <option value="caesar">César (desplazamiento 3)</option>
+        <option value="atbash">Cifrado Atbash</option>
+        <option value="leetspeak">Leet Speak (1337)</option>
       </select>
-      <p class="info-text pulse">⬆️ Escribe texto arriba para desbloquear las opciones</p>
+      <p class="info-text">⬆️ Escribe texto arriba para desbloquear las opciones</p>
     </div>
 
     <div class="result-section" id="resultSection">
@@ -226,46 +194,73 @@
 
     const conversions = {
       base64: (t) => btoa(unescape(encodeURIComponent(t))),
-      hex: (t) => Array.from(new TextEncoder().encode(t)).map(b => b.toString(16).padStart(2,'0')).join(''),
-      binary: (t) => Array.from(new TextEncoder().encode(t)).map(b => b.toString(2).padStart(8,'0')).join(' '),
+      hex: (t) => Array.from(new TextEncoder().encode(t)).map(b => b.toString(16).padStart(2, '0')).join(''),
+      binary: (t) => Array.from(new TextEncoder().encode(t)).map(b => b.toString(2).padStart(8, '0')).join(' '),
+      octal: (t) => Array.from(new TextEncoder().encode(t)).map(b => b.toString(8)).join(' '),
       ascii: (t) => Array.from(t).map(c => c.charCodeAt(0)).join(' '),
-      reverse: (t) => t.split('').reverse().join('')
+      url: (t) => encodeURIComponent(t),
+      html: (t) => t.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])),
+      unicode: (t) => Array.from(t).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(''),
+      rot13: (t) => t.replace(/[a-zA-Z]/g, c => String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0)+13) ? c : c-26)),
+      morse: (t) => {
+        const m = {'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',' ':'/'};
+        return t.toUpperCase().split('').map(c => m[c] || c).join(' ');
+      },
+      base32: (t) => {
+        const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        const b = new TextEncoder().encode(t);
+        let r = '', buf = 0, bits = 0;
+        for (let byte of b) {
+          buf = (buf << 8) | byte;
+          bits += 8;
+          while (bits >= 5) {
+            r += a[(buf >> (bits - 5)) & 31];
+            bits -= 5;
+          }
+        }
+        if (bits > 0) r += a[(buf << (5 - bits)) & 31];
+        return r;
+      },
+      md5: async (t) => {
+        const e = new TextEncoder().encode(t);
+        const h = await crypto.subtle.digest('MD5', e).catch(() => null);
+        if (!h) return 'MD5 no soportado';
+        return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('');
+      },
+      sha1: async (t) => {
+        const e = new TextEncoder().encode(t);
+        const h = await crypto.subtle.digest('SHA-1', e);
+        return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('');
+      },
+      sha256: async (t) => {
+        const e = new TextEncoder().encode(t);
+        const h = await crypto.subtle.digest('SHA-256', e);
+        return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('');
+      },
+      reverse: (t) => t.split('').reverse().join(''),
+      caesar: (t) => t.replace(/[a-zA-Z]/g, c => String.fromCharCode((c <= 'Z'?90:122)>=(c=c.charCodeAt(0)+3)?c:c-23)),
+      atbash: (t) => t.replace(/[a-zA-Z]/g, c => String.fromCharCode((c <= 'Z'?90:122)-(c.charCodeAt(0)-(c<='Z'?65:97)))),
+      leetspeak: (t) => t.toLowerCase().replace(/[aeiostl]/g, c => ({a:'4',e:'3',i:'1',o:'0',s:'5',t:'7',l:'1'}[c]))
     };
 
     textInput.addEventListener('input', () => {
       const hasText = textInput.value.trim().length > 0;
       systemSelect.disabled = !hasText;
       systemSection.classList.toggle('enabled', hasText);
-
-      if (hasText) {
-        systemSelect.innerHTML = `
-          <option value="">-- Selecciona un sistema --</option>
-          <option value="base64">Base64</option>
-          <option value="hex">Hexadecimal</option>
-          <option value="binary">Binario</option>
-          <option value="ascii">ASCII (códigos)</option>
-          <option value="reverse">Texto Invertido</option>
-        `;
-      } else {
-        systemSelect.innerHTML = '<option value="">-- Primero ingresa un texto --</option>';
-        resultSection.classList.remove('show');
-      }
+      if (!hasText) resultSection.classList.remove('show');
     });
 
     systemSelect.addEventListener('change', async () => {
       const text = textInput.value.trim();
       const system = systemSelect.value;
-      if (!text || !system) {
-        resultSection.classList.remove('show');
-        return;
-      }
-
+      if (!text || !system) return (resultSection.classList.remove('show'));
+      const converter = conversions[system];
       try {
-        const converted = await conversions[system](text);
+        const converted = await converter(text);
         result.value = converted;
         resultSection.classList.add('show');
-      } catch (err) {
-        result.value = 'Error en la conversión: ' + err.message;
+      } catch (e) {
+        result.value = 'Error en la conversión: ' + e.message;
         resultSection.classList.add('show');
       }
     });
@@ -274,9 +269,8 @@
       result.select();
       document.execCommand('copy');
       const btn = event.target;
-      const old = btn.textContent;
       btn.textContent = '✅ ¡Copiado!';
-      setTimeout(() => btn.textContent = old, 1500);
+      setTimeout(() => btn.textContent = '📋 Copiar Resultado', 2000);
     }
   </script>
 </body>
