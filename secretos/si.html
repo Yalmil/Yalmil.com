@@ -4,77 +4,145 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Juego: Banear Channels</title>
+
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #292943);
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-  h1 {
-    margin-bottom: 10px;
-  }
+* {
+  box-sizing: border-box;
+}
 
-  #baneo-btn {
-    background: #ff4757;
-    color: white;
-    border: none;
-    padding: 20px 40px;
-    font-size: 22px;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #330a00, #662000);
+  color: #ffd8a6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  animation: fadeIn 0.8s ease-out;
+}
 
-  #baneo-btn:hover {
-    background: #ff6b81;
-    transform: scale(1.05);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  .stats {
-    margin-top: 20px;
-    font-size: 18px;
-  }
+header {
+  background-color: #4d1a00;
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #ff8c00;
+  text-align: center;
+  box-shadow: 0 0 12px #ff8c0055;
+}
 
-  .mejoras {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #ff8c00;
+  text-shadow: 0 0 10px #ff8c00aa;
+}
 
-  .mejora {
-    background: #2f2f4f;
-    padding: 15px;
-    border-radius: 10px;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+main {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .mejora button {
-    margin-top: 8px;
-    padding: 10px;
-    border: none;
-    background: #5761ff;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
+.stats {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #ffd8a6;
+  text-shadow: 0 0 6px #ff8c0066;
+}
 
-  .mejora button:hover {
-    background: #7a83ff;
-  }
+#baneo-btn {
+  background: linear-gradient(90deg, #ff5500, #ff8c00);
+  color: white;
+  border: none;
+  padding: 20px 40px;
+  font-size: 22px;
+  border-radius: 15px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #ff8c0077;
+  transition: 0.2s;
+}
+
+#baneo-btn:hover {
+  background: linear-gradient(90deg, #ff751a, #ffaa33);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px #ff8c00aa;
+}
+
+.mejoras {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.mejora {
+  background: rgba(60, 20, 0, 0.3);
+  backdrop-filter: blur(8px);
+  border: 2px solid #ff8c00;
+  border-radius: 15px;
+  width: 300px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 0 10px #ff8c0044;
+  transition: 0.2s;
+}
+
+.mejora:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px #ff8c00;
+}
+
+.mejora h3 {
+  color: #ff8c00;
+  margin-bottom: 5px;
+  text-shadow: 0 0 5px #ff8c0088;
+}
+
+.mejora button {
+  margin-top: 8px;
+  padding: 10px;
+  border: none;
+  background: linear-gradient(90deg, #ff6a00, #ffb84d);
+  color: #330a00;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 0 8px #ff8c0055;
+  transition: 0.2s;
+}
+
+.mejora button:hover {
+  background: linear-gradient(90deg, #ffaa33, #ffd699);
+  box-shadow: 0 0 15px #ffb84d;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #ffb366;
+  background-color: #330800;
+  border-top: 1px solid #662200;
+}
 </style>
 </head>
+
 <body>
 
+<header>
   <h1>Juego: Banear Channels</h1>
+</header>
+
+<main>
   <button id="baneo-btn">Banear a Channel</button>
 
   <div class="stats">
@@ -106,79 +174,84 @@
       <button onclick="comprarYalgui()">Comprar</button>
     </div>
   </div>
+</main>
+
+<footer>
+  <p>Hecho con odio para Channels 💢</p>
+</footer>
 
 <script>
-  let baneos = 0;
-  let bpc = 1;
-  let empleados = 0;
-  let velocidad = 2500; // en milisegundos
-  let autoClickInterval = null;
+let baneos = 0;
+let bpc = 1;
+let empleados = 0;
+let velocidad = 2500;
+let autoClickInterval = null;
 
-  let costoOdio = 10;
-  let costoEmpleado = 50;
-  let costoYalgui = 200;
+let costoOdio = 10;
+let costoEmpleado = 50;
+let costoYalgui = 200;
 
-  const baneoDisplay = document.getElementById("baneos");
-  const bpcDisplay = document.getElementById("bpc");
-  const empleadosDisplay = document.getElementById("empleados");
-  const velocidadDisplay = document.getElementById("velocidad");
-  const costoOdioDisplay = document.getElementById("costo-odio");
-  const costoEmpleadoDisplay = document.getElementById("costo-empleado");
-  const costoYalguiDisplay = document.getElementById("costo-yalgui");
+const baneoDisplay = document.getElementById("baneos");
+const bpcDisplay = document.getElementById("bpc");
+const empleadosDisplay = document.getElementById("empleados");
+const velocidadDisplay = document.getElementById("velocidad");
+const costoOdioDisplay = document.getElementById("costo-odio");
+const costoEmpleadoDisplay = document.getElementById("costo-empleado");
+const costoYalguiDisplay = document.getElementById("costo-yalgui");
 
-  document.getElementById("baneo-btn").addEventListener("click", () => {
-    baneos += bpc;
-    actualizarPantalla();
-  });
-
-  function actualizarPantalla() {
-    baneoDisplay.textContent = baneos.toFixed(1);
-    bpcDisplay.textContent = bpc.toFixed(1);
-    empleadosDisplay.textContent = empleados;
-    velocidadDisplay.textContent = (velocidad / 1000).toFixed(2) + "s";
-  }
-
-  function comprarOdio() {
-    if (baneos >= costoOdio) {
-      baneos -= costoOdio;
-      bpc += 0.5;
-      costoOdio = Math.floor(costoOdio * 1.5);
-      costoOdioDisplay.textContent = costoOdio;
-      actualizarPantalla();
-    }
-  }
-
-  function comprarEmpleado() {
-    if (baneos >= costoEmpleado) {
-      baneos -= costoEmpleado;
-      empleados++;
-      costoEmpleado = Math.floor(costoEmpleado * 1.7);
-      costoEmpleadoDisplay.textContent = costoEmpleado;
-      actualizarPantalla();
-      iniciarAutoClick();
-    }
-  }
-
-  function comprarYalgui() {
-    if (baneos >= costoYalgui && velocidad > 500) {
-      baneos -= costoYalgui;
-      velocidad -= 250; // 2.5s -> 2.25s -> 2.0s ...
-      costoYalgui = Math.floor(costoYalgui * 2);
-      costoYalguiDisplay.textContent = costoYalgui;
-      actualizarPantalla();
-      iniciarAutoClick();
-    }
-  }
-
-  function iniciarAutoClick() {
-    if (autoClickInterval) clearInterval(autoClickInterval);
-    autoClickInterval = setInterval(() => {
-      baneos += empleados * bpc;
-      actualizarPantalla();
-    }, velocidad);
-  }
-
+document.getElementById("baneo-btn").addEventListener("click", () => {
+  baneos += bpc;
   actualizarPantalla();
+});
+
+function actualizarPantalla() {
+  baneoDisplay.textContent = baneos.toFixed(1);
+  bpcDisplay.textContent = bpc.toFixed(1);
+  empleadosDisplay.textContent = empleados;
+  velocidadDisplay.textContent = (velocidad / 1000).toFixed(2) + "s";
+}
+
+function comprarOdio() {
+  if (baneos >= costoOdio) {
+    baneos -= costoOdio;
+    bpc += 0.5;
+    costoOdio = Math.floor(costoOdio * 1.5);
+    costoOdioDisplay.textContent = costoOdio;
+    actualizarPantalla();
+  }
+}
+
+function comprarEmpleado() {
+  if (baneos >= costoEmpleado) {
+    baneos -= costoEmpleado;
+    empleados++;
+    costoEmpleado = Math.floor(costoEmpleado * 1.7);
+    costoEmpleadoDisplay.textContent = costoEmpleado;
+    actualizarPantalla();
+    iniciarAutoClick();
+  }
+}
+
+function comprarYalgui() {
+  if (baneos >= costoYalgui && velocidad > 500) {
+    baneos -= costoYalgui;
+    velocidad -= 250;
+    costoYalgui = Math.floor(costoYalgui * 2);
+    costoYalguiDisplay.textContent = costoYalgui;
+    actualizarPantalla();
+    iniciarAutoClick();
+  }
+}
+
+function iniciarAutoClick() {
+  if (autoClickInterval) clearInterval(autoClickInterval);
+  autoClickInterval = setInterval(() => {
+    baneos += empleados * bpc;
+    actualizarPantalla();
+  }, velocidad);
+}
+
+actualizarPantalla();
 </script>
 
 </body>
