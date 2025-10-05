@@ -80,7 +80,7 @@
     <h1>🅰 Sobrevive a las Letras</h1>
     <button id="startBtn">Jugar</button>
     <button id="controlsBtn">Controles</button>
-    <p id="controlsText" style="display:none; color:#ccc;">Mueve el mouse o toca la pantalla para esquivar las letras. Recoge los círculos para obtener habilidades.</p>
+    <p id="controlsText" style="display:none; color:#ccc;">Mueve el mouse o toca la pantalla para esquivar las letras. Recoge los íconos azules para obtener habilidades.</p>
   </div>
 
   <div id="ui">
@@ -114,8 +114,11 @@
 
     const letters = "ÑXYZWKLMNOPQRSTUVABCDE".split("");
     const enemyColors = ["#ff0044", "#ffcc00", "#00ffff", "#00ff66", "#cc00ff", "#ffaa00"];
-    const powerUpColors = ["#00ffcc", "#ff00ff", "#00ff00", "#ffff00"];
     const bgColors = ["#0f0c29", "#302b63", "#24243e", "#1a1a1a"];
+
+    // Imagen de power-up
+    const powerUpImg = new Image();
+    powerUpImg.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA_VOY-eH13RIjxNerDPrQkv_Cd9ev3ADeHWpGPJQiYg&s=10";
 
     record = parseInt(localStorage.getItem("record")) || 0;
     recordDisplay.textContent = record;
@@ -167,8 +170,7 @@
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
       const type = ["shield", "speed", "wave", "magnet"][Math.floor(Math.random() * 4)];
-      const color = powerUpColors[Math.floor(Math.random() * powerUpColors.length)];
-      powerUps.push({ x, y, size: 15, time: Date.now(), type, color });
+      powerUps.push({ x, y, size: 25, type });
     }
 
     function drawPlayer() {
@@ -211,12 +213,11 @@
       });
     }
 
+    // 🎨 Dibuja power-ups usando la imagen
     function drawPowerUps() {
       powerUps.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        const size = p.size * 2;
+        ctx.drawImage(powerUpImg, p.x - size/2, p.y - size/2, size, size);
       });
     }
 
