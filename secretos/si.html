@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Juego - Banear Channels</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#7c3aed;
+    --danger:#ef4444;
+    --safe:#10b981;
+    --glass: rgba(255,255,255,0.04);
+    --muted: #94a3b8;
+    --text:#e6eef6;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,#071028 0%, #071227 60%), var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+
+  .container{
+    width:100%;
+    max-width:980px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+    border-radius:14px;
+    padding:18px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  header{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+
+  .title{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:56px;height:56px;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),#5b21b6);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:18px;color:white;
+    box-shadow:0 6px 20px rgba(124,58,237,0.18);
+  }
+  h1{font-size:18px;margin:0}
+  p.lead{color:var(--muted);margin:0;font-size:13px}
+
+  .hud{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .stat{
+    background:var(--glass);
+    padding:8px 12px;
+    border-radius:10px;
+    text-align:center;
+    min-width:84px;
+  }
+  .stat small{display:block;color:var(--muted);font-size:12px}
+  .stat strong{display:block;font-size:16px}
+
+  main{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:16px;
+  }
+
+  /* Left: board */
+  .board{
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015));
+    padding:14px;border-radius:12px;
+    border:1px solid rgba(255,255,255,0.02);
+    min-height:360px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
+    gap:10px;
+  }
+  .channel{
+    background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));
+    border-radius:10px;padding:10px;
+    display:flex;gap:8px;align-items:center;
+    border:1px solid rgba(255,255,255,0.02);
+    transition:transform .12s ease, box-shadow .12s ease;
+    user-select:none;
+  }
+  .channel:hover{transform:translateY(-6px); box-shadow:0 10px 30px rgba(2,6,23,0.5)}
+  .avatar{
+    width:48px;height:48px;border-radius:8px;background:#071422;
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text);
+    font-size:18px;border:1px solid rgba(255,255,255,0.03);
+  }
+  .info{flex:1;}
+  .info h3{margin:0;font-size:14px}
+  .info small{color:var(--muted);display:block;margin-top:4px;font-size:12px}
+
+  .actions{display:flex;flex-direction:column;gap:6px}
+  button.btn{
+    padding:6px 10px;border-radius:8px;border:0;font-weight:700;cursor:pointer;
+    background:rgba(255,255,255,0.04);color:var(--text);
+  }
+  .btn.ban{background:linear-gradient(90deg,var(--danger),#ef7676)}
+  .btn.warn{background:linear-gradient(90deg,#f59e0b,#f97316)}
+  .btn.disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  /* Right: panel */
+  .panel{
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+    padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+    height:100%;
+  }
+  .panel h2{margin:0 0 8px 0;font-size:16px}
+  .panel .rules{color:var(--muted);font-size:13px;margin-bottom:10px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .controls button{padding:10px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:700}
+  .controls .primary{background:linear-gradient(90deg,var(--accent),#5b21b6);color:white}
+  .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;margin-top:8px}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#34d399,#60a5fa);width:0%}
+
+  footer.meta{margin-top:12px;font-size:13px;color:var(--muted)}
+
+  /* small screens */
+  @media (max-width:880px){
+    main{grid-template-columns: 1fr}
+    .panel{order:2}
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Juego banear channels">
+    <header>
+      <div class="title">
+        <div class="logo">BC</div>
+        <div>
+          <h1>Banear Channels — Prototipo</h1>
+          <p class="lead">Banear los canales tóxicos sin equivocarte con los protegidos.</p>
+        </div>
+      </div>
+
+      <div class="hud" aria-hidden="false">
+        <div class="stat"><small>Score</small><strong id="score">0</strong></div>
+        <div class="stat"><small>Vidas</small><strong id="lives">3</strong></div>
+        <div class="stat"><small>Nivel</small><strong id="level">1</strong></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="board" aria-label="Tablero de canales">
+        <div class="grid" id="grid">
+          <!-- Canales se generan aquí -->
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Panel de control">
+        <h2>Controles</h2>
+        <p class="rules">
+          Objetivo: banear todos los canales marcados como TÓXICOS antes de que termine el tiempo. No banees los canales PROTEGIDOS (admins), o perderás vidas.
+        </p>
+
+        <div class="controls">
+          <button class="primary" id="startBtn">Iniciar / Reiniciar</button>
+          <button id="nextLevelBtn" disabled>Siguiente Nivel</button>
+          <button id="muteBtn">Silenciar Sonido</button>
+        </div>
+
+        <div>
+          <small>Tiempo restante</small>
+          <div class="progress" title="Barra de tiempo">
+            <i id="timeBar"></i>
+          </div>
+          <div style="margin-top:6px;color:var(--muted);font-size:13px"> <strong id="timeText">--</strong> segundos</div>
+        </div>
+
+        <div style="margin-top:12px">
+          <h3 style="margin:0 0 6px 0">Registro</h3>
+          <div id="log" style="height:160px;overflow:auto;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;color:var(--muted);font-size:13px"></div>
+        </div>
+
+        <footer class="meta">Prototipo — modifícalo como quieras</footer>
+      </aside>
+    </main>
+  </div>
+
+<script>
+/*
+  Juego: Banear Channels (prototipo)
+  - Objetivo: banear solo los canales "tóxicos".
+  - Penalización por banear protegidos (admins).
+  - Tiempo por nivel, vidas, score y niveles crecientes.
+*/
+
+const grid = document.getElementById('grid');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const levelEl = document.getElementById('level');
+const startBtn = document.getElementById('startBtn');
+const nextLevelBtn = document.getElementById('nextLevelBtn');
+const timeBar = document.getElementById('timeBar');
+const timeText = document.getElementById('timeText');
+const logEl = document.getElementById('log');
+const muteBtn = document.getElementById('muteBtn');
+
+let state = {
+  score: 0,
+  lives: 3,
+  level: 1,
+  timeLeft: 30,
+  running: false,
+  channels: [],
+  timerInterval: null,
+  muted: false
+};
+
+// small sound effects via WebAudio API (simple beeps)
+const AudioSfx = (() => {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const play = (freq, duration=0.08, type='sine') => {
+    if(state.muted) return;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    o.connect(g);
+    g.connect(ctx.destination);
+    g.gain.value = 0.08;
+    o.start();
+    setTimeout(()=>{ o.stop(); }, duration*1000);
+  };
+  return { play };
+})();
+
+function log(text){
+  const time = new Date().toLocaleTimeString();
+  logEl.innerHTML = `<div>[${time}] ${text}</div>` + logEl.innerHTML;
+}
+
+// Genera nombres aleatorios para canales
+const sampleNames = [
+  "memes", "off-topic", "soporte", "comandos", "anuncios",
+  "bot-logs", "mod-chat", "politica", "gaming", "musica",
+  "spam", "deportes", "creatividad", "sugerencias", "nsfw"
+];
+
+function randomName(){
+  return sampleNames[Math.floor(Math.random()*sampleNames.length)] + "-" + Math.floor(Math.random()*900+100);
+}
+
+function createChannel(id, role){
+  // role: 'toxic' | 'protected' | 'neutral'
+  return {
+    id,
+    name: randomName(),
+    role,
+    banned: false,
+    avatarLetter: String.fromCharCode(65 + Math.floor(Math.random()*26))
+  };
+}
+
+function generateLevel(level){
+  // Ajusta cantidad y proporciones según nivel
+  const base = Math.min(12, 6 + Math.floor(level*1.5));
+  const toxicCount = Math.max(2, Math.min(base-2, Math.floor(base * (0.35 + level*0.03))));
+  const protectedCount = Math.max(1, Math.floor(base * (0.15 + level*0.02)));
+  const neutralCount = base - toxicCount - protectedCount;
+
+  const arr = [];
+  let i=0;
+  for(let t=0;t<toxicCount;t++) arr.push(createChannel(i++, 'toxic'));
+  for(let p=0;p<protectedCount;p++) arr.push(createChannel(i++, 'protected'));
+  for(let n=0;n<neutralCount;n++) arr.push(createChannel(i++, 'neutral'));
+
+  // mezclar
+  for(let k=arr.length-1;k>0;k--){
+    const j = Math.floor(Math.random()*(k+1));
+    [arr[k],arr[j]] = [arr[j],arr[k]];
+  }
+  return arr;
+}
+
+function renderChannels(){
+  grid.innerHTML = '';
+  state.channels.forEach(ch => {
+    const el = document.createElement('div');
+    el.className = 'channel';
+    el.dataset.id = ch.id;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = ch.avatarLetter;
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    const name = document.createElement('h3'); name.textContent = ch.name;
+    const tag = document.createElement('small');
+    tag.textContent = 'Canal';
+    info.appendChild(name);
+    info.appendChild(tag);
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+
+    const banBtn = document.createElement('button');
+    banBtn.className = 'btn ban';
+    banBtn.textContent = 'Banear';
+    banBtn.title = 'Banear canal';
+    banBtn.onclick = () => attemptBan(ch.id, banBtn);
+
+    const inspectBtn = document.createElement('button');
+    inspectBtn.className = 'btn';
+    inspectBtn.textContent = 'Inspeccionar';
+    inspectBtn.onclick = () => inspectChannel(ch.id);
+
+    actions.appendChild(banBtn);
+    actions.appendChild(inspectBtn);
+
+    el.appendChild(avatar);
+    el.appendChild(info);
+    el.appendChild(actions);
+
+    grid.appendChild(el);
+  });
+}
+
+function inspectChannel(id){
+  const ch = state.channels.find(c=>c.id===id);
+  if(!ch) return;
+  // mostrar pista pequeña: "actividad alta" etc.
+  let hint = 'Actividad: baja';
+  if(ch.role === 'toxic') hint = 'Actividad: alta y mensajes ofensivos';
+  if(ch.role === 'protected') hint = 'Etiqueta: protegida por admins';
+  log(`Inspeccionaste ${ch.name} — ${hint}`);
+  AudioSfx.play(1200, 0.06, 'sine');
+}
+
+function attemptBan(id, btn){
+  if(!state.running) return;
+  const ch = state.channels.find(c=>c.id===id);
+  if(!ch || ch.banned) return;
+  ch.banned = true;
+  // actualizar UI: poner opacidad y desactivar botón
+  btn.classList.add('disabled');
+  btn.disabled = true;
+  btn.textContent = 'Baneado';
+
+  if(ch.role === 'toxic'){
+    const gain = 100 + Math.floor(20 * state.level);
+    state.score += gain;
+    scoreEl.textContent = state.score;
+    log(`Baneaste correctamente ${ch.name} +${gain} pts`);
+    AudioSfx.play(1500 - Math.min(800, state.level*40), 0.06, 'square');
+    checkLevelComplete();
+  } else if(ch.role === 'protected'){
+    state.lives -= 1;
+    livesEl.textContent = state.lives;
+    log(`Error: ${ch.name} estaba protegida. -1 vida`);
+    AudioSfx.play(240, 0.12, 'sawtooth');
+    if(state.lives <= 0){
+      gameOver();
+    }
+  } else {
+    // neutral: pequeña penalización de puntos
+    const loss = 25;
+    state.score = Math.max(0, state.score - loss);
+    scoreEl.textContent = state.score;
+    log(`Baneaste ${ch.name} (neutral). -${loss} pts`);
+    AudioSfx.play(400, 0.08, 'triangle');
+    checkLevelComplete();
+  }
+}
+
+function checkLevelComplete(){
+  // nivel completo si no quedan canales "toxic" sin banear
+  const remainingToxic = state.channels.filter(c=>c.role==='toxic' && !c.banned).length;
+  if(remainingToxic === 0){
+    state.running = false;
+    clearInterval(state.timerInterval);
+    log(`Nivel ${state.level} completado!`);
+    nextLevelBtn.disabled = false;
+    startBtn.textContent = 'Reiniciar';
+    AudioSfx.play(1800, 0.2, 'sine');
+  }
+}
+
+function startLevel(level){
+  // tiempo base decrece con nivel
+  const baseTime = Math.max(12, 30 - Math.floor(level*2));
+  state.timeLeft = baseTime;
+  timeText.textContent = state.timeLeft;
+  timeBar.style.width = '100%';
+
+  state.channels = generateLevel(level);
+  renderChannels();
+
+  state.running = true;
+  nextLevelBtn.disabled = true;
+  startBtn.textContent = 'Reiniciar';
+  levelEl.textContent = level;
+  log(`Iniciando nivel ${level} — Tienes ${state.lives} vidas.`);
+
+  if(state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(()=>{
+    if(!state.running) return;
+    state.timeLeft -= 1;
+    const pct = Math.max(0, (state.timeLeft / baseTime) * 100);
+    timeBar.style.width = pct + '%';
+    timeText.textContent = state.timeLeft;
+    if(state.timeLeft <= 0){
+      clearInterval(state.timerInterval);
+      state.running = false;
+      // penaliza vidas por canales tóxicos sin banear
+      const remaining = state.channels.filter(c=>c.role==='toxic' && !c.banned).length;
+      if(remaining > 0){
+        state.lives -= remaining;
+        log(`Se acabó el tiempo! No baneaste ${remaining} canal(es) tóxico(s). -${remaining} vidas.`);
+        livesEl.textContent = state.lives;
+        AudioSfx.play(220, 0.14, 'sawtooth');
+        if(state.lives <= 0) return gameOver();
+      }
+      nextLevelBtn.disabled = false;
+    } else if(pct < 25){
+      // warning beep
+      AudioSfx.play(800, 0.04, 'triangle');
+    }
+  }, 1000);
+}
+
+function gameOver(){
+  state.running = false;
+  clearInterval(state.timerInterval);
+  log(`Game Over. Puntaje final: ${state.score}`);
+  AudioSfx.play(120, 0.5, 'sawtooth');
+  // bloquear todos los botones de banear
+  document.querySelectorAll('.btn.ban').forEach(b=>{
+    b.disabled = true;
+    b.classList.add('disabled');
+  });
+  startBtn.textContent = 'Reiniciar';
+  nextLevelBtn.disabled = true;
+}
+
+startBtn.addEventListener('click', () => {
+  // reiniciar estado básico
+  state.score = 0;
+  state.lives = 3;
+  state.level = 1;
+  scoreEl.textContent = state.score;
+  livesEl.textContent = state.lives;
+  levelEl.textContent = state.level;
+  logEl.innerHTML = '';
+  startLevel(state.level);
+});
+
+nextLevelBtn.addEventListener('click', () => {
+  if(state.lives <= 0) { log('No tienes vidas, reinicia.'); return; }
+  state.level += 1;
+  levelEl.textContent = state.level;
+  // tiempo se reduce con nivel; también puedes ajustar vidas/score
+  startLevel(state.level);
+});
+
+muteBtn.addEventListener('click', () => {
+  state.muted = !state.muted;
+  muteBtn.textContent = state.muted ? 'Activar Sonido' : 'Silenciar Sonido';
+});
+
+// iniciar una partida corta automáticamente (opcional)
+(function init(){
+  // render placeholder channels
+  state.channels = generateLevel(1);
+  renderChannels();
+  timeText.textContent = '--';
+  scoreEl.textContent = state.score;
+  livesEl.textContent = state.lives;
+  levelEl.textContent = state.level;
+  log('Juego listo. Presiona Iniciar para comenzar.');
+})();
+</script>
+</body>
+            </html>
