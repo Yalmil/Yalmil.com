@@ -4,76 +4,135 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iniciar sesión con Google</title>
+
   <style>
-    :root{
-      --bg: linear-gradient(135deg,#061a2b,#042b2f);
-      --card: rgba(255,255,255,0.06);
-      --glass: rgba(255,255,255,0.04);
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      background:var(--bg);
-      color:#e6f3f2;
-      -webkit-font-smoothing:antialiased;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .card{
-      width:360px;
-      max-width:95%;
-      padding:28px;
-      border-radius:14px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      box-shadow:0 8px 30px rgba(0,0,0,0.6);
-      text-align:center;
+
+    .card {
+      background: rgba(60, 20, 0, 0.3);
+      backdrop-filter: blur(8px);
+      border: 2px solid #ff8c00;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 360px;
+      width: 90%;
+      box-shadow: 0 0 20px #ff8c0055;
+      text-align: center;
     }
-    h1{font-size:20px;margin-bottom:8px}
-    p.sub{font-size:13px;color:rgba(230,243,242,0.8);margin-bottom:18px}
-    .btn{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      justify-content:center;
-      padding:10px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      border:none;
-      background: #fff;
-      color:#111;
-      font-weight:600;
-      width:100%;
-      box-shadow:0 6px 18px rgba(2,6,23,0.4);
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+      margin-bottom: 0.5rem;
     }
-    .btn img{width:20px;height:20px}
-    .status{
-      margin-top:14px;
-      font-size:13px;
-      color:rgba(230,243,242,0.9);
-      min-height:18px;
+
+    p.sub {
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: #ffd8a6;
+      opacity: 0.9;
     }
-    .profile{
-      margin-top:14px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:center;
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      background-color: #ff8c00;
+      color: #330800;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff8c0088;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .profile img{width:56px;height:56px;border-radius:999px;object-fit:cover}
-    .small{font-size:13px}
-    .signout{
-      margin-top:12px;
-      background:transparent;
-      border:1px solid rgba(230,243,242,0.08);
-      color:rgba(230,243,242,0.95);
-      padding:8px 12px;
-      border-radius:8px;
-      cursor:pointer;
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 25px #ff8c00;
     }
-    footer{margin-top:14px;font-size:12px;color:rgba(230,243,242,0.6)}
+
+    .btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .status {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      min-height: 18px;
+      color: #ffd8a6;
+    }
+
+    .profile {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .profile img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid #ff8c00;
+      object-fit: cover;
+      box-shadow: 0 0 10px #ff8c0055;
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: #ffd8a6;
+    }
+
+    .signout {
+      margin-top: 1rem;
+      background: transparent;
+      border: 1px solid #ff8c00;
+      color: #ffb366;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .signout:hover {
+      background: #ff8c00;
+      color: #330800;
+    }
+
+    footer {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #ffb366;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -89,9 +148,7 @@
     <div class="status" id="status"></div>
 
     <div id="profileArea" style="display:none">
-      <div class="profile" id="profile">
-        <!-- perfil se inserta aquí -->
-      </div>
+      <div class="profile" id="profile"></div>
       <button id="signOutBtn" class="signout">Cerrar sesión</button>
     </div>
 
@@ -99,7 +156,6 @@
   </div>
 
   <script type="module">
-    // IMPORTS (versión fija; puedes actualizar las versiones si quieres)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import {
       getAuth,
@@ -115,7 +171,6 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    // ---------- CONFIG: usa el config que ya proporcionaste ----------
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
       authDomain: "databaseloginweb.firebaseapp.com",
@@ -126,25 +181,21 @@
       appId: "1:121538864529:web:e92aaeaa4ba52618162630"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Elementos UI
     const btn = document.getElementById('googleSignIn');
     const status = document.getElementById('status');
     const profileArea = document.getElementById('profileArea');
     const profileDiv = document.getElementById('profile');
     const signOutBtn = document.getElementById('signOutBtn');
 
-    // Manejar click de iniciar sesión
     btn.addEventListener('click', async () => {
       status.textContent = 'Abriendo ventana de Google...';
       const provider = new GoogleAuthProvider();
       try {
         const result = await signInWithPopup(auth, provider);
-        // El usuario está ya autenticado; onAuthStateChanged se encargará de guardar y redirigir.
         status.textContent = 'Autenticación exitosa. Guardando datos...';
       } catch (error) {
         console.error('Error en signInWithPopup:', error);
@@ -152,10 +203,8 @@
       }
     });
 
-    // Escuchar cambios en el estado de autenticación
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // usuario autenticado
         const uid = user.uid;
         const userData = {
           name: user.displayName || null,
@@ -164,7 +213,6 @@
           lastLogin: Date.now()
         };
 
-        // Mostrar perfil (opcional, mientras redirige)
         profileDiv.innerHTML = `
           <img src="${userData.photoURL || ''}" alt="Foto perfil" />
           <div style="text-align:left">
@@ -175,7 +223,6 @@
         profileArea.style.display = 'block';
 
         try {
-          // Guardar en Realtime Database en /users/{uid}
           await set(ref(db, 'users/' + uid), {
             name: userData.name,
             email: userData.email,
@@ -184,8 +231,6 @@
           });
 
           status.textContent = 'Datos guardados. Redirigiendo...';
-          // Redirigir a inicio.html
-          // Si quieres pasar info por query o localStorage, puedes hacerlo aquí
           setTimeout(() => {
             window.location.href = 'inicio.html';
           }, 600);
@@ -194,13 +239,11 @@
           status.textContent = 'Error guardando datos en la base de datos';
         }
       } else {
-        // No hay usuario autenticado
         profileArea.style.display = 'none';
         status.textContent = '';
       }
     });
 
-    // Botón cerrar sesión (opcional)
     signOutBtn.addEventListener('click', async () => {
       try {
         await signOut(auth);
