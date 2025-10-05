@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Banea a todos los channels!</title>
+<title>Juego: Banear Channels</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -181,16 +179,36 @@ footer {
 </footer>
 
 <script>
-let baneos = 0;
-let bpc = 1;
-let empleados = 0;
-let velocidad = 2500;
+// ===== FUNCIONES DE COOKIES =====
+function setCookie(name, value, days = 365) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
+  const expires = "expires="+ d.toUTCString();
+  document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
+}
+
+function getCookie(name) {
+  const cname = name + "=";
+  const decoded = decodeURIComponent(document.cookie);
+  const ca = decoded.split(';');
+  for(let c of ca) {
+    while (c.charAt(0) == ' ') c = c.substring(1);
+    if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
+  }
+  return "";
+}
+
+// ===== VARIABLES =====
+let baneos = parseFloat(getCookie("baneos")) || 0;
+let bpc = parseFloat(getCookie("bpc")) || 1;
+let empleados = parseInt(getCookie("empleados")) || 0;
+let velocidad = parseInt(getCookie("velocidad")) || 2500;
+let costoOdio = parseInt(getCookie("costoOdio")) || 10;
+let costoEmpleado = parseInt(getCookie("costoEmpleado")) || 50;
+let costoYalgui = parseInt(getCookie("costoYalgui")) || 200;
 let autoClickInterval = null;
 
-let costoOdio = 10;
-let costoEmpleado = 50;
-let costoYalgui = 200;
-
+// ===== ELEMENTOS =====
 const baneoDisplay = document.getElementById("baneos");
 const bpcDisplay = document.getElementById("bpc");
 const empleadosDisplay = document.getElementById("empleados");
@@ -199,24 +217,38 @@ const costoOdioDisplay = document.getElementById("costo-odio");
 const costoEmpleadoDisplay = document.getElementById("costo-empleado");
 const costoYalguiDisplay = document.getElementById("costo-yalgui");
 
-document.getElementById("baneo-btn").addEventListener("click", () => {
-  baneos += bpc;
-  actualizarPantalla();
-});
+// ===== FUNCIONES =====
+function guardarDatos() {
+  setCookie("baneos", baneos);
+  setCookie("bpc", bpc);
+  setCookie("empleados", empleados);
+  setCookie("velocidad", velocidad);
+  setCookie("costoOdio", costoOdio);
+  setCookie("costoEmpleado", costoEmpleado);
+  setCookie("costoYalgui", costoYalgui);
+}
 
 function actualizarPantalla() {
   baneoDisplay.textContent = baneos.toFixed(1);
   bpcDisplay.textContent = bpc.toFixed(1);
   empleadosDisplay.textContent = empleados;
   velocidadDisplay.textContent = (velocidad / 1000).toFixed(2) + "s";
+  costoOdioDisplay.textContent = costoOdio;
+  costoEmpleadoDisplay.textContent = costoEmpleado;
+  costoYalguiDisplay.textContent = costoYalgui;
+  guardarDatos();
 }
+
+document.getElementById("baneo-btn").addEventListener("click", () => {
+  baneos += bpc;
+  actualizarPantalla();
+});
 
 function comprarOdio() {
   if (baneos >= costoOdio) {
     baneos -= costoOdio;
     bpc += 0.5;
     costoOdio = Math.floor(costoOdio * 1.5);
-    costoOdioDisplay.textContent = costoOdio;
     actualizarPantalla();
   }
 }
@@ -226,7 +258,6 @@ function comprarEmpleado() {
     baneos -= costoEmpleado;
     empleados++;
     costoEmpleado = Math.floor(costoEmpleado * 1.7);
-    costoEmpleadoDisplay.textContent = costoEmpleado;
     actualizarPantalla();
     iniciarAutoClick();
   }
@@ -237,7 +268,6 @@ function comprarYalgui() {
     baneos -= costoYalgui;
     velocidad -= 250;
     costoYalgui = Math.floor(costoYalgui * 2);
-    costoYalguiDisplay.textContent = costoYalgui;
     actualizarPantalla();
     iniciarAutoClick();
   }
@@ -251,7 +281,9 @@ function iniciarAutoClick() {
   }, velocidad);
 }
 
+// ===== INICIO =====
 actualizarPantalla();
+if (empleados > 0) iniciarAutoClick();
 </script>
 
 </body>
