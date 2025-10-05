@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta property="og:title" content="Registrarse en Yalmil.com" />
+  <meta property="og:title" content="Registrarse en Yalmil.com" />
   <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" /><style>
-    <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png?ex=68ca3722&is=68c8e5a2&hm=07f22424a0679c8804e496afa5e5b30a88ee8a14283e8da8fc607166fcf20f08&" type="image/png">
-    
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1355008732576088204/1417364586838884372/wplace-pixel-art_1.png?ex=68ca3722&is=68c8e5a2&hm=07f22424a0679c8804e496afa5e5b30a88ee8a14283e8da8fc607166fcf20f08&" type="image/png">
+
   <title>Yalmil.com</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -35,6 +35,7 @@
     }
 
     header {
+      position: relative;
       background-color: #4d1a00;
       padding: 1rem 2rem;
       border-bottom: 2px solid #ff8c00;
@@ -53,6 +54,26 @@
       margin: 0.5rem 0;
       font-weight: 400;
       color: #ffd8a6;
+    }
+
+    /* Foto de perfil */
+    #profilePic {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff8c00;
+      box-shadow: 0 0 10px #ff8c00aa;
+      cursor: pointer;
+      object-fit: cover;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #profilePic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #ffb84d;
     }
 
     main {
@@ -112,6 +133,7 @@
   <header>
     <h1>Yalmil Web</h1>
     <h3 id="bienvenida">Nuevo: UUID generator v4</h3>
+    <img id="profilePic" src="https://i.pravatar.cc/100?u=default" alt="Foto de perfil">
   </header>
 
   <main>
@@ -146,27 +168,28 @@
     const db = getFirestore(app);
 
     const profilePic = document.getElementById("profilePic");
-    const usernameDisplay = document.getElementById("usernameDisplay");
     const bienvenida = document.getElementById("bienvenida");
-    const goToProfile = document.getElementById("goToProfile");
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const data = userDoc.exists() ? userDoc.data() : {};
-        const username = data.username || user.email;
-        const avatarUrl = data.avatar || `https://i.pravatar.cc/100?u=${user.uid}`;
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
 
-        usernameDisplay.textContent = username;
-        profilePic.src = avatarUrl;
-        bienvenida.textContent = `Bienvenido de nuevo, ${username}!`;
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const photoURL = data.photoURL || user.photoURL || `https://i.pravatar.cc/100?u=${user.uid}`;
+          profilePic.src = photoURL;
+          bienvenida.textContent = `Bienvenido de nuevo, ${data.name || user.displayName || 'usuario'}!`;
+        } else {
+          profilePic.src = user.photoURL || `https://i.pravatar.cc/100?u=${user.uid}`;
+        }
       } else {
-        usernameDisplay.textContent = "Invitado";
+        profilePic.src = "https://i.pravatar.cc/100?u=default";
         bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
       }
     });
 
-    goToProfile.addEventListener('click', () => {
+    profilePic.addEventListener("click", () => {
       window.location.href = "perfil.html";
     });
   </script>
