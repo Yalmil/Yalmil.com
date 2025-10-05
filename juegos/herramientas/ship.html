@@ -160,15 +160,22 @@
         const lovePercent = Math.floor(Math.random() * 101);
         let message = "";
 
-        if (lovePercent <= 20) {
+        if (lovePercent <= 1) {
           message = "💔 Ni en otra dimensión...";
+        } else if (lovePercent <= 35) {
+          message = "🤔 Si pero solo en el reino Ñ";
         } else if (lovePercent <= 50) {
-          message = "🤔 Podría ser... si apagas el WiFi.";
-        } else if (lovePercent <= 80) {
-          message = "💞 Hay potencial, pero cuidado con la Ñ.";
-        } else {
-          message = "💍 ¡El amor es real! Ya pueden adoptar un ajolote.";
+          message = "💞 Hay potencial, pero cuidado con saanty.";
+        } else if (lovePercent <= 65) {
+          message = "💍 ¡El ship es real!";
+        } else if (lovePercent <= 75) {
+          message = "💗 Cuando es la boda?";
+        } else if (lovePercent <= 89) {
+          message = "♥️ Mis papis";
+        } else if (lovePercent <= 99) {
+          message = "🐈‍⬛ Pueden adoptar un Yalmil";
         }
+        
 
         loading.style.display = "none";
         output.innerHTML = `
