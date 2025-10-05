@@ -1,369 +1,335 @@
-<!DOCTYPE html>  
-<html lang="es">  
-<head>  
-    <meta charset="UTF-8">  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Wordle de Amigos</title>  
-    <style>  
-        * {  
-            margin: 0;  
-            padding: 0;  
-            box-sizing: border-box;  
-        }  
-  
-        body {  
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
-            min-height: 100vh;  
-            display: flex;  
-            justify-content: center;  
-            align-items: center;  
-            padding: 20px;  
-        }  
-  
-        .container {  
-            background: white;  
-            border-radius: 20px;  
-            padding: 40px;  
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);  
-            max-width: 800px;  
-            width: 100%;  
-        }  
-  
-        h1 {  
-            text-align: center;  
-            color: #667eea;  
-            margin-bottom: 10px;  
-            font-size: 2.5em;  
-        }  
-  
-        .subtitle {  
-            text-align: center;  
-            color: #666;  
-            margin-bottom: 30px;  
-            font-size: 1.1em;  
-        }  
-  
-        .input-container {  
-            position: relative;  
-            margin-bottom: 30px;  
-        }  
-  
-        #amigoInput {  
-            width: 100%;  
-            padding: 15px;  
-            font-size: 1.2em;  
-            border: 3px solid #667eea;  
-            border-radius: 10px;  
-            outline: none;  
-            transition: all 0.3s;  
-        }  
-  
-        #amigoInput:focus {  
-            border-color: #764ba2;  
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);  
-        }  
-  
-        .autocomplete-items {  
-            position: absolute;  
-            border: 2px solid #667eea;  
-            border-top: none;  
-            z-index: 99;  
-            top: 100%;  
-            left: 0;  
-            right: 0;  
-            background: white;  
-            border-radius: 0 0 10px 10px;  
-            max-height: 200px;  
-            overflow-y: auto;  
-        }  
-  
-        .autocomplete-item {  
-            padding: 12px;  
-            cursor: pointer;  
-            border-bottom: 1px solid #eee;  
-            transition: background 0.2s;  
-        }  
-  
-        .autocomplete-item:hover {  
-            background: #f0f0f0;  
-        }  
-  
-        .autocomplete-item:last-child {  
-            border-bottom: none;  
-        }  
-  
-        .intentos {  
-            margin-bottom: 30px;  
-        }  
-  
-        .intento {  
-            display: grid;  
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));  
-            gap: 10px;  
-            margin-bottom: 15px;  
-            padding: 15px;  
-            background: #f8f9fa;  
-            border-radius: 10px;  
-            animation: slideIn 0.3s ease;  
-        }  
-  
-        @keyframes slideIn {  
-            from {  
-                opacity: 0;  
-                transform: translateY(-20px);  
-            }  
-            to {  
-                opacity: 1;  
-                transform: translateY(0);  
-            }  
-        }  
-  
-        .atributo {  
-            padding: 12px;  
-            border-radius: 8px;  
-            text-align: center;  
-            font-weight: bold;  
-            transition: all 0.3s;  
-        }  
-  
-        .atributo.correcto {  
-            background: #4caf50;  
-            color: white;  
-        }  
-  
-        .atributo.incorrecto {  
-            background: #f44336;  
-            color: white;  
-        }  
-  
-        .atributo-label {  
-            font-size: 0.8em;  
-            opacity: 0.9;  
-            display: block;  
-            margin-bottom: 5px;  
-        }  
-  
-        .mensaje {  
-            text-align: center;  
-            padding: 20px;  
-            margin: 20px 0;  
-            border-radius: 10px;  
-            font-size: 1.3em;  
-            font-weight: bold;  
-            display: none;  
-        }  
-  
-        .mensaje.victoria {  
-            background: #4caf50;  
-            color: white;  
-            display: block;  
-        }  
-  
-        .stats {  
-            display: flex;  
-            justify-content: space-around;  
-            margin-top: 20px;  
-            padding: 20px;  
-            background: #f8f9fa;  
-            border-radius: 10px;  
-        }  
-  
-        .stat-item {  
-            text-align: center;  
-        }  
-  
-        .stat-number {  
-            font-size: 2em;  
-            font-weight: bold;  
-            color: #667eea;  
-        }  
-  
-        .stat-label {  
-            color: #666;  
-            font-size: 0.9em;  
-        }  
-  
-        button {  
-            background: #667eea;  
-            color: white;  
-            border: none;  
-            padding: 12px 30px;  
-            font-size: 1.1em;  
-            border-radius: 10px;  
-            cursor: pointer;  
-            transition: all 0.3s;  
-            display: block;  
-            margin: 20px auto;  
-        }  
-  
-        button:hover {  
-            background: #764ba2;  
-            transform: translateY(-2px);  
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);  
-        }  
-    </style>  
-</head>  
-<body>  
-    <div class="container">  
-        <h1>🎮 Wordle de Amigos</h1>  
-        <p class="subtitle">¡Adivina quién es el amigo del día!</p>  
-  
-        <div class="input-container">  
-            <input type="text" id="amigoInput" placeholder="Escribe el nombre de tu amigo..." autocomplete="off">  
-            <div id="autocomplete-list" class="autocomplete-items"></div>  
-        </div>  
-  
-        <div class="stats">  
-            <div class="stat-item">  
-                <div class="stat-number" id="intentosCount">0</div>  
-                <div class="stat-label">Intentos</div>  
-            </div>  
-        </div>  
-  
-        <div id="mensaje" class="mensaje"></div>  
-  
-        <div id="intentos" class="intentos"></div>  
-  
-        <button id="nuevoJuego" style="display:none;">🔄 Nuevo Juego</button>  
-    </div>  
-  
-    <script>  
-        // TUS AMIGOS  
-        const amigos = [  
-            { nombre: "Aure", raza: "Planeta", año: "2023", youtuber: "Sí", color: "Rojo" },  
-            { nombre: "Abricraft", raza: "Bloque", año: "2024", youtuber: "Sí", color: "Azul" },  
-            { nombre: "Saantybl", raza: "Letra", año: "2023", youtuber: "Razonable", color: "Verde" },  
-            { nombre: "Yalmil", raza: "Gato", año: "2023/2024", youtuber: "Sí", color: "Morado" },  
-            { nombre: "Channel", raza: "Calculadora", año: "2024", youtuber: "No", color: "Naranja" },  
-            { nombre: "Nienie", raza: "Planeta", año: "2023", youtuber: "No", color: "Rosa" },  
-            { nombre: "Sophie", raza: "Humanoide", año: "2024", youtuber: "No", color: "Verde" },  
-            { nombre: "Debs", raza: "País", año: "2023", youtuber: "No se", color: "Rojo" },  
-            { nombre: "URS", raza: "País", año: "2023", youtuber: "No", color: "Negro/Amarillo/Blanco" },  
-            { nombre: "Lucass", raza: "Estadio", año: "2022", youtuber: "No", color: "Verde" },  
-            { nombre: "Nick", raza: "Desconocido", año: "2021", youtuber: "No", color: "Blanco" },  
-            { nombre: "Sr. L", raza: "SCP", año: "2022", youtuber: "No", color: "Negro" },  
-            { nombre: "Cristian", raza: "Película/Anime", año: "2025", youtuber: "No", color: "Amarillo" },  
-            { nombre: "Derick", raza: "Película/Anime", año: "2023", youtuber: "No", color: "Rojo" },  
-            { nombre: "Izan", raza: "Animal/Peluche", año: "2024", youtuber: "No", color: "Blanco" },  
-            { nombre: "Eron", raza: "Humano", año: "2024", youtuber: "No", color: "Negro" },  
-            { nombre: "Lu", raza: "Humano", año: "2025", youtuber: "No", color: "Blanco" },  
-            { nombre: "Dear", raza: "Minecraft", año: "2022", youtuber: "No", color: "Azul" },  
-            { nombre: "Kaisser", raza: "Humano", año: "2023/2024", youtuber: "Sí", color: "Negro" },  
-            { nombre: "Milenial", raza: "Meme", año: "2024", youtuber: "No", color: "Rojo" },  
-            { nombre: "Ben10", raza: "Meme", año: "2023", youtuber: "No", color: "Verde" },  
-            { nombre: "Cartoon", raza: "Desconocido", año: "2024", youtuber: "Razonable", color: "Rojo" },  
-            { nombre: "Alxbc", raza: "Película/Anime", año: "2024", youtuber: "No", color: "Negro" },  
-            { nombre: "Fabi", raza: "Meme", año: "2025", youtuber: "Razonable", color: "Amarillo" }  
-        ];  
-  
-        let amigoDelDia = null;  
-        let intentos = 0;  
-        let juegoTerminado = false;  
-  
-        // Seleccionar amigo del día aleatorio  
-        function seleccionarAmigoDelDia() {  
-            const hoy = new Date().toDateString();  
-            const seed = hoy.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);  
-            const index = seed % amigos.length;  
-            amigoDelDia = amigos[index];  
-            console.log("Amigo del día seleccionado:", amigoDelDia.nombre);  
-        }  
-  
-        // Autocompletado  
-        const input = document.getElementById('amigoInput');  
-        const autocompleteList = document.getElementById('autocomplete-list');  
-  
-        input.addEventListener('input', function() {  
-            const val = this.value;  
-            autocompleteList.innerHTML = '';  
-              
-            if (!val || juegoTerminado) return;  
-  
-            const matches = amigos.filter(a =>   
-                a.nombre.toLowerCase().includes(val.toLowerCase())  
-            );  
-  
-            matches.forEach(amigo => {  
-                const div = document.createElement('div');  
-                div.className = 'autocomplete-item';  
-                div.textContent = amigo.nombre;  
-                div.addEventListener('click', () => {  
-                    input.value = amigo.nombre;  
-                    autocompleteList.innerHTML = '';  
-                    verificarAmigo(amigo);  
-                });  
-                autocompleteList.appendChild(div);  
-            });  
-        });  
-  
-        input.addEventListener('keypress', function(e) {  
-            if (e.key === 'Enter' && !juegoTerminado) {  
-                const amigoEncontrado = amigos.find(a =>   
-                    a.nombre.toLowerCase() === this.value.toLowerCase()  
-                );  
-                if (amigoEncontrado) {  
-                    verificarAmigo(amigoEncontrado);  
-                    autocompleteList.innerHTML = '';  
-                }  
-            }  
-        });  
-  
-        // Verificar amigo  
-        function verificarAmigo(amigoSeleccionado) {  
-            if (juegoTerminado) return;  
-  
-            intentos++;  
-            document.getElementById('intentosCount').textContent = intentos;  
-  
-            const intentoDiv = document.createElement('div');  
-            intentoDiv.className = 'intento';  
-  
-            const atributos = Object.keys(amigoDelDia).filter(k => k !== 'nombre');  
-              
-            atributos.forEach(attr => {  
-                const attrDiv = document.createElement('div');  
-                const esCorrecto = amigoSeleccionado[attr] === amigoDelDia[attr];  
-                attrDiv.className = `atributo ${esCorrecto ? 'correcto' : 'incorrecto'}`;  
-                attrDiv.innerHTML = `  
-                    <span class="atributo-label">${attr}</span>  
-                    ${amigoSeleccionado[attr]}  
-                `;  
-                intentoDiv.appendChild(attrDiv);  
-            });  
-  
-            document.getElementById('intentos').prepend(intentoDiv);  
-            input.value = '';  
-  
-            // Verificar victoria  
-            if (amigoSeleccionado.nombre === amigoDelDia.nombre) {  
-                juegoTerminado = true;  
-                const mensaje = document.getElementById('mensaje');  
-                mensaje.className = 'mensaje victoria';  
-                mensaje.textContent = `🎉 ¡Correcto! Era ${amigoDelDia.nombre}! Lo lograste en ${intentos} intentos.`;  
-                document.getElementById('nuevoJuego').style.display = 'block';  
-                input.disabled = true;  
-            }  
-        }  
-  
-        // Nuevo juego  
-        document.getElementById('nuevoJuego').addEventListener('click', () => {  
-            location.reload();  
-        });  
-  
-        // Cerrar autocompletado al hacer clic fuera  
-        document.addEventListener('click', function(e) {  
-            if (e.target !== input) {  
-                autocompleteList.innerHTML = '';  
-            }  
-        });  
-  
-        // Inicializar juego  
-        if (amigos.length > 0) {  
-            seleccionarAmigoDelDia();  
-        } else {  
-            alert('¡Agrega tus amigos al array "amigos" en el código!');  
-        }  
-    </script>  
-</body>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle de Amigos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      background: rgba(60, 20, 0, 0.3);
+      backdrop-filter: blur(6px);
+      border: 2px solid #ff8c00;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px #ff8c0055;
+      padding: 2rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #ffb366;
+      margin-bottom: 2rem;
+      font-size: 1.1em;
+    }
+
+    .input-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    #amigoInput {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1em;
+      border: 2px solid #ff8c00;
+      border-radius: 0.8rem;
+      background: rgba(50, 10, 0, 0.3);
+      color: #ffd8a6;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    #amigoInput:focus {
+      border-color: #ffb366;
+      box-shadow: 0 0 10px #ff8c0077;
+    }
+
+    .autocomplete-items {
+      position: absolute;
+      background: rgba(60, 20, 0, 0.9);
+      border: 2px solid #ff8c00;
+      border-top: none;
+      z-index: 99;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border-radius: 0 0 0.8rem 0.8rem;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+
+    .autocomplete-item {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #ff8c0022;
+      transition: 0.2s;
+    }
+
+    .autocomplete-item:hover {
+      background: rgba(255, 140, 0, 0.2);
+    }
+
+    .intento {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 1rem;
+      background: rgba(50, 10, 0, 0.2);
+      padding: 1rem;
+      border-radius: 0.8rem;
+      border: 1px solid #ff8c0033;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .atributo {
+      padding: 10px;
+      border-radius: 0.6rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9em;
+    }
+
+    .atributo.correcto {
+      background: #4caf50;
+      color: white;
+    }
+
+    .atributo.incorrecto {
+      background: #f44336;
+      color: white;
+    }
+
+    .atributo-label {
+      display: block;
+      font-size: 0.8em;
+      color: #ffb366;
+      margin-bottom: 4px;
+    }
+
+    .mensaje {
+      text-align: center;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0.8rem;
+      font-weight: bold;
+      font-size: 1.2em;
+      display: none;
+    }
+
+    .mensaje.victoria {
+      display: block;
+      background: #4caf50;
+      color: white;
+      box-shadow: 0 0 12px #4caf5088;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(60, 20, 0, 0.2);
+      border: 1px solid #ff8c0033;
+      border-radius: 0.8rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #ff8c00;
+      text-shadow: 0 0 6px #ff8c0088;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #ffb366;
+    }
+
+    button {
+      background: #ff8c00;
+      color: #330a00;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1em;
+      border-radius: 0.8rem;
+      cursor: pointer;
+      transition: 0.3s;
+      display: block;
+      margin: 20px auto 0;
+      font-weight: 600;
+      box-shadow: 0 0 10px #ff8c0055;
+    }
+
+    button:hover {
+      background: #ffb366;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px #ff8c00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Wordle de Amigos</h1>
+    <p class="subtitle">¡Adivina quién es el amigo del día!</p>
+
+    <div class="input-container">
+      <input type="text" id="amigoInput" placeholder="Escribe el nombre de tu amigo..." autocomplete="off">
+      <div id="autocomplete-list" class="autocomplete-items"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-number" id="intentosCount">0</div>
+        <div class="stat-label">Intentos</div>
+      </div>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+    <div id="intentos" class="intentos"></div>
+    <button id="nuevoJuego" style="display:none;">🔄 Nuevo Juego</button>
+  </div>
+
+  <script>
+    const amigos = [
+      { nombre: "Aure", raza: "Planeta", año: "2023", youtuber: "Sí", color: "Rojo" },
+      { nombre: "Abricraft", raza: "Bloque", año: "2024", youtuber: "Sí", color: "Azul" },
+      { nombre: "Saantybl", raza: "Letra", año: "2023", youtuber: "Razonable", color: "Verde" },
+      { nombre: "Yalmil", raza: "Gato", año: "2023/2024", youtuber: "Sí", color: "Morado" },
+      { nombre: "Channel", raza: "Calculadora", año: "2024", youtuber: "No", color: "Naranja" },
+      { nombre: "Nienie", raza: "Planeta", año: "2023", youtuber: "No", color: "Rosa" },
+      { nombre: "Sophie", raza: "Humanoide", año: "2024", youtuber: "No", color: "Verde" },
+      { nombre: "Debs", raza: "País", año: "2023", youtuber: "No se", color: "Rojo" },
+      { nombre: "URS", raza: "País", año: "2023", youtuber: "No", color: "Negro/Amarillo/Blanco" },
+      { nombre: "Lucass", raza: "Estadio", año: "2022", youtuber: "No", color: "Verde" },
+      { nombre: "Nick", raza: "Desconocido", año: "2021", youtuber: "No", color: "Blanco" },
+      { nombre: "Sr. L", raza: "SCP", año: "2022", youtuber: "No", color: "Negro" },
+      { nombre: "Cristian", raza: "Película/Anime", año: "2025", youtuber: "No", color: "Amarillo" },
+      { nombre: "Derick", raza: "Película/Anime", año: "2023", youtuber: "No", color: "Rojo" },
+      { nombre: "Izan", raza: "Animal/Peluche", año: "2024", youtuber: "No", color: "Blanco" },
+      { nombre: "Eron", raza: "Humano", año: "2024", youtuber: "No", color: "Negro" },
+      { nombre: "Lu", raza: "Humano", año: "2025", youtuber: "No", color: "Blanco" },
+      { nombre: "Dear", raza: "Minecraft", año: "2022", youtuber: "No", color: "Azul" },
+      { nombre: "Kaisser", raza: "Humano", año: "2023/2024", youtuber: "Sí", color: "Negro" },
+      { nombre: "Milenial", raza: "Meme", año: "2024", youtuber: "No", color: "Rojo" },
+      { nombre: "Ben10", raza: "Meme", año: "2023", youtuber: "No", color: "Verde" },
+      { nombre: "Cartoon", raza: "Desconocido", año: "2024", youtuber: "Razonable", color: "Rojo" },
+      { nombre: "Alxbc", raza: "Película/Anime", año: "2024", youtuber: "No", color: "Negro" },
+      { nombre: "Fabi", raza: "Meme", año: "2025", youtuber: "Razonable", color: "Amarillo" }
+    ];
+
+    let amigoDelDia = null;
+    let intentos = 0;
+    let juegoTerminado = false;
+
+    function seleccionarAmigoDelDia() {
+      const hoy = new Date().toDateString();
+      const seed = hoy.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      const index = seed % amigos.length;
+      amigoDelDia = amigos[index];
+    }
+
+    const input = document.getElementById('amigoInput');
+    const autocompleteList = document.getElementById('autocomplete-list');
+
+    input.addEventListener('input', function() {
+      const val = this.value;
+      autocompleteList.innerHTML = '';
+      if (!val || juegoTerminado) return;
+      const matches = amigos.filter(a => a.nombre.toLowerCase().includes(val.toLowerCase()));
+      matches.forEach(amigo => {
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+        div.textContent = amigo.nombre;
+        div.addEventListener('click', () => {
+          input.value = amigo.nombre;
+          autocompleteList.innerHTML = '';
+          verificarAmigo(amigo);
+        });
+        autocompleteList.appendChild(div);
+      });
+    });
+
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter' && !juegoTerminado) {
+        const amigoEncontrado = amigos.find(a => a.nombre.toLowerCase() === input.value.toLowerCase());
+        if (amigoEncontrado) {
+          verificarAmigo(amigoEncontrado);
+          autocompleteList.innerHTML = '';
+        }
+      }
+    });
+
+    function verificarAmigo(amigoSeleccionado) {
+      if (juegoTerminado) return;
+      intentos++;
+      document.getElementById('intentosCount').textContent = intentos;
+      const intentoDiv = document.createElement('div');
+      intentoDiv.className = 'intento';
+      const atributos = Object.keys(amigoDelDia).filter(k => k !== 'nombre');
+      atributos.forEach(attr => {
+        const div = document.createElement('div');
+        const esCorrecto = amigoSeleccionado[attr] === amigoDelDia[attr];
+        div.className = `atributo ${esCorrecto ? 'correcto' : 'incorrecto'}`;
+        div.innerHTML = `<span class="atributo-label">${attr}</span>${amigoSeleccionado[attr]}`;
+        intentoDiv.appendChild(div);
+      });
+      document.getElementById('intentos').prepend(intentoDiv);
+      input.value = '';
+
+      if (amigoSeleccionado.nombre === amigoDelDia.nombre) {
+        juegoTerminado = true;
+        const mensaje = document.getElementById('mensaje');
+        mensaje.className = 'mensaje victoria';
+        mensaje.textContent = `🎉 ¡Correcto! Era ${amigoDelDia.nombre}! Lo lograste en ${intentos} intentos.`;
+        document.getElementById('nuevoJuego').style.display = 'block';
+        input.disabled = true;
+      }
+    }
+
+    document.getElementById('nuevoJuego').addEventListener('click', () => location.reload());
+    document.addEventListener('click', e => { if (e.target !== input) autocompleteList.innerHTML = ''; });
+    seleccionarAmigoDelDia();
+  </script>
+</body>
 </html>
