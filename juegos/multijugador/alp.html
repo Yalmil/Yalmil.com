@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salas - Yalmil</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      color: white;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    input, button {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    input {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    button {
+      cursor: pointer;
+      background: #4e54c8;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #6a73ff;
+    }
+
+    #joinSection {
+      display: none;
+      margin-top: 10px;
+    }
+
+    #startBtn {
+      background: #00c853;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Salas Yalmil</h2>
+    <input type="text" id="username" placeholder="Tu nombre...">
+    <br>
+    <button id="createRoom">Crear sala</button>
+    <button id="joinRoom">Unirse a sala</button>
+
+    <div id="joinSection">
+      <input type="text" id="roomIdInput" placeholder="ID de la sala (asd, wasd, qwerty)">
+      <button id="confirmJoin">Entrar</button>
+    </div>
+
+    <button id="startBtn">Iniciar sala</button>
+  </div>
+
+  <script type="module">
+    // Firebase Config
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const usernameInput = document.getElementById('username');
+    const createRoomBtn = document.getElementById('createRoom');
+    const joinRoomBtn = document.getElementById('joinRoom');
+    const joinSection = document.getElementById('joinSection');
+    const confirmJoinBtn = document.getElementById('confirmJoin');
+    const roomIdInput = document.getElementById('roomIdInput');
+    const startBtn = document.getElementById('startBtn');
+
+    const roomsAvailable = ["asd", "wasd", "qwerty"];
+
+    // Crear sala
+    createRoomBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        alert("Debes poner tu nombre primero");
+        return;
+      }
+
+      const roomID = roomsAvailable[Math.floor(Math.random() * roomsAvailable.length)];
+      const roomRef = ref(db, `salas/${roomID}`);
+
+      const snapshot = await get(roomRef);
+      const players = snapshot.exists() ? Object.keys(snapshot.val().jugadores || {}) : [];
+
+      if (players.length >= 5) {
+        alert("La sala está llena, intenta otra");
+        return;
+      }
+
+      await set(ref(db, `salas/${roomID}`), {
+        organizador: username,
+        jugadores: {
+          [username]: {
+            rol: "Organizador"
+          }
+        }
+      });
+
+      localStorage.setItem("username", username);
+      localStorage.setItem("roomID", roomID);
+      localStorage.setItem("rol", "Organizador");
+
+      alert(`Sala creada (${roomID}). Eres el Organizador.`);
+      startBtn.style.display = "block";
+
+      window.location.href = `https://yalmil.pages.dev/alp/${roomID}`;
+    };
+
+    // Mostrar campo para unirse
+    joinRoomBtn.onclick = () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        alert("Debes poner tu nombre primero");
+        return;
+      }
+      joinSection.style.display = "block";
+    };
+
+    // Confirmar unión a sala
+    confirmJoinBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+      const roomID = roomIdInput.value.trim();
+      if (!roomID || !roomsAvailable.includes(roomID)) {
+        alert("Esa sala no existe");
+        return;
+      }
+
+      const roomRef = ref(db, `salas/${roomID}`);
+      const snapshot = await get(roomRef);
+
+      if (!snapshot.exists()) {
+        alert("La sala aún no ha sido creada por un organizador");
+        return;
+      }
+
+      const data = snapshot.val();
+      const players = data.jugadores ? Object.keys(data.jugadores) : [];
+
+      if (players.length >= 5) {
+        alert("La sala está llena");
+        return;
+      }
+
+      if (!data.organizador) {
+        alert("El organizador no está en la sala todavía");
+        return;
+      }
+
+      await update(ref(db, `salas/${roomID}/jugadores/${username}`), { rol: "Jugador" });
+
+      localStorage.setItem("username", username);
+      localStorage.setItem("roomID", roomID);
+      localStorage.setItem("rol", "Jugador");
+
+      alert(`Te uniste a la sala ${roomID}`);
+      window.location.href = `https://yalmil.pages.dev/alp/${roomID}`;
+    };
+
+    // Botón "Iniciar sala" (Organizador)
+    startBtn.onclick = async () => {
+      const roomID = localStorage.getItem("roomID");
+      const roomRef = ref(db, `salas/${roomID}`);
+      const snapshot = await get(roomRef);
+      if (snapshot.exists()) {
+        const players = Object.keys(snapshot.val().jugadores || {});
+        if (players.length >= 2) {
+          alert("Sala iniciada. Redirigiendo...");
+          // Aquí pondrás tu página final:
+          // window.location.href = "https://yalmil.pages.dev/alp/iniciada.html";
+        } else {
+          alert("Necesitas al menos 2 jugadores para iniciar la sala");
+        }
+      }
+    };
+  </script>
+</body>
+  </html>
