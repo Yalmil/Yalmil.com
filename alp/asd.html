@@ -75,7 +75,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+    import { 
+      getDatabase, ref, onValue, get, set, remove, update, onDisconnect 
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -90,10 +92,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Datos guardados en localStorage
+    // Datos locales
     const username = localStorage.getItem("username");
     const roomID = localStorage.getItem("roomID");
-    const rol = localStorage.getItem("rol");
+    let rol = localStorage.getItem("rol");
 
     const roomTitle = document.getElementById('roomTitle');
     const playersList = document.getElementById('playersList');
@@ -110,13 +112,22 @@
     // Mostrar botón solo al organizador
     if (rol === "Organizador") startBtn.style.display = "inline-block";
 
+    const playerRef = ref(db, `salas/${roomID}/jugadores/${username}`);
+
+    // ✅ Eliminar jugador automáticamente al desconectarse
+    onDisconnect(playerRef).remove();
+
     // Escuchar en tiempo real los jugadores
     const roomRef = ref(db, `salas/${roomID}/jugadores`);
-    onValue(roomRef, (snapshot) => {
+    onValue(roomRef, async (snapshot) => {
       playersList.innerHTML = "";
+
       if (snapshot.exists()) {
         const players = snapshot.val();
-        Object.keys(players).forEach((name) => {
+        const playerNames = Object.keys(players);
+
+        // Mostrar lista de jugadores
+        playerNames.forEach((name) => {
           const li = document.createElement("li");
           li.textContent = name;
           if (players[name].rol === "Organizador") {
@@ -125,8 +136,23 @@
           }
           playersList.appendChild(li);
         });
+
+        // ✅ Si el organizador se fue, reasignar a otro jugador aleatorio
+        const organizadorPresente = playerNames.some(
+          name => players[name].rol === "Organizador"
+        );
+
+        if (!organizadorPresente && playerNames.length > 0) {
+          const randomPlayer = playerNames[Math.floor(Math.random() * playerNames.length)];
+          await update(ref(db, `salas/${roomID}/jugadores/${randomPlayer}`), { rol: "Organizador" });
+          console.log(`Nuevo organizador: ${randomPlayer}`);
+        }
+
       } else {
-        playersList.innerHTML = "<li>No hay jugadores aún</li>";
+        // ✅ Si ya no hay jugadores, eliminar toda la sala
+        await remove(ref(db, `salas/${roomID}`));
+        alert("La sala se cerró porque no hay jugadores activos");
+        window.location.href = "https://yalmil.pages.dev";
       }
     });
 
@@ -148,6 +174,13 @@
       // Aquí pondrás tu página final cuando la tengas
       // window.location.href = "https://yalmil.pages.dev/alp/iniciada.html";
     };
+
+    // Si el usuario cierra la pestaña, limpiar localStorage
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("roomID");
+      localStorage.removeItem("rol");
+    });
   </script>
 </body>
 </html>
