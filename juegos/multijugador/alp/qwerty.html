@@ -75,7 +75,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+    import { getDatabase, ref, onValue, get, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -90,7 +90,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Datos guardados en localStorage
+    // Datos locales
     const username = localStorage.getItem("username");
     const roomID = localStorage.getItem("roomID");
     const rol = localStorage.getItem("rol");
@@ -109,6 +109,11 @@
 
     // Mostrar botón solo al organizador
     if (rol === "Organizador") startBtn.style.display = "inline-block";
+
+    const playerRef = ref(db, `salas/${roomID}/jugadores/${username}`);
+
+    // ✅ Eliminar jugador automáticamente al desconectarse
+    onDisconnect(playerRef).remove();
 
     // Escuchar en tiempo real los jugadores
     const roomRef = ref(db, `salas/${roomID}/jugadores`);
@@ -148,6 +153,14 @@
       // Aquí pondrás tu página final cuando la tengas
       // window.location.href = "https://yalmil.pages.dev/alp/iniciada.html";
     };
+
+    // (Opcional extra)
+    // Si el usuario cierra la pestaña, limpiamos localStorage
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("roomID");
+      localStorage.removeItem("rol");
+    });
   </script>
 </body>
 </html>
