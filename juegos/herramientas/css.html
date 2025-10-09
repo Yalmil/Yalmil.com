@@ -1,286 +1,616 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador de CSS</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de CSS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #330a00, #662000);
-      color: #ffd8a6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      animation: fadeIn 0.8s ease-out;
-      padding: 20px;
-    }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
 
-    .container {
-      background: rgba(60, 20, 0, 0.3);
-      backdrop-filter: blur(8px);
-      border: 2px solid #ff8c00;
-      border-radius: 1rem;
-      box-shadow: 0 0 25px #ff8c0055;
-      padding: 2rem;
-      max-width: 800px;
-      width: 100%;
-      animation: popIn 0.5s ease-out;
-    }
+        .title h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
 
-    @keyframes popIn {
-      from { transform: scale(0.97); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+        .title p {
+            color: #666;
+            font-size: 14px;
+        }
 
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      color: #ff8c00;
-      text-shadow: 0 0 10px #ff8c00aa;
-      margin-bottom: 2rem;
-    }
+        .menu {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
 
-    label {
-      display: block;
-      font-weight: 600;
-      color: #ffb366;
-      margin-bottom: 10px;
-    }
+        .menu button {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #333;
+        }
 
-    textarea, select, input, button {
-      width: 100%;
-      padding: 15px;
-      border: 2px solid #ff8c00;
-      border-radius: 0.8rem;
-      background: rgba(50, 10, 0, 0.3);
-      color: #ffd8a6;
-      font-size: 1em;
-      outline: none;
-      transition: 0.3s;
-    }
+        .menu button:hover {
+            border-color: #667eea;
+            background: #f5f5f5;
+        }
 
-    textarea:focus, select:focus, input:focus, button:hover {
-      border-color: #ffb366;
-      box-shadow: 0 0 10px #ff8c0077;
-      background: rgba(60, 20, 0, 0.4);
-    }
+        .menu button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
 
-    select:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+        .content {
+            display: none;
+        }
 
-    .menu {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+        .content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
 
-    .menu button {
-      flex: 1;
-      padding: 10px;
-      background: linear-gradient(45deg, #ff8c00, #ffb366);
-      color: #331400;
-      font-weight: 600;
-      border: none;
-      border-radius: 0.8rem;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 10px #ff8c0044;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-    .menu button.active {
-      background: #ffb366;
-      box-shadow: 0 0 20px #ff8c0077;
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    .menu button:hover {
-      transform: scale(1.02);
-    }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-    .preview {
-      background: rgba(60, 20, 0, 0.2);
-      border: 2px dashed #ff8c00;
-      border-radius: 0.8rem;
-      padding: 1rem;
-      margin-top: 15px;
-      color: #ffd8a6;
-      text-align: center;
-    }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
 
-    .generate-btn {
-      margin-top: 1rem;
-      padding: 12px 25px;
-      background: linear-gradient(45deg, #ff8c00, #ffb366);
-      color: #331400;
-      font-weight: 600;
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px #ff8c0044;
-    }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
 
-    .generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px #ff8c0077;
-    }
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
-    .generate-btn:active {
-      transform: translateY(0);
-    }
+        .color-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
 
-    .result {
-      margin-top: 1.5rem;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-    }
+        .color-input-wrapper input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-    .result.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
+        .color-input-wrapper input[type="text"] {
+            flex: 1;
+        }
 
-    .copy-btn {
-      margin-top: 1rem;
-      padding: 12px 25px;
-      background: linear-gradient(45deg, #ff8c00, #ffb366);
-      color: #331400;
-      font-weight: 600;
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px #ff8c0044;
-    }
+        .preview {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+        }
 
-    .copy-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px #ff8c0077;
-    }
+        .preview-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-    @media (max-width: 600px) {
-      .container {
-        padding: 1.5rem;
-      }
-      h1 {
-        font-size: 1.6rem;
-      }
-    }
-  </style>
+        .preview-box {
+            width: 100%;
+            height: 150px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            overflow: hidden;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .result.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .result textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: none;
+            background: white;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 10px 15px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+        }
+
+        .copy-btn.copied {
+            background: #2196f3;
+        }
+
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-wrapper input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 45px;
+            text-align: right;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Generador de CSS</h1>
+    <div class="container">
+        <div class="title">
+            <h1>Generador de CSS</h1>
+            <p>Elige tu plataforma</p>
+        </div>
 
-    <div class="menu">
-      <button class="menu-btn active" data-type="fandom">CSS Fandom</button>
-      <button class="menu-btn" data-type="html">CSS HTML</button>
+        <div class="menu">
+            <button class="menu-btn active" data-type="fandom">CSS para Fandom.com</button>
+            <button class="menu-btn" data-type="html">CSS para HTML</button>
+        </div>
+
+        <!-- FANDOM -->
+        <div id="fandom" class="content active">
+            <div class="form-group">
+                <label>Color de fondo</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="fandomBgColor" value="#1a1a1a">
+                    <input type="text" id="fandomBgColorText" value="#1a1a1a" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Color de texto</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="fandomTextColor" value="#ffffff">
+                    <input type="text" id="fandomTextColorText" value="#ffffff" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Opacidad de fondo (%)</label>
+                <div class="range-wrapper">
+                    <input type="range" id="fandomOpacity" min="0" max="100" value="80">
+                    <span class="range-value"><span id="fandomOpacityValue">80</span>%</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>URL de imagen de fondo (opcional)</label>
+                <input type="text" id="fandomImage" placeholder="https://ejemplo.com/imagen.jpg">
+            </div>
+
+            <div class="form-group">
+                <label>Color de acento</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="fandomAccent" value="#667eea">
+                    <input type="text" id="fandomAccentText" value="#667eea" readonly>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-label">Vista previa</div>
+                <div class="preview-box" id="fandomPreview"></div>
+            </div>
+
+            <button class="generate-btn" onclick="generateFandom()">Generar CSS</button>
+        </div>
+
+        <!-- HTML -->
+        <div id="html" class="content">
+            <div class="form-group">
+                <label>Color de fondo</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="htmlBgColor" value="#ffffff">
+                    <input type="text" id="htmlBgColorText" value="#ffffff" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Color de texto</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="htmlTextColor" value="#333333">
+                    <input type="text" id="htmlTextColorText" value="#333333" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Opacidad de fondo (%)</label>
+                <div class="range-wrapper">
+                    <input type="range" id="htmlOpacity" min="0" max="100" value="100">
+                    <span class="range-value"><span id="htmlOpacityValue">100</span>%</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>URL de imagen de fondo (opcional)</label>
+                <input type="text" id="htmlImage" placeholder="https://ejemplo.com/imagen.jpg">
+            </div>
+
+            <div class="form-group">
+                <label>Color de bordes y acentos</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="htmlBorder" value="#cccccc">
+                    <input type="text" id="htmlBorderText" value="#cccccc" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tamaño de fuente base (px)</label>
+                <div class="range-wrapper">
+                    <input type="range" id="htmlFontSize" min="12" max="20" value="16">
+                    <span class="range-value"><span id="htmlFontSizeValue">16</span>px</span>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-label">Vista previa</div>
+                <div class="preview-box" id="htmlPreview"></div>
+            </div>
+
+            <button class="generate-btn" onclick="generateHTML()">Generar CSS</button>
+        </div>
+
+        <!-- RESULTADO -->
+        <div class="result" id="result">
+            <h3>CSS Generado - Copia y pega:</h3>
+            <textarea id="resultCode" readonly></textarea>
+            <button class="copy-btn" onclick="copyCode()">Copiar al portapapeles</button>
+        </div>
     </div>
 
-    <div id="fandom" class="content active">
-      <label>Color de fondo</label>
-      <input type="color" id="fandomBgColor" value="#1a1a1a">
+    <script>
+        // Event listeners para cambiar entre tabs
+        document.querySelectorAll('.menu-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab(this.dataset.type);
+            });
+        });
 
-      <label>Color de texto</label>
-      <input type="color" id="fandomTextColor" value="#ffffff">
+        function switchTab(type) {
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`button[data-type="${type}"]`).classList.add('active');
+            document.getElementById(type).classList.add('active');
+            document.getElementById('result').classList.remove('active');
+        }
 
-      <label>URL de imagen</label>
-      <input type="text" id="fandomImage" placeholder="https://ejemplo.com/imagen.jpg">
+        // Fandom color inputs
+        document.getElementById('fandomBgColor').addEventListener('input', function() {
+            document.getElementById('fandomBgColorText').value = this.value;
+            updateFandomPreview();
+        });
 
-      <button class="generate-btn" onclick="generateFandom()">Generar CSS</button>
-      <div class="preview" id="fandomPreview">Vista previa Fandom</div>
-    </div>
+        document.getElementById('fandomTextColor').addEventListener('input', function() {
+            document.getElementById('fandomTextColorText').value = this.value;
+            updateFandomPreview();
+        });
 
-    <div id="html" class="content">
-      <label>Color de fondo</label>
-      <input type="color" id="htmlBgColor" value="#ffffff">
+        document.getElementById('fandomAccent').addEventListener('input', function() {
+            document.getElementById('fandomAccentText').value = this.value;
+            updateFandomPreview();
+        });
 
-      <label>Color de texto</label>
-      <input type="color" id="htmlTextColor" value="#333333">
+        document.getElementById('fandomOpacity').addEventListener('input', function() {
+            document.getElementById('fandomOpacityValue').textContent = this.value;
+            updateFandomPreview();
+        });
 
-      <label>Color de borde</label>
-      <input type="color" id="htmlBorder" value="#cccccc">
+        document.getElementById('fandomImage').addEventListener('input', updateFandomPreview);
 
-      <label>URL de imagen</label>
-      <input type="text" id="htmlImage" placeholder="https://ejemplo.com/imagen.jpg">
+        function updateFandomPreview() {
+            const bgColor = document.getElementById('fandomBgColor').value;
+            const textColor = document.getElementById('fandomTextColor').value;
+            const opacity = document.getElementById('fandomOpacity').value / 100;
+            const image = document.getElementById('fandomImage').value;
+            const preview = document.getElementById('fandomPreview');
 
-      <button class="generate-btn" onclick="generateHTML()">Generar CSS</button>
-      <div class="preview" id="htmlPreview">Vista previa HTML</div>
-    </div>
+            let bgStyle = `rgba(${parseInt(bgColor.slice(1,3),16)}, ${parseInt(bgColor.slice(3,5),16)}, ${parseInt(bgColor.slice(5,7),16)}, ${opacity})`;
+            
+            if (image) {
+                preview.style.backgroundImage = `url('${image}'), linear-gradient(${bgStyle}, ${bgStyle})`;
+                preview.style.backgroundSize = 'cover';
+                preview.style.backgroundPosition = 'center';
+            } else {
+                preview.style.background = bgStyle;
+            }
+            
+            preview.style.color = textColor;
+            preview.innerHTML = '<div style="padding: 20px; font-size: 14px;">Vista previa del fondo</div>';
+        }
 
-    <div class="result" id="result">
-      <textarea id="resultCode" readonly rows="10"></textarea>
-      <button class="copy-btn" onclick="copyCode()">Copiar</button>
-    </div>
-  </div>
+        // HTML color inputs
+        document.getElementById('htmlBgColor').addEventListener('input', function() {
+            document.getElementById('htmlBgColorText').value = this.value;
+            updateHtmlPreview();
+        });
 
-  <script>
-    document.querySelectorAll('.menu-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(this.dataset.type).classList.add('active');
-      });
-    });
+        document.getElementById('htmlTextColor').addEventListener('input', function() {
+            document.getElementById('htmlTextColorText').value = this.value;
+            updateHtmlPreview();
+        });
 
-    function generateFandom() {
-      const bg = document.getElementById('fandomBgColor').value;
-      const txt = document.getElementById('fandomTextColor').value;
-      const img = document.getElementById('fandomImage').value;
+        document.getElementById('htmlBorder').addEventListener('input', function() {
+            document.getElementById('htmlBorderText').value = this.value;
+            updateHtmlPreview();
+        });
 
-      let css = `/* CSS Fandom */\n.mw-parser-output {\n`;
-      if (img) css += `  background-image: url('${img}');\n`;
-      css += `  background-color: ${bg};\n}\nbody { color: ${txt}; }`;
+        document.getElementById('htmlOpacity').addEventListener('input', function() {
+            document.getElementById('htmlOpacityValue').textContent = this.value;
+            updateHtmlPreview();
+        });
 
-      showResult(css);
-      document.getElementById('fandomPreview').style.background = bg;
-      document.getElementById('fandomPreview').style.color = txt;
-    }
+        document.getElementById('htmlFontSize').addEventListener('input', function() {
+            document.getElementById('htmlFontSizeValue').textContent = this.value;
+            updateHtmlPreview();
+        });
 
-    function generateHTML() {
-      const bg = document.getElementById('htmlBgColor').value;
-      const txt = document.getElementById('htmlTextColor').value;
-      const brd = document.getElementById('htmlBorder').value;
-      const img = document.getElementById('htmlImage').value;
+        document.getElementById('htmlImage').addEventListener('input', updateHtmlPreview);
 
-      let css = `<style>\nbody {\n`;
-      if (img) css += `  background-image: url('${img}');\n`;
-      css += `  background-color: ${bg};\n  color: ${txt};\n}\nbutton, input { border-color: ${brd}; }\n</style>`;
+        function updateHtmlPreview() {
+            const bgColor = document.getElementById('htmlBgColor').value;
+            const textColor = document.getElementById('htmlTextColor').value;
+            const borderColor = document.getElementById('htmlBorder').value;
+            const opacity = document.getElementById('htmlOpacity').value / 100;
+            const fontSize = document.getElementById('htmlFontSize').value;
+            const image = document.getElementById('htmlImage').value;
+            const preview = document.getElementById('htmlPreview');
 
-      showResult(css);
-      document.getElementById('htmlPreview').style.background = bg;
-      document.getElementById('htmlPreview').style.color = txt;
-    }
+            let bgStyle = `rgba(${parseInt(bgColor.slice(1,3),16)}, ${parseInt(bgColor.slice(3,5),16)}, ${parseInt(bgColor.slice(5,7),16)}, ${opacity})`;
+            
+            if (image) {
+                preview.style.backgroundImage = `url('${image}'), linear-gradient(${bgStyle}, ${bgStyle})`;
+                preview.style.backgroundSize = 'cover';
+                preview.style.backgroundPosition = 'center';
+            } else {
+                preview.style.background = bgStyle;
+            }
+            
+            preview.style.color = textColor;
+            preview.style.borderColor = borderColor;
+            preview.style.fontSize = fontSize + 'px';
+            preview.innerHTML = '<div style="padding: 20px;">Vista previa HTML</div>';
+        }
 
-    function showResult(css) {
-      const result = document.getElementById('result');
-      document.getElementById('resultCode').value = css;
-      result.classList.add('active');
-    }
+        function generateFandom() {
+            const bgColor = document.getElementById('fandomBgColor').value;
+            const textColor = document.getElementById('fandomTextColor').value;
+            const opacity = document.getElementById('fandomOpacity').value / 100;
+            const image = document.getElementById('fandomImage').value;
+            const accentColor = document.getElementById('fandomAccent').value;
 
-    function copyCode() {
-      const text = document.getElementById('resultCode');
-      text.select();
-      document.execCommand('copy');
-    }
-  </script>
+            let css = `/* CSS para Fandom.com */\n\n`;
+            
+            if (image) {
+                css += `.mw-parser-output {\n`;
+                css += `    background-image: url('${image}');\n`;
+                css += `    background-color: ${bgColor};\n`;
+                css += `    background-size: cover;\n`;
+                css += `    background-attachment: fixed;\n`;
+                css += `    opacity: ${opacity};\n`;
+                css += `}\n\n`;
+            } else {
+                css += `.mw-parser-output {\n`;
+                css += `    background-color: ${bgColor};\n`;
+                css += `    opacity: ${opacity};\n`;
+                css += `}\n\n`;
+            }
+
+            css += `body {\n`;
+            css += `    color: ${textColor};\n`;
+            css += `}\n\n`;
+
+            css += `a {\n`;
+            css += `    color: ${accentColor};\n`;
+            css += `}\n\n`;
+
+            css += `a:visited {\n`;
+            css += `    color: ${accentColor};\n`;
+            css += `}\n`;
+
+            displayResult(css);
+        }
+
+        function generateHTML() {
+            const bgColor = document.getElementById('htmlBgColor').value;
+            const textColor = document.getElementById('htmlTextColor').value;
+            const borderColor = document.getElementById('htmlBorder').value;
+            const opacity = document.getElementById('htmlOpacity').value / 100;
+            const fontSize = document.getElementById('htmlFontSize').value;
+            const image = document.getElementById('htmlImage').value;
+
+            let css = `<style>\n`;
+            css += `    * {\n`;
+            css += `        margin: 0;\n`;
+            css += `        padding: 0;\n`;
+            css += `        box-sizing: border-box;\n`;
+            css += `    }\n\n`;
+
+            css += `    body {\n`;
+            if (image) {
+                css += `        background-image: url('${image}');\n`;
+                css += `        background-color: ${bgColor};\n`;
+                css += `        background-size: cover;\n`;
+                css += `        background-attachment: fixed;\n`;
+            } else {
+                css += `        background-color: ${bgColor};\n`;
+            }
+            css += `        color: ${textColor};\n`;
+            css += `        font-size: ${fontSize}px;\n`;
+            css += `        opacity: ${opacity};\n`;
+            css += `    }\n\n`;
+
+            css += `    a {\n`;
+            css += `        color: ${borderColor};\n`;
+            css += `        text-decoration: none;\n`;
+            css += `    }\n\n`;
+
+            css += `    a:hover {\n`;
+            css += `        text-decoration: underline;\n`;
+            css += `    }\n\n`;
+
+            css += `    button, input, textarea {\n`;
+            css += `        border: 1px solid ${borderColor};\n`;
+            css += `        background-color: ${bgColor};\n`;
+            css += `        color: ${textColor};\n`;
+            css += `    }\n`;
+            css += `</style>`;
+
+            displayResult(css);
+        }
+
+        function displayResult(code) {
+            document.getElementById('resultCode').value = code;
+            document.getElementById('result').classList.add('active');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyCode() {
+            const textarea = document.getElementById('resultCode');
+            textarea.select();
+            document.execCommand('copy');
+            
+            const btn = document.querySelector('.copy-btn');
+            const originalText = btn.textContent;
+            btn.textContent = '¡Copiado!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        // Initialize previews
+        updateFandomPreview();
+        updateHtmlPreview();
+    </script>
 </body>
 </html>
