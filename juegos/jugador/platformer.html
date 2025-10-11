@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Plataformero - Base con Level Editor</title>
+
+  <!-- LÍNEAS QUE QUIERES SIEMPRE -->
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1724;
+      --accent:#7cc6ff;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:#fff}
+    .wrap{display:flex;gap:12px;padding:12px;box-sizing:border-box;align-items:flex-start;flex-wrap:wrap}
+    #gameContainer{background:#071027;border-radius:10px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center}
+    canvas{display:block;background:linear-gradient(180deg,#0b1830,#051022);border-radius:6px}
+    .controls{margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    button,select{background:var(--panel);color:#fff;border:1px solid rgba(255,255,255,.06);padding:8px 10px;border-radius:8px;cursor:pointer}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.03);min-width:260px}
+    .editorTools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+    .tileBtn{width:40px;height:40px;border-radius:6px;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer}
+    .tileBtn.active{outline:2px solid var(--accent)}
+    .io{display:flex;gap:6px;flex-direction:column}
+    textarea{width:100%;height:110px;background:#0b1422;color:#dbeafe;border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,.03);resize:vertical}
+    /* mobile D-pad */
+    .touchPad{position:fixed;left:10px;bottom:10px;display:flex;gap:6px;align-items:center;z-index:50}
+    .touchBtn{width:64px;height:64px;border-radius:12px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-size:20px;user-select:none}
+    .touchBtn.jmp{width:64px;height:64px;border-radius:50%;background:rgba(124,198,255,.12)}
+    @media (min-width:900px){ .touchPad{display:none} }
+    @media (max-width:640px){ .wrap{padding:8px} canvas{width:100vw;height:60vh} .panel{min-width:calc(100% - 28px)} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="gameContainer">
+      <canvas id="game" width="960" height="540"></canvas>
+      <div class="controls">
+        <button id="playPause">Pausar</button>
+        <button id="reset">Reset</button>
+        <button id="toggleEditor">Entrar Editor</button>
+        <label style="display:flex;align-items:center;gap:6px">
+          Zoom
+          <input id="zoom" type="range" min="0.5" max="1.5" step="0.1" value="1">
+        </label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 8px 0">Editor de niveles</h3>
+      <div class="editorTools">
+        <div class="tileBtn active" data-tile="1" title="Bloque sólido" style="background:#6b7280">1</div>
+        <div class="tileBtn" data-tile="0" title="Borrar" style="background:transparent;border:1px dashed rgba(255,255,255,.06)">X</div>
+        <div class="tileBtn" data-tile="2" title="Bloque suela (salto)">
+          <small>2</small>
+        </div>
+        <div class="tileBtn" data-tile="3" title="Meta">
+          <small>🏁</small>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button id="fill">Rellenar</button>
+        <button id="clear">Limpiar</button>
+        <button id="centerPlayer">Colocar Jugador Centro</button>
+      </div>
+
+      <div class="io">
+        <label>Exportar / Guardar (JSON)</label>
+        <textarea id="out" placeholder="Aquí se exportará el JSON del nivel"></textarea>
+        <div style="display:flex;gap:6px">
+          <button id="exportBtn">Exportar</button>
+          <button id="importBtn">Importar</button>
+          <input type="file" id="fileInput" accept=".json" style="display:none">
+        </div>
+      </div>
+
+      <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,.03)">
+
+      <div style="font-size:13px;color:#cbd5e1">
+        Controles: Teclado (A/D o ← →, W/Space para saltar). En móvil usa los botones táctiles.
+      </div>
+    </div>
+  </div>
+
+  <!-- Touch controls (mobile) -->
+  <div class="touchPad" id="touchPad">
+    <div class="touchBtn" id="leftBtn">◀</div>
+    <div class="touchBtn" id="rightBtn">▶</div>
+    <div class="touchBtn jmp" id="jumpBtn">▲</div>
+  </div>
+
+  <script>
+  /* ----------------------
+     Configuración y mapa
+     ---------------------- */
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', {alpha:false});
+  let scale = 1;
+  const TILE = 32;
+  const COLS = 30; // ancho en tiles
+  const ROWS = 17; // alto en tiles
+  canvas.width = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  // Mapa de ejemplo: 0 = vacío, 1 = sólido, 2 = suela (slippery/booster), 3 = meta
+  let level = createEmptyLevel();
+  // Poner suelo base
+  for(let x=0;x<COLS;x++) level[(ROWS-2)*COLS + x] = 1;
+
+  let editorMode = false;
+  let running = true;
+
+  const player = {
+    x: TILE*2, y: TILE*(ROWS-3), w: 26, h: 30,
+    vx:0, vy:0, onGround:false
+  };
+
+  /* ----------------------
+     Input (pc + móvil)
+     ---------------------- */
+  const keys = {left:false,right:false,jump:false};
+  window.addEventListener('keydown', e=>{
+    if(e.key==='a' || e.key==='ArrowLeft') keys.left=true;
+    if(e.key==='d' || e.key==='ArrowRight') keys.right=true;
+    if(e.key==='w' || e.key===' ' || e.key==='Spacebar') keys.jump=true;
+    if(e.key==='e') toggleEditor();
+  });
+  window.addEventListener('keyup', e=>{
+    if(e.key==='a' || e.key==='ArrowLeft') keys.left=false;
+    if(e.key==='d' || e.key==='ArrowRight') keys.right=false;
+    if(e.key==='w' || e.key===' ' || e.key==='Spacebar') keys.jump=false;
+  });
+
+  // touch
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  const jumpBtn = document.getElementById('jumpBtn');
+  [leftBtn,rightBtn,jumpBtn].forEach(b=>{
+    b.addEventListener('touchstart', e=>{ e.preventDefault(); if(b===leftBtn) keys.left=true; if(b===rightBtn) keys.right=true; if(b===jumpBtn) keys.jump=true; });
+    b.addEventListener('touchend', e=>{ e.preventDefault(); if(b===leftBtn) keys.left=false; if(b===rightBtn) keys.right=false; if(b===jumpBtn) keys.jump=false; });
+  });
+
+  /* ----------------------
+     Editor UI
+     ---------------------- */
+  const tileBtns = document.querySelectorAll('.tileBtn');
+  let selectedTile = 1;
+  tileBtns.forEach(b=>{
+    b.addEventListener('click', ()=> {
+      tileBtns.forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      selectedTile = parseInt(b.getAttribute('data-tile'));
+    });
+  });
+
+  document.getElementById('toggleEditor').addEventListener('click', toggleEditor);
+  document.getElementById('fill').addEventListener('click', ()=>{ for(let i=0;i<level.length;i++) level[i]=selectedTile; draw(); });
+  document.getElementById('clear').addEventListener('click', ()=>{ level = createEmptyLevel(); draw(); });
+  document.getElementById('centerPlayer').addEventListener('click', ()=>{ player.x = TILE*2; player.y = TILE*(ROWS-3); player.vx=player.vy=0; });
+  document.getElementById('exportBtn').addEventListener('click', ()=>{ document.getElementById('out').value = JSON.stringify(exportLevel()); });
+  document.getElementById('importBtn').addEventListener('click', ()=>{ try{ const j=JSON.parse(document.getElementById('out').value); importLevel(j); }catch(e){ alert('JSON inválido') } });
+
+  const fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{ try{ importLevel(JSON.parse(r.result)); }catch(e){ alert('archivo inválido') } }
+    r.readAsText(f);
+  });
+
+  // click en canvas para editar
+  canvas.addEventListener('pointerdown', e=>{
+    if(!editorMode) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const tx = Math.floor(cx / TILE);
+    const ty = Math.floor(cy / TILE);
+    if(tx<0||tx>=COLS||ty<0||ty>=ROWS) return;
+    level[ty*COLS + tx] = selectedTile;
+    draw();
+  });
+
+  /* ----------------------
+     Game physics & loop
+     ---------------------- */
+  function step(dt){
+    if(!running) return;
+    // input
+    const accel = 0.8;
+    if(keys.left) player.vx -= accel;
+    if(keys.right) player.vx += accel;
+    // apply friction
+    player.vx *= 0.85;
+    // gravity
+    player.vy += 0.9;
+    if(player.vy > 18) player.vy = 18;
+
+    // jump
+    if(keys.jump && player.onGround){
+      player.vy = -12;
+      player.onGround = false;
+    }
+
+    // move & collisions (simple AABB tile collisions)
+    moveX(player.vx);
+    moveY(player.vy);
+
+    // check win (tile 3)
+    const tileUnder = tileAt((player.x + player.w/2), (player.y + player.h/2));
+    if(tileUnder===3) {
+      // simple win reaction
+      running = false;
+      setTimeout(()=>{ alert('¡Nivel completado!'); running = true; },50);
+    }
+  }
+
+  function moveX(vx){
+    player.x += vx;
+    const dir = vx>0?1:-1;
+    // check collisions horizontally
+    const edges = [
+      {x: player.x + (dir>0?player.w:0), y: player.y + 2},
+      {x: player.x + (dir>0?player.w:0), y: player.y + player.h - 2}
+    ];
+    for(const p of edges){
+      const t = tileAt(p.x, p.y);
+      if(t===1 || t===2){
+        if(dir>0) player.x = Math.floor((Math.floor((p.x)/TILE))*TILE) - player.w - 0.01;
+        else player.x = Math.floor((Math.floor((p.x)/TILE)+1)*TILE)+0.01;
+        player.vx = 0;
+      }
+    }
+  }
+
+  function moveY(vy){
+    player.y += vy;
+    const dir = vy>0?1:-1;
+    const edges = [
+      {x: player.x+2, y: player.y + (dir>0?player.h:0)},
+      {x: player.x + player.w -2, y: player.y + (dir>0?player.h:0)}
+    ];
+    player.onGround = false;
+    for(const p of edges){
+      const t = tileAt(p.x, p.y);
+      if(t===1 || t===2){
+        if(dir>0){
+          player.y = Math.floor((Math.floor((p.y)/TILE))*TILE) - player.h - 0.01;
+          player.vy = 0;
+          player.onGround = true;
+        } else {
+          player.y = Math.floor((Math.floor((p.y)/TILE)+1)*TILE)+0.01;
+          player.vy = 0;
+        }
+      }
+    }
+  }
+
+  function tileAt(px,py){
+    const tx = Math.floor(px / TILE);
+    const ty = Math.floor(py / TILE);
+    if(tx<0||tx>=COLS||ty<0||ty>=ROWS) return 0;
+    return level[ty*COLS + tx];
+  }
+
+  /* ----------------------
+     Rendering
+     ---------------------- */
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // background grid
+    for(let y=0;y<ROWS;y++){
+      for(let x=0;x<COLS;x++){
+        const tile = level[y*COLS + x];
+        const bx = x*TILE, by = y*TILE;
+        if(tile===1){
+          // sólido (cambia por imagen/textura luego)
+          ctx.fillStyle = '#274060';
+          ctx.fillRect(bx,by,TILE,TILE);
+          ctx.strokeStyle = 'rgba(0,0,0,.15)';
+          ctx.strokeRect(bx,by,TILE,TILE);
+        } else if(tile===2){
+          ctx.fillStyle = '#4c9066';
+          ctx.fillRect(bx,by,TILE,TILE);
+          ctx.fillStyle = 'rgba(255,255,255,.06)';
+          ctx.fillRect(bx+2,by+2,TILE-4,TILE-4);
+        } else if(tile===3){
+          ctx.fillStyle = '#ffc857';
+          ctx.fillRect(bx,by,TILE,TILE);
+          ctx.fillStyle = '#000';
+          ctx.fillText('🏁', bx+6, by+22);
+        } else {
+          // empty - draw faint grid
+          ctx.strokeStyle = 'rgba(255,255,255,.02)';
+          ctx.strokeRect(bx,by,TILE,TILE);
+        }
+      }
+    }
+
+    // player
+    ctx.fillStyle = '#a8e6ff';
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    // simple HUD
+    if(editorMode){
+      ctx.fillStyle = 'rgba(0,0,0,.45)';
+      ctx.fillRect(6,6,180,28);
+      ctx.fillStyle = '#fff';
+      ctx.fillText('EDITOR: ACTIVO', 12, 26);
+    }
+  }
+
+  /* ----------------------
+     Utilities / Editor import-export
+     ---------------------- */
+  function createEmptyLevel(){
+    const arr = new Array(COLS*ROWS).fill(0);
+    return arr;
+  }
+
+  function exportLevel(){
+    return {
+      cols: COLS,
+      rows: ROWS,
+      tile: TILE,
+      level: level,
+      player: {x: player.x, y: player.y}
+    };
+  }
+
+  function importLevel(obj){
+    if(!obj || !obj.level) return;
+    if(obj.level.length !== COLS*ROWS) {
+      alert('Dimensiones diferentes, intentando adaptar');
+      // try to adapt (not necessary complex) -> ignore for now
+      return;
+    }
+    level = obj.level.slice();
+    if(obj.player){ player.x = obj.player.x; player.y = obj.player.y; }
+    draw();
+  }
+
+  /* ----------------------
+     Buttons / UI bindings
+     ---------------------- */
+  document.getElementById('zoom').addEventListener('input', e=>{
+    scale = parseFloat(e.target.value);
+    canvas.style.width = canvas.width * scale + 'px';
+    canvas.style.height = canvas.height * scale + 'px';
+  });
+
+  document.getElementById('playPause').addEventListener('click', ()=>{
+    running = !running;
+    document.getElementById('playPause').textContent = running ? 'Pausar' : 'Reanudar';
+  });
+  document.getElementById('reset').addEventListener('click', ()=>{ player.x = TILE*2; player.y = TILE*(ROWS-3); player.vx=0; player.vy=0; });
+
+  document.getElementById('toggleEditor').addEventListener('click', toggleEditor);
+
+  function toggleEditor(){
+    editorMode = !editorMode;
+    document.getElementById('toggleEditor').textContent = editorMode ? 'Salir Editor' : 'Entrar Editor';
+    draw();
+  }
+
+  // export automatically to textarea on load
+  document.getElementById('out').value = JSON.stringify(exportLevel(), null, 2);
+
+  /* ----------------------
+     Main loop
+     ---------------------- */
+  let last = performance.now();
+  function loop(now){
+    const dt = (now - last) / 1000;
+    last = now;
+    if(!editorMode) step(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  /* ----------------------
+     Inicial dibujado
+     ---------------------- */
+  draw();
+
+  </script>
+</body>
+  </html>
