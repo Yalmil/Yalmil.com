@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sala Multijugador - Yalmil</title>
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{font-family:Inter, system-ui, Arial, sans-serif}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1020;color:#e6eef8;padding:20px}
+    .card{background:linear-gradient(180deg,#0f1724, #091022);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.6);width:100%;max-width:900px}
+    h1{font-size:20px;margin-bottom:8px}
+    .row{display:flex;gap:8px;margin-bottom:8px}
+    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid #1f2a44;background:transparent;color:inherit}
+    button{cursor:pointer}
+    .hidden{display:none}
+    #playersList{max-height:150px;overflow:auto;border:1px dashed #24324f;padding:8px;border-radius:8px}
+    .player{padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px}
+    .meta{font-size:12px;color:#9fb0d6}
+    #gameArea{margin-top:12px}
+    .hint{background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;margin-bottom:6px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Sala multijugador</h1>
+    <div id="initial">
+      <div class="row">
+        <input id="nameInput" placeholder="Tu nombre" />
+        <button id="createBtn">Crear sala</button>
+        <button id="joinBtn">Unirse a sala</button>
+      </div>
+      <div id="joinArea" class="hidden row">
+        <input id="joinId" placeholder="ID de la sala" />
+        <button id="joinConfirm">Unirse</button>
+      </div>
+      <div id="status" class="meta"></div>
+    </div><div id="room" class="hidden">
+  <div class="row">
+    <div>
+      <div class="meta">Sala: <span id="roomIdDisplay"></span></div>
+      <div class="meta">Tu nombre: <span id="yourName"></span></div>
+    </div>
+    <div style="margin-left:auto">
+      <button id="leaveBtn">Salir</button>
+    </div>
+  </div>
+
+  <h3>Jugadores</h3>
+  <div id="playersList"></div>
+
+  <div id="controls" class="row" style="margin-top:8px">
+    <button id="startGame" class="hidden">Iniciar partida (solo creador)</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div id="roleArea"></div>
+    <div id="chooserArea" class="hidden">
+      <h4>Tú debes elegir la palabra y pistas</h4>
+      <input id="wordInput" placeholder="Palabra" />
+      <input id="hint1" placeholder="Pista 1" />
+      <input id="hint2" placeholder="Pista 2" />
+      <input id="hint3" placeholder="Pista 3" />
+      <div class="row">
+        <button id="submitWord">Enviar palabra</button>
+      </div>
+    </div>
+
+    <div id="guessArea" class="hidden">
+      <h4>Adivina la palabra</h4>
+      <div id="reveals" class="meta"></div>
+      <input id="guessInput" placeholder="Escribe tu intento" />
+      <button id="guessBtn">Enviar intento</button>
+      <div id="attemptsInfo" class="meta"></div>
+      <div id="hintsBox" style="margin-top:8px"></div>
+    </div>
+
+    <div id="resultArea" class="meta" style="margin-top:10px"></div>
+  </div>
+
+</div>
+
+  </div>  <!-- Firebase v9 modular CDN -->  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import { getDatabase, ref, set, push, onValue, get, child, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+
+    // --- RELLENA ESTO con la config de tu proyecto Firebase ---
+    const firebaseConfig = {
+      apiKey: "REPLACE",
+      authDomain: "REPLACE",
+      databaseURL: "REPLACE",
+      projectId: "REPLACE",
+      storageBucket: "REPLACE",
+      messagingSenderId: "REPLACE",
+      appId: "REPLACE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Utils
+    const $ = id => document.getElementById(id);
+    const randomId = (len=6) => Math.random().toString(36).substring(2,2+len).toUpperCase();
+
+    // Elements
+    const nameInput = $('nameInput');
+    const createBtn = $('createBtn');
+    const joinBtn = $('joinBtn');
+    const joinArea = $('joinArea');
+    const joinConfirm = $('joinConfirm');
+    const joinId = $('joinId');
+    const status = $('status');
+
+    const room = $('room');
+    const roomIdDisplay = $('roomIdDisplay');
+    const yourName = $('yourName');
+    const playersList = $('playersList');
+    const leaveBtn = $('leaveBtn');
+    const startGameBtn = $('startGame');
+
+    const gameArea = $('gameArea');
+    const roleArea = $('roleArea');
+    const chooserArea = $('chooserArea');
+    const guessArea = $('guessArea');
+    const wordInput = $('wordInput');
+    const hint1 = $('hint1');
+    const hint2 = $('hint2');
+    const hint3 = $('hint3');
+    const submitWord = $('submitWord');
+    const guessInput = $('guessInput');
+    const guessBtn = $('guessBtn');
+    const attemptsInfo = $('attemptsInfo');
+    const hintsBox = $('hintsBox');
+    const resultArea = $('resultArea');
+    const reveals = $('reveals');
+
+    // App state
+    let local = {
+      roomId: null,
+      name: null,
+      playerKey: null,
+      isCreator: false,
+      chooserKey: null
+    };
+
+    // Create room
+    createBtn.addEventListener('click', async ()=>{
+      const name = nameInput.value.trim();
+      if(!name){status.textContent='Escribe tu nombre';return}
+      const id = randomId(6);
+      local.name = name; local.roomId = id; local.isCreator = true;
+      await set(ref(db, `rooms/${id}`), {
+        creatorName: name,
+        creatorTime: Date.now(),
+        createdBy: name
+      });
+      await joinRoom(id);
+    });
+
+    // Join UI
+    joinBtn.addEventListener('click', ()=>{ joinArea.classList.toggle('hidden'); });
+    joinConfirm.addEventListener('click', ()=>{ const id = joinId.value.trim().toUpperCase(); if(!id) {status.textContent='Ingresa un ID'} else joinRoom(id); });
+
+    async function joinRoom(id){
+      const name = nameInput.value.trim();
+      if(!name){status.textContent='Escribe tu nombre';return}
+      const roomRef = ref(db, `rooms/${id}`);
+      const snap = await get(roomRef);
+      if(!snap.exists()){status.textContent='Sala no encontrada';return}
+
+      local.roomId = id; local.name = name;
+      // add player
+      const playersRef = ref(db, `rooms/${id}/players`);
+      const newPlayerRef = push(playersRef);
+      await set(newPlayerRef, { name, joinedAt: Date.now() });
+      local.playerKey = newPlayerRef.key;
+      // mark creator if creatorName equals
+      const roomData = snap.val();
+      local.isCreator = (roomData.creatorName === name) || (roomData.createdBy === name);
+
+      // show UI
+      $('initial').classList.add('hidden');
+      room.classList.remove('hidden');
+      yourName.textContent = name;
+      roomIdDisplay.textContent = id;
+      status.textContent='Conectado a la sala';
+
+      // listen players and game state
+      listenRoom(id);
+    }
+
+    // Leave
+    leaveBtn.addEventListener('click', async ()=>{
+      if(!local.roomId || !local.playerKey) return location.reload();
+      await remove(ref(db, `rooms/${local.roomId}/players/${local.playerKey}`));
+      location.reload();
+    });
+
+    // listen room updates
+    function listenRoom(id){
+      const roomRef = ref(db, `rooms/${id}`);
+      onValue(roomRef, (snap)=>{
+        if(!snap.exists()) { status.textContent='Sala eliminada'; return }
+        const data = snap.val();
+        renderPlayers(data.players || {});
+        // show start button if creator
+        if(local.isCreator) startGameBtn.classList.remove('hidden'); else startGameBtn.classList.add('hidden');
+
+        // game state
+        if(data.game && data.game.active){
+          gameArea.classList.remove('hidden');
+          // who is chooser
+          const chooserKey = data.game.chooserKey;
+          local.chooserKey = chooserKey;
+          if(local.playerKey === chooserKey){
+            roleArea.textContent='Eres el que elige la palabra';
+            chooserArea.classList.remove('hidden');
+            guessArea.classList.add('hidden');
+          } else {
+            roleArea.textContent='Eres adivinador';
+            chooserArea.classList.add('hidden');
+            guessArea.classList.remove('hidden');
+          }
+
+          // reveal hints according to attempts
+          const attempts = data.game.attempts ? data.game.attempts.length : 0;
+          attemptsInfo.textContent = `Intentos: ${attempts}`;
+          reveals.textContent = '';
+          hintsBox.innerHTML = '';
+          if(attempts >= 5){ reveals.textContent = `Inicial: ${data.game.word ? data.game.word.charAt(0) : ''}` }
+          if(attempts >= 9 && data.game.hint1) hintsBox.innerHTML += `<div class="hint">Pista 1: ${data.game.hint1}</div>`;
+          if(attempts >= 14 && data.game.hint2) hintsBox.innerHTML += `<div class="hint">Pista 2: ${data.game.hint2}</div>`;
+          if(attempts >= 19 && data.game.hint3) hintsBox.innerHTML += `<div class="hint">Pista 3: ${data.game.hint3}</div>`;
+          if(attempts >= 25){ resultArea.textContent = '¡La partida terminó! Se alcanzó el máximo de intentos. Perdiste.'; guessArea.classList.add('hidden'); }
+
+          // if solved
+          if(data.game.solved){ resultArea.textContent = `Palabra adivinada: ${data.game.word} — Ganador: ${data.game.winnerName}`; guessArea.classList.add('hidden'); chooserArea.classList.add('hidden'); }
+
+        } else {
+          gameArea.classList.add('hidden');
+          roleArea.textContent = '';
+        }
+
+      });
+    }
+
+    function renderPlayers(playersObj){
+      playersList.innerHTML = '';
+      for(const key in playersObj){
+        const p = playersObj[key];
+        const div = document.createElement('div'); div.className='player';
+        div.innerHTML = `<strong>${p.name}</strong> <div class="meta">${new Date(p.joinedAt).toLocaleString()}</div>`;
+        playersList.appendChild(div);
+        // save our key if names match and we don't have key
+        if(p.name === local.name && !local.playerKey){ local.playerKey = key }
+      }
+    }
+
+    // Start game (creator)
+    startGameBtn.addEventListener('click', async ()=>{
+      if(!local.isCreator) return alert('Solo el creador puede iniciar');
+      // choose random player
+      const playersSnap = await get(ref(db, `rooms/${local.roomId}/players`));
+      if(!playersSnap.exists()){ alert('No hay jugadores'); return }
+      const players = playersSnap.val();
+      const keys = Object.keys(players);
+      const rnd = keys[Math.floor(Math.random()*keys.length)];
+      // init game state
+      await set(ref(db, `rooms/${local.roomId}/game`), {
+        active: true,
+        chooserKey: rnd,
+        attempts: [],
+        createdAt: Date.now()
+      });
+    });
+
+    // chooser submits word
+    submitWord.addEventListener('click', async ()=>{
+      const w = wordInput.value.trim();
+      if(!w){alert('Escribe la palabra');return}
+      const payload = {
+        word: w,
+        hint1: hint1.value.trim() || '',
+        hint2: hint2.value.trim() || '',
+        hint3: hint3.value.trim() || '',
+        solved: false
+      };
+      await update(ref(db, `rooms/${local.roomId}/game`), payload);
+      chooserArea.classList.add('hidden');
+      guessArea.classList.remove('hidden');
+    });
+
+    // guess submission
+    guessBtn.addEventListener('click', async ()=>{
+      const guess = guessInput.value.trim();
+      if(!guess) return;
+      const gameRef = ref(db, `rooms/${local.roomId}/game`);
+      const gameSnap = await get(gameRef);
+      if(!gameSnap.exists()) return;
+      const game = gameSnap.val();
+      // register attempt
+      const attempts = game.attempts ? game.attempts : [];
+      attempts.push({ by: local.playerKey, name: local.name, text: guess, at: Date.now() });
+      await update(gameRef, { attempts });
+
+      // check correct
+      if(game.word && guess.toLowerCase() === game.word.toLowerCase()){
+        await update(gameRef, { solved: true, winnerKey: local.playerKey, winnerName: local.name });
+      }
+
+      // check thresholds handled by listener
+      guessInput.value = '';
+    });
+
+    // Cleanup: if room empty remove it (simple approach: on page unload remove our player)
+    window.addEventListener('beforeunload', async ()=>{
+      try{ if(local.roomId && local.playerKey) await remove(ref(db, `rooms/${local.roomId}/players/${local.playerKey}`)); }catch(e){}
+    });
+
+    // OPTIONAL: Watch room players count and delete empty room
+    // This requires a server or security rules to ensure someone doesn't delete others' rooms; here is a naive client attempt:
+    onValue(ref(db), async ()=>{
+      // light heartbeat omitted
+    });
+
+    // NOTAS:
+    // - Reemplaza firebaseConfig con los datos reales de tu proyecto.
+    // - Los jugadores se guardan en: rooms/{ROOM_ID}/players/{PLAYER_KEY}
+    // - El creador inicia la partida y se escoge aleatoriamente un chooser: rooms/{ROOM_ID}/game
+    // - Recomendación: configura reglas de Realtime Database adecuadas para seguridad.
+  </script></body>
+    </html>
