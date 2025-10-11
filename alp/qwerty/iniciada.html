@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego - Sala</title>
+
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:Inter, Poppins, sans-serif;background:linear-gradient(135deg,#141E30,#243B55);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;padding:20px}
+    .card{background:rgba(0,0,0,.45);padding:20px;border-radius:12px;width:100%;max-width:720px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+    h1{margin:0 0 12px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1;min-width:200px}
+    ul{list-style:none;padding:0;margin:8px 0}
+    li{background:rgba(255,255,255,.05);padding:8px;border-radius:6px;margin-bottom:6px}
+    .organ{color:#00e676;font-weight:700}
+    button{background:#00c853;border:0;padding:10px 14px;border-radius:8px;color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#1976d2}
+    .center{text-align:center}
+    .loading{padding:40px;border-radius:8px;background:rgba(255,255,255,.03)}
+    input,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#fff;margin-bottom:8px}
+    .hint{background:rgba(0,0,0,.35);padding:8px;border-radius:6px;margin:6px 0}
+    .small{font-size:13px;color:rgba(255,255,255,.7)}
+    .disabled{opacity:.5;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="row">
+      <div class="col">
+        <h1 id="roomTitle">Sala</h1>
+        <div class="small">Jugador: <span id="meName"></span> · Rol: <span id="meRole"></span></div>
+
+        <h3>Jugadores</h3>
+        <ul id="playersList"></ul>
+
+        <div class="center" style="margin-top:10px;">
+          <button id="pickBtn" style="display:none">Elegir jugador aleatorio</button>
+          <button id="resetBtn" class="secondary" style="display:none;margin-left:8px">Reiniciar juego</button>
+        </div>
+      </div>
+
+      <div class="col" id="rightPanel">
+        <!-- Contenido dinámico -->
+        <div id="stateArea" class="center">
+          <div class="small">Esperando a que comience el juego</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import {
+      getDatabase, ref, onValue, get, set, remove, update, onDisconnect, runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+    // Config Firebase (usa la tuya)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Datos locales
+    const username = localStorage.getItem("username");
+    const roomID = localStorage.getItem("roomID");
+    const rol = localStorage.getItem("rol");
+
+    // Elementos DOM
+    const roomTitle = document.getElementById("roomTitle");
+    const playersList = document.getElementById("playersList");
+    const pickBtn = document.getElementById("pickBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stateArea = document.getElementById("stateArea");
+    const meNameSpan = document.getElementById("meName");
+    const meRoleSpan = document.getElementById("meRole");
+
+    if (!username || !roomID) {
+      alert("No se encontró información de la sala. Regresando...");
+      window.location.href = "https://yalmil.pages.dev";
+    }
+
+    roomTitle.textContent = `Sala: ${roomID}`;
+    meNameSpan.textContent = username;
+    meRoleSpan.textContent = rol || "Jugador";
+
+    // Referencias
+    const playersRef = ref(db, `salas/${roomID}/jugadores`);
+    const gameRef = ref(db, `salas/${roomID}/game`);
+    const myPlayerRef = ref(db, `salas/${roomID}/jugadores/${username}`);
+
+    // registrar presencia y eliminar al desconectar
+    onDisconnect(myPlayerRef).remove();
+
+    // Mostrar boton de elegir solo al organizador
+    if (rol === "Organizador") {
+      pickBtn.style.display = "inline-block";
+      resetBtn.style.display = "inline-block";
+    }
+
+    // Elegir jugador aleatorio (organizador)
+    pickBtn.onclick = async () => {
+      const snap = await get(playersRef);
+      if (!snap.exists()) return alert("No hay jugadores");
+      const players = Object.keys(snap.val());
+      if (players.length === 0) return alert("No hay jugadores");
+      const random = players[Math.floor(Math.random() * players.length)];
+      // Crear objeto game con estado collecting
+      await set(gameRef, {
+        selected: random,
+        status: "collecting", // collecting -> guessing -> ended
+        word: null,
+        pistas: null,
+        guesses: null,
+        eliminados: null,
+        winner: null
+      });
+      console.log("Seleccionado:", random);
+    };
+
+    // Reiniciar juego (organizador) - limpia estado game
+    resetBtn.onclick = async () => {
+      if (!confirm("Reiniciar juego y borrar estado actual?")) return;
+      await remove(gameRef);
+      alert("Juego reiniciado");
+    };
+
+    // Escuchar jugadores y lista
+    onValue(playersRef, (snap) => {
+      playersList.innerHTML = "";
+      if (!snap.exists()) return;
+      const players = snap.val();
+      Object.keys(players).forEach(name => {
+        const li = document.createElement("li");
+        li.textContent = name + (players[name].rol === "Organizador" ? " ⭐(Organizador)" : "");
+        if (players[name].rol === "Organizador") li.classList.add("organ");
+        playersList.appendChild(li);
+      });
+    });
+
+    // Escuchar estado del juego
+    onValue(gameRef, (snap) => {
+      const game = snap.val();
+      renderGameState(game);
+    });
+
+    // Renderiza la UI del panel derecho según estado del juego
+    function renderGameState(game) {
+      stateArea.innerHTML = "";
+      if (!game) {
+        stateArea.innerHTML = `<div class="small">No hay juego activo. Espera a que el organizador elija un jugador.</div>`;
+        return;
+      }
+
+      const status = game.status || "idle";
+      const selected = game.selected || null;
+
+      // Si está en colecta de palabra y yo soy el seleccionado -> mostrar formulario
+      if (status === "collecting") {
+        if (selected === username) {
+          // Formulario para el elegido
+          const container = document.createElement("div");
+          container.innerHTML = `
+            <h3>Elegiste para escribir la palabra</h3>
+            <div class="small">Responde estas preguntas (respuestas abiertas)</div>
+            <div style="margin-top:10px">
+              <input id="wordInput" placeholder="Cuál es tu palabra?" />
+              <textarea id="p1" rows="2" placeholder="Pista 1?"></textarea>
+              <textarea id="p2" rows="2" placeholder="Pista 2?"></textarea>
+              <textarea id="p3" rows="2" placeholder="Pista 3?"></textarea>
+              <div style="margin-top:8px" class="center">
+                <button id="sendWordBtn">Enviar palabra y pistas</button>
+              </div>
+            </div>
+          `;
+          stateArea.appendChild(container);
+
+          document.getElementById("sendWordBtn").onclick = async () => {
+            const word = document.getElementById("wordInput").value?.trim();
+            const p1 = document.getElementById("p1").value?.trim() || "";
+            const p2 = document.getElementById("p2").value?.trim() || "";
+            const p3 = document.getElementById("p3").value?.trim() || "";
+
+            if (!word) return alert("Debes ingresar una palabra");
+            // Guardar y pasar a fase guessing
+            await update(gameRef, {
+              word: word,
+              pistas: { p1, p2, p3 },
+              status: "guessing",
+              guesses: {}, // reiniciar contadores
+              eliminados: {},
+              winner: null
+            });
+            alert("Palabra guardada. Esperando que adivinen...");
+          };
+        } else {
+          // Varios ven pantalla de carga
+          stateArea.innerHTML = `
+            <div class="loading">
+              <h3>Esperando a que ${selected} escriba la palabra</h3>
+              <div class="small">Por favor, espera...</div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // Fase adivinar
+      if (status === "guessing") {
+        // Si hay ganador redirigimos en el listener de 'ended' (más abajo)
+        const pistas = (game.pistas) ? game.pistas : { p1: null, p2: null, p3: null };
+
+        // Si soy el seleccionado, no puedo adivinar (puedo ver que la gente adivina)
+        if (selected === username) {
+          const box = document.createElement("div");
+          box.innerHTML = `
+            <h3>Eres quien puso la palabra</h3>
+            <div class="small">Espera a que los demás intenten adivinar</div>
+            <div style="margin-top:12px" id="currentGuessesInfo"></div>
+          `;
+          stateArea.appendChild(box);
+          // Mostrar contador de intentos por jugador (opcional)
+          if (game.guesses) {
+            const info = document.getElementById("currentGuessesInfo");
+            info.innerHTML = "<h4>Intentos por jugador</h4>";
+            Object.keys(game.guesses).forEach(p => {
+              const c = game.guesses[p] || 0;
+              const el = document.createElement("div");
+              el.textContent = `${p}: ${c} intento(s)` + (game.eliminados && game.eliminados[p] ? " (eliminado)" : "");
+              info.appendChild(el);
+            });
+          }
+          return;
+        }
+
+        // Si estoy eliminado
+        const elim = game.eliminados && game.eliminados[username];
+        if (elim) {
+          stateArea.innerHTML = `<div class="small">Has sido eliminado por llegar a 15 intentos. Espera la próxima ronda.</div>`;
+          return;
+        }
+
+        // Interfaz de adivinar para otros jugadores
+        const playerGuesses = (game.guesses && game.guesses[username]) ? game.guesses[username] : 0;
+
+        const guessBox = document.createElement("div");
+        guessBox.innerHTML = `
+          <h3>Adivina la palabra</h3>
+          <div class="small">Intentos realizados: <strong id="myCount">${playerGuesses}</strong></div>
+
+          <div class="hint" id="hintArea">
+            <div class="small">Pistas disponibles:</div>
+            <div id="pistasList">
+              ${playerGuesses >= 1 ? `<div>Pista 1: ${escapeHtml(pistas.p1 || "")}</div>` : `<div>Pista 1: (desbloquea en 1 intento)</div>`}
+              ${playerGuesses >= 5 ? `<div>Pista 2: ${escapeHtml(pistas.p2 || "")}</div>` : `<div>Pista 2: (desbloquea en 5 intentos)</div>`}
+              ${playerGuesses >= 10 ? `<div>Pista 3: ${escapeHtml(pistas.p3 || "")}</div>` : `<div>Pista 3: (desbloquea en 10 intentos)</div>`}
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <input id="guessInput" placeholder="Escribe tu intento aquí" />
+            <div style="margin-top:8px" class="center">
+              <button id="sendGuessBtn">Enviar intento</button>
+            </div>
+          </div>
+        `;
+        stateArea.appendChild(guessBox);
+
+        document.getElementById("sendGuessBtn").onclick = async () => {
+          const intento = document.getElementById("guessInput").value?.trim();
+          if (!intento) return alert("Escribe un intento");
+
+          // Primero incrementar el contador del jugador de forma segura
+          const myGuessRef = ref(db, `salas/${roomID}/game/guesses/${username}`);
+          try {
+            await runTransaction(myGuessRef, (current) => {
+              return (current || 0) + 1;
+            });
+
+            // actualizar local display del contador
+            const updatedSnap = await get(ref(db, `salas/${roomID}/game/guesses/${username}`));
+            const newCount = updatedSnap.exists() ? updatedSnap.val() : 0;
+            document.getElementById("myCount").textContent = newCount;
+
+            // Si alcanzó 15, marcar eliminado y no permitir más
+            if (newCount >= 15) {
+              await update(ref(db, `salas/${roomID}/game/eliminados/${username}`), { eliminated: true });
+              alert("Llegaste a 15 intentos. Has sido eliminado.");
+              return;
+            }
+
+            // Recuperar palabra actual (no sensible mostrarla)
+            const gameSnap = await get(gameRef);
+            const currentGame = gameSnap.val();
+            if (!currentGame || !currentGame.word) return alert("Error interno: palabra no encontrada");
+
+            const realWord = String(currentGame.word).trim().toLowerCase();
+            if (intento.toLowerCase() === realWord) {
+              // Ganador: marcar winner y cambiar estado a ended
+              await update(gameRef, { winner: username, status: "ended" });
+              // Todos se redirigirán en el listener al ver status ended
+            } else {
+              // Si no acierta, actualizar pistas visibles (al leer gameRef se actualizará automáticamente)
+              document.getElementById("guessInput").value = "";
+            }
+          } catch (err) {
+            console.error("Error en intento:", err);
+            alert("Error al procesar intento");
+          }
+        };
+
+        return;
+      }
+
+      // Fase finalizada
+      if (status === "ended") {
+        const winner = game.winner || "Alguien";
+        stateArea.innerHTML = `
+          <h3>Juego finalizado</h3>
+          <div class="small">Ganador: <strong>${winner}</strong></div>
+          <div style="margin-top:10px">
+            <div class="small">Serás redirigido a Index.html</div>
+          </div>
+        `;
+        // redirigir todos a Index.html
+        setTimeout(() => {
+          window.location.href = "Index.html";
+        }, 1200);
+        return;
+      }
+
+      // Estado por defecto
+      stateArea.innerHTML = `<div class="small">Estado desconocido: ${status}</div>`;
+    }
+
+    // listener para redirección inmediata si game cambia a ended (por seguridad)
+    onValue(gameRef, (snap) => {
+      const g = snap.val();
+      if (g && g.status === "ended") {
+        // pequeña demora para que el usuario vea el mensaje
+        setTimeout(() => {
+          window.location.href = "Index.html";
+        }, 1000);
+      }
+    });
+
+    // utilidad para escapar HTML en inserciones seguras
+    function escapeHtml(s) {
+      if (!s) return "";
+      return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
+    }
+
+    // limpiar localStorage al cerrar (opcional)
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("username");
+      localStorage.removeItem("roomID");
+      localStorage.removeItem("rol");
+    });
+  </script>
+</body>
+</html>
