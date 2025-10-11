@@ -113,50 +113,55 @@
     if (rol === "Organizador") startBtn.style.display = "inline-block";
 
     const playerRef = ref(db, `salas/${roomID}/jugadores/${username}`);
-
-    // ✅ Eliminar jugador automáticamente al desconectarse
     onDisconnect(playerRef).remove();
 
-    // Escuchar en tiempo real los jugadores
-    const roomRef = ref(db, `salas/${roomID}/jugadores`);
+    // Escuchar jugadores en tiempo real
+    const roomRef = ref(db, `salas/${roomID}`);
     onValue(roomRef, async (snapshot) => {
-      playersList.innerHTML = "";
+      const data = snapshot.val();
 
-      if (snapshot.exists()) {
-        const players = snapshot.val();
-        const playerNames = Object.keys(players);
-
-        // Mostrar lista de jugadores
-        playerNames.forEach((name) => {
-          const li = document.createElement("li");
-          li.textContent = name;
-          if (players[name].rol === "Organizador") {
-            li.classList.add("organizador");
-            li.textContent += " ⭐(Organizador)";
-          }
-          playersList.appendChild(li);
-        });
-
-        // ✅ Si el organizador se fue, reasignar a otro jugador aleatorio
-        const organizadorPresente = playerNames.some(
-          name => players[name].rol === "Organizador"
-        );
-
-        if (!organizadorPresente && playerNames.length > 0) {
-          const randomPlayer = playerNames[Math.floor(Math.random() * playerNames.length)];
-          await update(ref(db, `salas/${roomID}/jugadores/${randomPlayer}`), { rol: "Organizador" });
-          console.log(`Nuevo organizador: ${randomPlayer}`);
-        }
-
-      } else {
-        // ✅ Si ya no hay jugadores, eliminar toda la sala
+      // Si no hay datos, cerrar sala
+      if (!data || !data.jugadores) {
         await remove(ref(db, `salas/${roomID}`));
         alert("La sala se cerró porque no hay jugadores activos");
         window.location.href = "https://yalmil.pages.dev";
+        return;
+      }
+
+      const players = data.jugadores;
+      const playerNames = Object.keys(players);
+      playersList.innerHTML = "";
+
+      // Mostrar jugadores
+      playerNames.forEach((name) => {
+        const li = document.createElement("li");
+        li.textContent = name;
+        if (players[name].rol === "Organizador") {
+          li.classList.add("organizador");
+          li.textContent += " ⭐(Organizador)";
+        }
+        playersList.appendChild(li);
+      });
+
+      // Si la sala fue iniciada → redirigir a todos
+      if (data.iniciada === true) {
+        window.location.href = "https://yalmil.pages.dev/alp/asd/iniciada";
+        return;
+      }
+
+      // Reasignar organizador si se fue
+      const organizadorPresente = playerNames.some(
+        name => players[name].rol === "Organizador"
+      );
+
+      if (!organizadorPresente && playerNames.length > 0) {
+        const randomPlayer = playerNames[Math.floor(Math.random() * playerNames.length)];
+        await update(ref(db, `salas/${roomID}/jugadores/${randomPlayer}`), { rol: "Organizador" });
+        console.log(`Nuevo organizador: ${randomPlayer}`);
       }
     });
 
-    // Botón de iniciar sala
+    // Iniciar sala → marcarla como iniciada (redirige a todos)
     startBtn.onclick = async () => {
       const roomData = await get(ref(db, `salas/${roomID}/jugadores`));
       if (!roomData.exists()) {
@@ -170,11 +175,12 @@
         return;
       }
 
+      await update(ref(db, `salas/${roomID}`), { iniciada: true });
       alert("Sala iniciada. Redirigiendo...");
       window.location.href = "https://yalmil.pages.dev/alp/asd/iniciada";
     };
 
-    // Si el usuario cierra la pestaña, limpiar localStorage
+    // Limpiar datos locales al salir
     window.addEventListener("beforeunload", () => {
       localStorage.removeItem("username");
       localStorage.removeItem("roomID");
