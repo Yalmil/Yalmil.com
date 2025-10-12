@@ -1,294 +1,276 @@
- <!DOCTYPE html><html lang="es"><head>        
-  <meta charset="UTF-8">      
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">      
-  <title>Yalmil.com - Sala multijugador</title>      
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">      
-  <meta property="og:title" content="Yalmil.com" />      
-  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />      
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />      
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />      
-  <meta property="og:type" content="website" />      
-  <style>      
-    :root{font-family:Inter, system-ui, Arial, sans-serif}      
-    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1020;color:#e6eef8;padding:20px;overflow:hidden}      
-    .card{background:linear-gradient(180deg,#0f1724,#091022);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.6);width:100%;max-width:900px;position:relative}      
-    h1{font-size:20px;margin-bottom:8px}      
-    .row{display:flex;gap:8px;margin-bottom:8px}      
-    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid #1f2a44;background:transparent;color:inherit}      
-    button{cursor:pointer}      
-    .hidden{display:none}      
-    #playersList{max-height:150px;overflow:auto;border:1px dashed #24324f;padding:8px;border-radius:8px}      
-    .player{padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px}      
-    .meta{font-size:12px;color:#9fb0d6}      
-    #gameArea{margin-top:12px}      
-    .hint{background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;margin-bottom:6px}      
-    .winner-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:#1f2a44;padding:40px 60px;border-radius:20px;color:#fff;font-size:24px;font-weight:bold;text-align:center;box-shadow:0 0 30px rgba(0,0,0,0.6);transition:transform .5s ease;z-index:10}      
-    .winner-popup.show{transform:translate(-50%,-50%) scale(1)}      
-  </style>      
-</head>      
-<body>      
-  <div class="card">      
-    <h1>Sala multijugador</h1>      
-    <div id="initial">      
-      <div class="row">      
-        <input id="nameInput" placeholder="Tu nombre" />      
-        <button id="createBtn">Crear sala</button>      
-        <button id="joinBtn">Unirse a sala</button>      
-      </div>      
-      <div id="joinArea" class="hidden row">      
-        <input id="joinId" placeholder="ID de la sala" />      
-        <button id="joinConfirm">Unirse</button>      
-      </div>      
-      <div id="status" class="meta"></div>      
-    </div>      
-    <div id="room" class="hidden">      
-      <div class="row">      
-        <div>      
-          <div class="meta">Sala: <span id="roomIdDisplay"></span></div>      
-          <div class="meta">Tu nombre: <span id="yourName"></span></div>      
-        </div>      
-        <div style="margin-left:auto">      
-          <button id="leaveBtn">Salir</button>      
-        </div>      
-      </div><h3>Jugadores</h3>      
-  <div id="playersList"></div>    <div id="controls" class="row" style="margin-top:8px">      
-    <button id="startGame" class="hidden">Iniciar partida</button>      
-  </div>    <div id="gameArea" class="hidden">      
-    <div id="roleArea"></div>      
-    <div id="chooserArea" class="hidden">      
-      <h4>Tú debes elegir la palabra</h4>      
-      <input id="wordInput" placeholder="Palabra" />      
-      <input id="hint1" placeholder="Pista 1" />      
-      <input id="hint2" placeholder="Pista 2" />      
-      <input id="hint3" placeholder="Pista 3" />      
-      <div class="row">      
-        <button id="submitWord">Enviar palabra</button>      
-      </div>      
-    </div>  <div id="loadingArea" class="hidden meta">Cargando...</div>    <div id="guessArea" class="hidden">      
-  <h4>Adivina la palabra</h4>      
-  <div id="reveals" class="meta"></div>      
-  <input id="guessInput" placeholder="Escribe tu intento" />      
-  <button id="guessBtn">Enviar intento</button>      
-  <div id="attemptsInfo" class="meta"></div>      
-  <div id="hintsBox" style="margin-top:8px"></div>      
-</div>    <div id="resultArea" class="meta" style="margin-top:10px"></div>    <div id="chooserStats" class="hidden">      
-  <h4>Jugadores conectados</h4>      
-  <div id="connectedPlayers"></div>      
-  <h4>Historial de palabras</h4>      
-  <div id="wordHistory"></div>      
-</div>    </div>      
-  <div id="winnerPopup" class="winner-popup">Ganador</div>      
-</div>    </div>        
-  <script type="module">      
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';      
-    import { getDatabase, ref, set, push, onValue, get, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';  const firebaseConfig={apiKey:"AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",authDomain:"databaseloginweb.firebaseapp.com",databaseURL:"https://databaseloginweb-default-rtdb.firebaseio.com",projectId:"databaseloginweb",storageBucket:"databaseloginweb.firebasestorage.app",messagingSenderId:"121538864529",appId:"1:121538864529:web:e92aaeaa4ba52618162630"};      
-const app=initializeApp(firebaseConfig);      
-const db=getDatabase(app);    const $=id=>document.getElementById(id);  
-const local={roomId:null,name:null,playerKey:null,isCreator:false,chooserKey:null};  
-const randomId=(len=6)=>Math.random().toString(36).substring(2,2+len).toUpperCase();  $('createBtn').onclick=async()=>{
-const name=$('nameInput').value.trim();
-if(!name)return $('status').textContent='Escribe tu nombre';
-const id=randomId();
-local.name=name;
-local.roomId=id;
-local.isCreator=true;
-await set(ref(db,rooms/${id}),{creatorName:name,createdBy:name,creatorTime:Date.now()});
-await joinRoom(id);
-};
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yalmil.com - Sala multijugador</title>
 
-$('joinBtn').onclick=()=>$('joinArea').classList.toggle('hidden');
-$('joinConfirm').onclick=()=>{const id=$('joinId').value.trim().toUpperCase();if(!id)return $('status').textContent='Ingresa un ID';joinRoom(id)};
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
 
-async function joinRoom(id){
-const name=$('nameInput').value.trim();
-if(!name)return $('status').textContent='Escribe tu nombre';
-const roomRef=ref(db,rooms/${id});
-const snap=await get(roomRef);
-if(!snap.exists())return $('status').textContent='Sala no encontrada';
+  <style>
+    :root { font-family: Inter, system-ui, Arial, sans-serif }
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:#0b1020; color:#e6eef8; padding:20px; overflow:hidden }
+    .card { background:linear-gradient(180deg,#0f1724,#091022); padding:18px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.6); width:100%; max-width:900px; position:relative }
+    h1 { font-size:20px; margin-bottom:8px }
+    .row { display:flex; gap:8px; margin-bottom:8px }
+    input, button, textarea { padding:8px; border-radius:8px; border:1px solid #1f2a44; background:transparent; color:inherit }
+    button { cursor:pointer }
+    .hidden { display:none }
+    #playersList { max-height:150px; overflow:auto; border:1px dashed #24324f; padding:8px; border-radius:8px }
+    .player { padding:6px; border-radius:6px; background:rgba(255,255,255,0.02); margin-bottom:6px }
+    .meta { font-size:12px; color:#9fb0d6 }
+    .label { font-size:11px; margin-left:6px; padding:2px 6px; border-radius:6px; background:#1e293b; color:#fff }
+    .organizer { background:#2563eb }
+    .creator { background:#22c55e }
+    .winner-popup { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#1f2a44; padding:40px 60px; border-radius:20px; color:#fff; font-size:24px; font-weight:bold; text-align:center; box-shadow:0 0 30px rgba(0,0,0,0.6); transition:transform .5s ease; z-index:10 }
+    .winner-popup.show { transform:translate(-50%,-50%) scale(1) }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Sala multijugador</h1>
+    <div id="initial">
+      <div class="row">
+        <input id="nameInput" placeholder="Tu nombre" />
+        <button id="createBtn">Crear sala</button>
+        <button id="joinBtn">Unirse a sala</button>
+      </div>
+      <div id="joinArea" class="hidden row">
+        <input id="joinId" placeholder="ID de la sala" />
+        <button id="joinConfirm">Unirse</button>
+      </div>
+      <div id="status" class="meta"></div>
+    </div>
 
-const playersRef=ref(db,rooms/${id}/players);
-const newPlayer=push(playersRef);
-await set(newPlayer,{name,joinedAt:Date.now()});
-local.playerKey=newPlayer.key;
-local.roomId=id;
-local.name=name;
+    <div id="room" class="hidden">
+      <div class="row">
+        <div>
+          <div class="meta">Sala: <span id="roomIdDisplay"></span></div>
+          <div class="meta">Tu nombre: <span id="yourName"></span></div>
+        </div>
+        <div style="margin-left:auto">
+          <button id="leaveBtn">Salir</button>
+        </div>
+      </div>
 
-$('initial').classList.add('hidden');
-$('room').classList.remove('hidden');
-$('yourName').textContent=name;
-$('roomIdDisplay').textContent=id;
+      <h3>Jugadores</h3>
+      <div id="playersList"></div>
 
-listenRoom(id);
-}
+      <div id="controls" class="row" style="margin-top:8px">
+        <button id="startGame" class="hidden">Iniciar partida</button>
+      </div>
 
-$('leaveBtn').onclick=async()=>{
-if(local.roomId&&local.playerKey){
-const playerRef=ref(db,rooms/${local.roomId}/players/${local.playerKey});
-await remove(playerRef);
-// Verificar si quedan jugadores
-const playersSnap=await get(ref(db,rooms/${local.roomId}/players));
-if(!playersSnap.exists()) await remove(ref(db,rooms/${local.roomId})); // Eliminar sala si no hay nadie
-}
-location.reload();
-};
+      <div id="gameArea" class="hidden">
+        <div id="roleArea"></div>
+      </div>
 
-function listenRoom(id){
-const roomRef=ref(db,rooms/${id});
-onValue(roomRef,async(snap)=>{
-if(!snap.exists())return;
-const data=snap.val();
-const players=data.players||{};
+      <div id="winnerPopup" class="winner-popup">Ganador</div>
+    </div>
+  </div>
 
-renderPlayers(players);
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import { getDatabase, ref, set, push, onValue, get, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 
-// 🔥 Si no hay jugadores, eliminar toda la sala automáticamente
-if(Object.keys(players).length===0){
-await remove(ref(db,rooms/${id}));
-return;
-}
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
 
-const game=data.game;
-if(local.isCreator&&!game?.active){
-$('startGame').classList.remove('hidden');
-}else{
-$('startGame').classList.add('hidden');
-}
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const $ = id => document.getElementById(id);
 
-if(game&&game.active){
-$('gameArea').classList.remove('hidden');
-local.chooserKey=game.chooserKey;
-const isChooser=local.playerKey===game.chooserKey;
-$('chooserArea').classList.add('hidden');
-$('guessArea').classList.add('hidden');
-$('loadingArea').classList.add('hidden');
-$('chooserStats').classList.add('hidden');
+    const local = { roomId: null, name: null, playerKey: null, isCreator: false, isOrganizer: false };
 
-if(isChooser){
-if(!game.word){
-$('roleArea').textContent='Estás eligiendo la palabra';
-$('chooserArea').classList.remove('hidden');
-}else{
-$('roleArea').textContent='Eres el que eligió la palabra';
-$('chooserStats').classList.remove('hidden');
-renderChooserStats(data);
-}
-}else{
-if(!game.word){
-$('roleArea').textContent='Cargando...';
-$('loadingArea').classList.remove('hidden');
-}else{
-$('roleArea').textContent='Eres adivinador';
-$('guessArea').classList.remove('hidden');
-updateGuessUI(game);
-}
-}
+    const randomId = (len = 6) => Math.random().toString(36).substring(2, 2 + len).toUpperCase();
 
-if(game.solved){
-showWinner(game.winnerName);
-setTimeout(async()=>{
-await remove(ref(db,rooms/${id}/game));
-if(local.isCreator)$('startGame').classList.remove('hidden');
-$('guessArea').classList.add('hidden');
-$('chooserArea').classList.add('hidden');
-$('chooserStats').classList.add('hidden');
-$('gameArea').classList.add('hidden');
-$('roleArea').textContent='';
-},3500);
-}
-}else{
-$('gameArea').classList.add('hidden');
-}
+    $('createBtn').onclick = async () => {
+      const name = $('nameInput').value.trim();
+      if (!name) return $('status').textContent = 'Escribe tu nombre';
+      if (name.toLowerCase() === 'yalmil') {
+        const pass = prompt("Introduce la contraseña:");
+        if (pass !== "Si") return alert("Contraseña incorrecta");
+      }
+      const id = randomId();
+      local.name = name;
+      local.roomId = id;
+      local.isCreator = name.toLowerCase() === 'yalmil';
+      await set(ref(db, `rooms/${id}`), { creatorName: name, organizerKey: null, createdAt: Date.now() });
+      await joinRoom(id);
+    };
 
-});
-}
+    $('joinBtn').onclick = () => $('joinArea').classList.toggle('hidden');
 
-function renderPlayers(players){
-$('playersList').innerHTML='';
-for(const k in players){
-const p=players[k];
-const d=document.createElement('div');
-d.className='player';
-d.innerHTML=<strong>${p.name}</strong> <div class='meta'>${new Date(p.joinedAt).toLocaleString()}</div>;
-$('playersList').appendChild(d);
-}
-}
+    $('joinConfirm').onclick = () => {
+      const id = $('joinId').value.trim().toUpperCase();
+      if (!id) return $('status').textContent = 'Ingresa un ID';
+      joinRoom(id);
+    };
 
-// ✅ Mínimo 2 jugadores para iniciar
-$('startGame').onclick=async()=>{
-if(!local.isCreator)return alert('Solo el creador puede iniciar');
-const playersSnap=await get(ref(db,rooms/${local.roomId}/players));
-if(!playersSnap.exists())return alert('No hay jugadores');
-const players=playersSnap.val();
-const playerCount=Object.keys(players).length;
-if(playerCount<2)return alert('Se necesitan al menos 2 jugadores para iniciar');
+    async function joinRoom(id) {
+      const name = $('nameInput').value.trim();
+      if (!name) return $('status').textContent = 'Escribe tu nombre';
+      if (name.toLowerCase() === 'yalmil') {
+        const pass = prompt("Introduce la contraseña:");
+        if (pass !== "Si") return alert("Contraseña incorrecta");
+      }
 
-const keys=Object.keys(players);
-const rnd=keys[Math.floor(Math.random()*keys.length)];
-await set(ref(db,rooms/${local.roomId}/game),{active:true,chooserKey:rnd,attempts:[],createdAt:Date.now()});
-};
+      const roomRef = ref(db, `rooms/${id}`);
+      const snap = await get(roomRef);
+      if (!snap.exists()) return $('status').textContent = 'Sala no encontrada';
+      const playersRef = ref(db, `rooms/${id}/players`);
+      const newPlayer = push(playersRef);
+      await set(newPlayer, { name, joinedAt: Date.now() });
+      local.playerKey = newPlayer.key;
+      local.roomId = id;
+      local.name = name;
+      local.isCreator = name.toLowerCase() === 'yalmil';
+      $('initial').classList.add('hidden');
+      $('room').classList.remove('hidden');
+      $('yourName').textContent = name;
+      $('roomIdDisplay').textContent = id;
 
-$('submitWord').onclick=async()=>{
-const w=$('wordInput').value.trim();
-if(!w)return alert('Escribe la palabra');
-const payload={word:w,hint1:$('hint1').value.trim(),hint2:$('hint2').value.trim(),hint3:$('hint3').value.trim(),solved:false};
-await update(ref(db,rooms/${local.roomId}/game),payload);
-$('chooserArea').classList.add('hidden');
-$('chooserStats').classList.remove('hidden');
-renderChooserStats(await (await get(ref(db,rooms/${local.roomId}))).val());
-};
+      const data = (await get(roomRef)).val();
+      if (!data.organizerKey) {
+        await update(roomRef, { organizerKey: newPlayer.key });
+        local.isOrganizer = true;
+      }
 
-$('guessBtn').onclick=async()=>{
-const g=$('guessInput').value.trim();
-if(!g)return;
-const gameRef=ref(db,rooms/${local.roomId}/game);
-const snap=await get(gameRef);
-if(!snap.exists())return;
-const game=snap.val();
-const at=game.attempts||[];
-at.push({by:local.playerKey,name:local.name,text:g,at:Date.now()});
-await update(gameRef,{attempts:at});
-if(game.word&&g.toLowerCase()===game.word.toLowerCase())
-await update(gameRef,{solved:true,winnerName:local.name});
-$('guessInput').value='';
-};
+      listenRoom(id);
+    }
 
-function updateGuessUI(game){
-const a=game.attempts?game.attempts.length:0;
-$('attemptsInfo').textContent=Intentos: ${a};
-$('reveals').textContent='';
-$('hintsBox').innerHTML='';
-if(a>=5)$('reveals').textContent=Inicial: ${game.word?game.word.charAt(0):''};
-if(a>=9&&game.hint1)$('hintsBox').innerHTML+=<div class='hint'>Pista 1: ${game.hint1}</div>;
-if(a>=14&&game.hint2)$('hintsBox').innerHTML+=<div class='hint'>Pista 2: ${game.hint2}</div>;
-if(a>=19&&game.hint3)$('hintsBox').innerHTML+=<div class='hint'>Pista 3: ${game.hint3}</div>;
-if(a>=25){$('resultArea').textContent='Se acabaron los intentos.';$('guessArea').classList.add('hidden')}
-}
+    $('leaveBtn').onclick = async () => {
+      if (local.roomId && local.playerKey) {
+        const playerRef = ref(db, `rooms/${local.roomId}/players/${local.playerKey}`);
+        await remove(playerRef);
+        const roomRef = ref(db, `rooms/${local.roomId}`);
+        const roomSnap = await get(roomRef);
+        if (roomSnap.exists()) {
+          const data = roomSnap.val();
+          const players = data.players || {};
+          const playerKeys = Object.keys(players);
+          if (data.organizerKey === local.playerKey && playerKeys.length > 0) {
+            const randomKey = playerKeys[Math.floor(Math.random() * playerKeys.length)];
+            await update(roomRef, { organizerKey: randomKey });
+          }
+          if (playerKeys.length === 0) await remove(roomRef);
+        }
+      }
+      location.reload();
+    };
 
-function renderChooserStats(data){
-const players=data.players||{};
-const words=data.wordHistory||[];
-$('connectedPlayers').innerHTML='';
-for(const k in players){$('connectedPlayers').innerHTML+=<div>${players[k].name}</div>}
-$('wordHistory').innerHTML=words.map(w=><div>${w}</div>).join('')||'Sin historial';
-}
+    function listenRoom(id) {
+      const roomRef = ref(db, `rooms/${id}`);
+      onValue(roomRef, snap => {
+        if (!snap.exists()) return;
+        const data = snap.val();
+        const players = data.players || {};
+        renderPlayers(players, data.organizerKey);
+        const isOrganizer = local.playerKey === data.organizerKey;
+        local.isOrganizer = isOrganizer;
+        if (isOrganizer || local.isCreator) $('startGame').classList.remove('hidden');
+        else $('startGame').classList.add('hidden');
+      });
+    }
 
-function showWinner(name){
-const popup=$('winnerPopup');
-popup.textContent=Ganador: ${name};
-popup.classList.add('show');
-setTimeout(()=>popup.classList.remove('show'),3000);
-}
+    $('startGame').onclick = async () => {
+      if (!local.isOrganizer && !local.isCreator) return;
+      $('startGame').classList.add('hidden');
+      const roomRef = ref(db, `rooms/${local.roomId}`);
+      const data = (await get(roomRef)).val();
+      const players = Object.keys(data.players || {});
+      const randomPlayer = players[Math.floor(Math.random() * players.length)];
+      await update(roomRef, { game: { chooser: randomPlayer, state: 'choosing' } });
+    };
 
-window.addEventListener('beforeunload',async()=>{
-try{
-if(local.roomId&&local.playerKey){
-await remove(ref(db,rooms/${local.roomId}/players/${local.playerKey}));
-const playersSnap=await get(ref(db,rooms/${local.roomId}/players));
-if(!playersSnap.exists())await remove(ref(db,rooms/${local.roomId}));
-}
-}catch(e){}
-});
+    onValue(ref(db, `rooms`), async snap => {
+      const room = snap.val()?.[local.roomId];
+      if (!room) return;
+      const game = room.game;
+      if (!game) return;
+      const roleArea = $('roleArea');
+      $('gameArea').classList.remove('hidden');
+      if (game.state === 'choosing') {
+        if (local.playerKey === game.chooser) {
+          roleArea.innerHTML = `<h3>Elige una palabra</h3>
+            <input id="word" placeholder="Palabra" /><br>
+            <input id="p1" placeholder="Pista 1" /><br>
+            <input id="p2" placeholder="Pista 2" /><br>
+            <input id="p3" placeholder="Pista 3" /><br>
+            <button id="sendWord">Listo</button>`;
+          $('sendWord').onclick = async () => {
+            const word = $('word').value.trim().toLowerCase();
+            const hints = [ $('p1').value, $('p2').value, $('p3').value ];
+            if (!word) return alert('Escribe una palabra');
+            await update(ref(db, `rooms/${local.roomId}/game`), { word, hints, guesses: {}, state: 'guessing' });
+          };
+        } else {
+          roleArea.innerHTML = `<h3>Esperando a que el jugador elija una palabra...</h3>`;
+        }
+      } else if (game.state === 'guessing') {
+        if (!game.word) return;
+        roleArea.innerHTML = `<h3>Adivina la palabra</h3>
+          <input id="guessInput" placeholder="Tu intento" />
+          <button id="guessBtn">Intentar</button>
+          <div id="feedback"></div>`;
+        const guesses = Object.values(game.guesses || {});
+        const attempts = guesses.filter(g => g.player === local.name).length;
+        let hintMsg = '';
+        if (attempts >= 25) hintMsg = 'Perdiste';
+        else if (attempts >= 20) hintMsg = 'Pista 3: ' + game.hints[2];
+        else if (attempts >= 15) hintMsg = 'Pista 2: ' + game.hints[1];
+        else if (attempts >= 10) hintMsg = 'Pista 1: ' + game.hints[0];
+        else if (attempts >= 5) hintMsg = 'Inicial: ' + game.word[0].toUpperCase();
+        if (hintMsg) $('feedback').innerHTML = `<p>${hintMsg}</p>`;
 
-  </script>      
-</body>      
+        $('guessBtn').onclick = async () => {
+          const val = $('guessInput').value.trim().toLowerCase();
+          if (!val) return;
+          const correct = val === game.word.toLowerCase();
+          const newGuess = push(ref(db, `rooms/${local.roomId}/game/guesses`));
+          await set(newGuess, { player: local.name, guess: val });
+          if (correct) {
+            showWinner(local.name);
+            await update(ref(db, `rooms/${local.roomId}/game`), null);
+          }
+        };
+      }
+    });
+
+    function renderPlayers(players, organizerKey) {
+      $('playersList').innerHTML = '';
+      for (const k in players) {
+        const p = players[k];
+        const d = document.createElement('div');
+        d.className = 'player';
+        let label = '';
+        if (k === organizerKey) label = "<span class='label organizer'>Organizador</span>";
+        if (p.name.toLowerCase() === 'yalmil') label = "<span class='label creator'>Creador</span>";
+        d.innerHTML = `<strong>${p.name}</strong> ${label} <div class='meta'>${new Date(p.joinedAt).toLocaleString()}</div>`;
+        $('playersList').appendChild(d);
+      }
+    }
+
+    function showWinner(name) {
+      const popup = $('winnerPopup');
+      popup.textContent = `Ganador: ${name}`;
+      popup.classList.add('show');
+      setTimeout(() => {
+        popup.classList.remove('show');
+        $('startGame').classList.remove('hidden');
+      }, 3000);
+    }
+  </script>
+</body>
 </html>
