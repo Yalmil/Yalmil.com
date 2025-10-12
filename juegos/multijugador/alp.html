@@ -333,7 +333,9 @@
         popup.classList.remove('show');
         $('gameArea').classList.add('hidden');
         $('roleArea').innerHTML = '';
-        $('startGame').classList.remove('hidden');
+        if (local.isOrganizer || local.isCreator) {
+          $('startGame').classList.remove('hidden');
+        }
       }, 3000);
     }
   </script>
