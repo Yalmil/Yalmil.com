@@ -234,7 +234,11 @@
       const room = snap.val()?.[local.roomId];
       if (!room) return;
       const game = room.game;
-      if (!game) return;
+      if (!game) {
+        $('gameArea').classList.add('hidden');
+        $('roleArea').innerHTML = '';
+        return;
+      }
       const roleArea = $('roleArea');
       $('gameArea').classList.remove('hidden');
       if (game.state === 'choosing') {
