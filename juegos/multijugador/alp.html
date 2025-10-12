@@ -29,6 +29,11 @@
     .creator { background:#22c55e }
     .winner-popup { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:#1f2a44; padding:40px 60px; border-radius:20px; color:#fff; font-size:24px; font-weight:bold; text-align:center; box-shadow:0 0 30px rgba(0,0,0,0.6); transition:transform .5s ease; z-index:10 }
     .winner-popup.show { transform:translate(-50%,-50%) scale(1) }
+    .guesses-history { max-height:200px; overflow-y:auto; border:1px solid #24324f; padding:8px; border-radius:8px; margin-top:8px; background:rgba(255,255,255,0.02) }
+    .guess-item { padding:6px; margin-bottom:4px; background:rgba(255,255,255,0.05); border-radius:4px; font-size:12px }
+    .guess-item strong { color:#e6eef8 }
+    .guess-item .player-name { color:#9fb0d6 }
+    .min-players-warning { background:#7f1d1d; padding:8px; border-radius:8px; margin-bottom:8px; color:#fca5a5; font-size:12px }
   </style>
 </head>
 <body>
@@ -60,6 +65,7 @@
 
       <h3>Jugadores</h3>
       <div id="playersList"></div>
+      <div id="minPlayersWarning" class="min-players-warning hidden">Se necesitan mínimo 2 jugadores para iniciar la partida</div>
 
       <div id="controls" class="row" style="margin-top:8px">
         <button id="startGame" class="hidden">Iniciar partida</button>
@@ -176,30 +182,34 @@
         if (!snap.exists()) return;
         const data = snap.val();
         const players = data.players || {};
+        const playerCount = Object.keys(players).length;
+        
         renderPlayers(players, data.organizerKey);
-        const isOrganizer = local.playerKey === data.organizerKey;
-        local.isOrganizer = isOrganizer;
-
-        // Mostrar el botón de iniciar solo si no hay partida activa y el jugador es creador u organizador
-        if ((!data.game || data.game.state === 'ended') && (local.isCreator || local.isOrganizer)) {
-          $('startGame').classList.remove('hidden');
-        } else {
+        
+        if (playerCount < 2) {
+          $('minPlayersWarning').classList.remove('hidden');
           $('startGame').classList.add('hidden');
+        } else {
+          $('minPlayersWarning').classList.add('hidden');
+          const isOrganizer = local.playerKey === data.organizerKey;
+          local.isOrganizer = isOrganizer;
+          if ((isOrganizer || local.isCreator) && !data.game) $('startGame').classList.remove('hidden');
+          else if (data.game) $('startGame').classList.add('hidden');
         }
       });
     }
 
     $('startGame').onclick = async () => {
       if (!local.isOrganizer && !local.isCreator) return;
-      $('startGame').classList.add('hidden'); // Ocultar el botón al iniciar
       const roomRef = ref(db, `rooms/${local.roomId}`);
       const data = (await get(roomRef)).val();
       const players = Object.keys(data.players || {});
+      if (players.length < 2) return alert('Se necesitan mínimo 2 jugadores');
+      $('startGame').classList.add('hidden');
       const randomPlayer = players[Math.floor(Math.random() * players.length)];
       await update(roomRef, { game: { chooser: randomPlayer, state: 'choosing' } });
     };
 
-    // Escucha el estado del juego
     onValue(ref(db, `rooms`), async snap => {
       const room = snap.val()?.[local.roomId];
       if (!room) return;
@@ -207,16 +217,20 @@
       if (!game) return;
       const roleArea = $('roleArea');
       $('gameArea').classList.remove('hidden');
-
-      // Si la partida terminó, mostrar botón solo a organizador/creador
-      if (game.state === 'ended') {
-        if (local.isCreator || local.isOrganizer) $('startGame').classList.remove('hidden');
-        return;
-      }
-
       if (game.state === 'choosing') {
         if (local.playerKey === game.chooser) {
+          const guesses = Object.values(game.guesses || {});
+          let guessesHTML = '';
+          if (guesses.length > 0) {
+            guessesHTML = '<div class="guesses-history"><strong>Intentos fallidos:</strong><br>';
+            guesses.forEach(g => {
+              guessesHTML += `<div class="guess-item"><span class="player-name">${g.player}:</span> <strong>${g.guess}</strong></div>`;
+            });
+            guessesHTML += '</div>';
+          }
+          
           roleArea.innerHTML = `<h3>Elige una palabra</h3>
+            ${guessesHTML}
             <input id="word" placeholder="Palabra" /><br>
             <input id="p1" placeholder="Pista 1" /><br>
             <input id="p2" placeholder="Pista 2" /><br>
@@ -255,7 +269,7 @@
           await set(newGuess, { player: local.name, guess: val });
           if (correct) {
             showWinner(local.name);
-            await update(ref(db, `rooms/${local.roomId}/game`), { state: 'ended' });
+            await update(ref(db, `rooms/${local.roomId}/game`), null);
           }
         };
       }
@@ -281,6 +295,7 @@
       popup.classList.add('show');
       setTimeout(() => {
         popup.classList.remove('show');
+        $('startGame').classList.remove('hidden');
       }, 3000);
     }
   </script>
