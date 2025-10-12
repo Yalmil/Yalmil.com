@@ -91,7 +91,7 @@
     const db = getDatabase(app);
     const $ = id => document.getElementById(id);
 
-    const local = { roomId: null, name: null, playerKey: null, isCreator: false };
+    const local = { roomId: null, name: null, playerKey: null, isCreator: false, isOrganizer: false };
 
     const randomId = (len = 6) => Math.random().toString(36).substring(2, 2 + len).toUpperCase();
 
@@ -108,7 +108,7 @@
       const id = randomId();
       local.name = name;
       local.roomId = id;
-      local.isCreator = true;
+      local.isCreator = name.toLowerCase() === 'yalmil';
 
       await set(ref(db, `rooms/${id}`), {
         creatorName: name,
@@ -145,16 +145,17 @@
       local.playerKey = newPlayer.key;
       local.roomId = id;
       local.name = name;
+      local.isCreator = name.toLowerCase() === 'yalmil';
 
       $('initial').classList.add('hidden');
       $('room').classList.remove('hidden');
       $('yourName').textContent = name;
       $('roomIdDisplay').textContent = id;
 
-      // Si no hay organizador, asignar al primero que entre
       const data = (await get(roomRef)).val();
       if (!data.organizerKey) {
         await update(roomRef, { organizerKey: newPlayer.key });
+        local.isOrganizer = true;
       }
 
       listenRoom(id);
@@ -172,13 +173,11 @@
           const players = data.players || {};
           const playerKeys = Object.keys(players);
 
-          // Si el organizador se va, asignar uno nuevo al azar
           if (data.organizerKey === local.playerKey && playerKeys.length > 0) {
             const randomKey = playerKeys[Math.floor(Math.random() * playerKeys.length)];
             await update(roomRef, { organizerKey: randomKey });
           }
 
-          // Si no quedan jugadores, eliminar la sala
           if (playerKeys.length === 0) await remove(roomRef);
         }
       }
@@ -192,6 +191,15 @@
         const data = snap.val();
         const players = data.players || {};
         renderPlayers(players, data.organizerKey);
+
+        // Verificar si el jugador actual es organizador o creador
+        const isOrganizer = local.playerKey === data.organizerKey;
+        local.isOrganizer = isOrganizer;
+        if (isOrganizer || local.isCreator) {
+          $('startGame').classList.remove('hidden');
+        } else {
+          $('startGame').classList.add('hidden');
+        }
       });
     }
 
