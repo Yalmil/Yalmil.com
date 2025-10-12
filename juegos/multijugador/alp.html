@@ -1,13 +1,17 @@
-<!DOCTYPE html><html lang="es"><head>  
+<!DOCTYPE html>
+<html lang="es">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Yalmil.com - Sala multijugador</title>
+
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
   <meta property="og:title" content="Yalmil.com" />
   <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
+
   <style>
     :root{font-family:Inter, system-ui, Arial, sans-serif}
     body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0b1020;color:#e6eef8;padding:20px;overflow:hidden}
@@ -20,8 +24,9 @@
     #playersList{max-height:150px;overflow:auto;border:1px dashed #24324f;padding:8px;border-radius:8px}
     .player{padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px}
     .meta{font-size:12px;color:#9fb0d6}
-    .tag{background:#2b3e6b;padding:2px 6px;border-radius:6px;margin-left:6px;font-size:11px;color:#fff}
-    .tag.creador{background:#a14cf0}
+    .label{font-size:11px;margin-left:6px;padding:2px 6px;border-radius:6px;background:#1e293b;color:#fff}
+    .organizer{background:#2563eb}
+    .creator{background:#22c55e}
     .winner-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:#1f2a44;padding:40px 60px;border-radius:20px;color:#fff;font-size:24px;font-weight:bold;text-align:center;box-shadow:0 0 30px rgba(0,0,0,0.6);transition:transform .5s ease;z-index:10}
     .winner-popup.show{transform:translate(-50%,-50%) scale(1)}
   </style>
@@ -62,149 +67,164 @@
 
       <div id="gameArea" class="hidden">
         <div id="roleArea"></div>
-        <div id="chooserArea" class="hidden">
-          <h4>Tú debes elegir la palabra</h4>
-          <input id="wordInput" placeholder="Palabra" />
-          <input id="hint1" placeholder="Pista 1" />
-          <input id="hint2" placeholder="Pista 2" />
-          <input id="hint3" placeholder="Pista 3" />
-          <div class="row"><button id="submitWord">Enviar palabra</button></div>
-        </div>
-
-        <div id="loadingArea" class="hidden meta">Cargando...</div>
-        <div id="guessArea" class="hidden">
-          <h4>Adivina la palabra</h4>
-          <div id="reveals" class="meta"></div>
-          <input id="guessInput" placeholder="Escribe tu intento" />
-          <button id="guessBtn">Enviar intento</button>
-          <div id="attemptsInfo" class="meta"></div>
-          <div id="hintsBox" style="margin-top:8px"></div>
-        </div>
-        <div id="resultArea" class="meta" style="margin-top:10px"></div>
-        <div id="chooserStats" class="hidden">
-          <h4>Jugadores conectados</h4>
-          <div id="connectedPlayers"></div>
-          <h4>Historial de palabras</h4>
-          <div id="wordHistory"></div>
-        </div>
       </div>
+
       <div id="winnerPopup" class="winner-popup">Ganador</div>
     </div>
-  </div>  
+  </div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-import { getDatabase, ref, set, push, onValue, get, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import { getDatabase, ref, set, push, onValue, get, update, remove } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 
-const firebaseConfig={apiKey:"AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",authDomain:"databaseloginweb.firebaseapp.com",databaseURL:"https://databaseloginweb-default-rtdb.firebaseio.com",projectId:"databaseloginweb",storageBucket:"databaseloginweb.firebasestorage.app",messagingSenderId:"121538864529",appId:"1:121538864529:web:e92aaeaa4ba52618162630"};
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
 
-const $=id=>document.getElementById(id);
-const local={roomId:null,name:null,playerKey:null,isCreator:false,chooserKey:null,isYalmil:false};
-const randomId=(len=6)=>Math.random().toString(36).substring(2,2+len).toUpperCase();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const $ = id => document.getElementById(id);
 
-// Verifica si el usuario es Yalmil
-async function verifyYalmil(name){
-  if(name.toLowerCase()==="yalmil"){
-    const pass=prompt("Contraseña de Creador:");
-    if(pass==="Si"){alert("Bienvenido Creador.");return true;}
-    else{alert("Contraseña incorrecta.");return false;}
-  }
-  return false;
-}
+    const local = { roomId: null, name: null, playerKey: null, isCreator: false };
 
-$('createBtn').onclick=async()=>{
-  const name=$('nameInput').value.trim();
-  if(!name)return $('status').textContent='Escribe tu nombre';
-  const isY=await verifyYalmil(name);
-  const id=randomId();
-  local.name=name;
-  local.roomId=id;
-  local.isCreator=true;
-  local.isYalmil=isY;
-  await set(ref(db,`rooms/${id}`),{creatorName:name,organizerKey:null});
-  await joinRoom(id);
-};
+    const randomId = (len = 6) => Math.random().toString(36).substring(2, 2 + len).toUpperCase();
 
-$('joinBtn').onclick=()=>$('joinArea').classList.toggle('hidden');
-$('joinConfirm').onclick=async()=>{
-  const id=$('joinId').value.trim().toUpperCase();
-  if(!id)return $('status').textContent='Ingresa un ID';
-  const name=$('nameInput').value.trim();
-  if(!name)return $('status').textContent='Escribe tu nombre';
-  const isY=await verifyYalmil(name);
-  local.isYalmil=isY;
-  joinRoom(id);
-};
+    $('createBtn').onclick = async () => {
+      const name = $('nameInput').value.trim();
+      if (!name) return $('status').textContent = 'Escribe tu nombre';
 
-async function joinRoom(id){
-  const name=$('nameInput').value.trim();
-  const roomRef=ref(db,`rooms/${id}`);
-  const snap=await get(roomRef);
-  if(!snap.exists())return $('status').textContent='Sala no encontrada';
+      // Si el nombre es "Yalmil", pedir contraseña
+      if (name.toLowerCase() === 'yalmil') {
+        const pass = prompt("Introduce la contraseña:");
+        if (pass !== "Si") return alert("Contraseña incorrecta");
+      }
 
-  const playersRef=ref(db,`rooms/${id}/players`);
-  const newPlayer=push(playersRef);
-  await set(newPlayer,{name,joinedAt:Date.now()});
-  local.playerKey=newPlayer.key;
-  local.roomId=id;
-  local.name=name;
+      const id = randomId();
+      local.name = name;
+      local.roomId = id;
+      local.isCreator = true;
 
-  $('initial').classList.add('hidden');
-  $('room').classList.remove('hidden');
-  $('yourName').textContent=name;
-  $('roomIdDisplay').textContent=id;
+      await set(ref(db, `rooms/${id}`), {
+        creatorName: name,
+        organizerKey: null,
+        createdAt: Date.now()
+      });
 
-  const roomData=snap.val();
-  if(!roomData.organizerKey)await update(roomRef,{organizerKey:local.playerKey});
-  listenRoom(id);
-}
+      await joinRoom(id);
+    };
 
-$('leaveBtn').onclick=async()=>{
-  if(local.roomId&&local.playerKey){
-    const roomRef=ref(db,`rooms/${local.roomId}`);
-    const playerRef=ref(db,`rooms/${local.roomId}/players/${local.playerKey}`);
-    await remove(playerRef);
-    const playersSnap=await get(ref(db,`rooms/${local.roomId}/players`));
-    const players=playersSnap.val()||{};
-    if(Object.keys(players).length===0){
-      await remove(roomRef);
-    }else{
-      const roomSnap=await get(roomRef);
-      const roomData=roomSnap.val();
-      if(roomData.organizerKey===local.playerKey){
-        const keys=Object.keys(players);
-        const newOrg=keys[Math.floor(Math.random()*keys.length)];
-        await update(roomRef,{organizerKey:newOrg});
+    $('joinBtn').onclick = () => $('joinArea').classList.toggle('hidden');
+
+    $('joinConfirm').onclick = () => {
+      const id = $('joinId').value.trim().toUpperCase();
+      if (!id) return $('status').textContent = 'Ingresa un ID';
+      joinRoom(id);
+    };
+
+    async function joinRoom(id) {
+      const name = $('nameInput').value.trim();
+      if (!name) return $('status').textContent = 'Escribe tu nombre';
+      if (name.toLowerCase() === 'yalmil') {
+        const pass = prompt("Introduce la contraseña:");
+        if (pass !== "Si") return alert("Contraseña incorrecta");
+      }
+
+      const roomRef = ref(db, `rooms/${id}`);
+      const snap = await get(roomRef);
+      if (!snap.exists()) return $('status').textContent = 'Sala no encontrada';
+
+      const playersRef = ref(db, `rooms/${id}/players`);
+      const newPlayer = push(playersRef);
+      await set(newPlayer, { name, joinedAt: Date.now() });
+      local.playerKey = newPlayer.key;
+      local.roomId = id;
+      local.name = name;
+
+      $('initial').classList.add('hidden');
+      $('room').classList.remove('hidden');
+      $('yourName').textContent = name;
+      $('roomIdDisplay').textContent = id;
+
+      // Si no hay organizador, asignar al primero que entre
+      const data = (await get(roomRef)).val();
+      if (!data.organizerKey) {
+        await update(roomRef, { organizerKey: newPlayer.key });
+      }
+
+      listenRoom(id);
+    }
+
+    $('leaveBtn').onclick = async () => {
+      if (local.roomId && local.playerKey) {
+        const playerRef = ref(db, `rooms/${local.roomId}/players/${local.playerKey}`);
+        await remove(playerRef);
+
+        const roomRef = ref(db, `rooms/${local.roomId}`);
+        const roomSnap = await get(roomRef);
+        if (roomSnap.exists()) {
+          const data = roomSnap.val();
+          const players = data.players || {};
+          const playerKeys = Object.keys(players);
+
+          // Si el organizador se va, asignar uno nuevo al azar
+          if (data.organizerKey === local.playerKey && playerKeys.length > 0) {
+            const randomKey = playerKeys[Math.floor(Math.random() * playerKeys.length)];
+            await update(roomRef, { organizerKey: randomKey });
+          }
+
+          // Si no quedan jugadores, eliminar la sala
+          if (playerKeys.length === 0) await remove(roomRef);
+        }
+      }
+      location.reload();
+    };
+
+    function listenRoom(id) {
+      const roomRef = ref(db, `rooms/${id}`);
+      onValue(roomRef, snap => {
+        if (!snap.exists()) return;
+        const data = snap.val();
+        const players = data.players || {};
+        renderPlayers(players, data.organizerKey);
+      });
+    }
+
+    function renderPlayers(players, organizerKey) {
+      $('playersList').innerHTML = '';
+      for (const k in players) {
+        const p = players[k];
+        const d = document.createElement('div');
+        d.className = 'player';
+        let label = '';
+
+        if (k === organizerKey) label = "<span class='label organizer'>Organizador</span>";
+        if (p.name.toLowerCase() === 'yalmil') label = "<span class='label creator'>Creador</span>";
+
+        d.innerHTML = `<strong>${p.name}</strong> ${label} <div class='meta'>${new Date(p.joinedAt).toLocaleString()}</div>`;
+        $('playersList').appendChild(d);
       }
     }
-  }
-  location.reload();
-};
 
-function listenRoom(id){
-  const roomRef=ref(db,`rooms/${id}`);
-  onValue(roomRef,async(snap)=>{
-    if(!snap.exists())return;
-    const data=snap.val();
-    const players=data.players||{};
-    renderPlayers(players,data.organizerKey);
-  });
-}
+    function showWinner(name) {
+      const popup = $('winnerPopup');
+      popup.textContent = `Ganador: ${name}`;
+      popup.classList.add('show');
+      setTimeout(() => popup.classList.remove('show'), 3000);
+    }
 
-function renderPlayers(players,organizerKey){
-  $('playersList').innerHTML='';
-  for(const k in players){
-    const p=players[k];
-    const d=document.createElement('div');
-    d.className='player';
-    let tags='';
-    if(k===organizerKey)tags+=`<span class="tag">Organizador</span>`;
-    if(p.name.toLowerCase()==="yalmil")tags+=`<span class="tag creador">Creador</span>`;
-    d.innerHTML=`<strong>${p.name}</strong> ${tags}<div class='meta'>${new Date(p.joinedAt).toLocaleString()}</div>`;
-    $('playersList').appendChild(d);
-  }
-}
-</script>
-</body></html>
+    window.addEventListener('beforeunload', async () => {
+      try {
+        if (local.roomId && local.playerKey) {
+          await remove(ref(db, `rooms/${local.roomId}/players/${local.playerKey}`));
+        }
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>
