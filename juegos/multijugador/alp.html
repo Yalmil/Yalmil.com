@@ -179,14 +179,19 @@
         renderPlayers(players, data.organizerKey);
         const isOrganizer = local.playerKey === data.organizerKey;
         local.isOrganizer = isOrganizer;
-        if (isOrganizer || local.isCreator) $('startGame').classList.remove('hidden');
-        else $('startGame').classList.add('hidden');
+
+        // Mostrar el botón de iniciar solo si no hay partida activa y el jugador es creador u organizador
+        if ((!data.game || data.game.state === 'ended') && (local.isCreator || local.isOrganizer)) {
+          $('startGame').classList.remove('hidden');
+        } else {
+          $('startGame').classList.add('hidden');
+        }
       });
     }
 
     $('startGame').onclick = async () => {
       if (!local.isOrganizer && !local.isCreator) return;
-      $('startGame').classList.add('hidden');
+      $('startGame').classList.add('hidden'); // Ocultar el botón al iniciar
       const roomRef = ref(db, `rooms/${local.roomId}`);
       const data = (await get(roomRef)).val();
       const players = Object.keys(data.players || {});
@@ -194,6 +199,7 @@
       await update(roomRef, { game: { chooser: randomPlayer, state: 'choosing' } });
     };
 
+    // Escucha el estado del juego
     onValue(ref(db, `rooms`), async snap => {
       const room = snap.val()?.[local.roomId];
       if (!room) return;
@@ -201,6 +207,13 @@
       if (!game) return;
       const roleArea = $('roleArea');
       $('gameArea').classList.remove('hidden');
+
+      // Si la partida terminó, mostrar botón solo a organizador/creador
+      if (game.state === 'ended') {
+        if (local.isCreator || local.isOrganizer) $('startGame').classList.remove('hidden');
+        return;
+      }
+
       if (game.state === 'choosing') {
         if (local.playerKey === game.chooser) {
           roleArea.innerHTML = `<h3>Elige una palabra</h3>
@@ -242,7 +255,7 @@
           await set(newGuess, { player: local.name, guess: val });
           if (correct) {
             showWinner(local.name);
-            await update(ref(db, `rooms/${local.roomId}/game`), null);
+            await update(ref(db, `rooms/${local.roomId}/game`), { state: 'ended' });
           }
         };
       }
@@ -268,7 +281,6 @@
       popup.classList.add('show');
       setTimeout(() => {
         popup.classList.remove('show');
-        $('startGame').classList.remove('hidden');
       }, 3000);
     }
   </script>
