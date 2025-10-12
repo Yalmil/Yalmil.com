@@ -101,6 +101,26 @@
 
     const randomId = (len = 6) => Math.random().toString(36).substring(2, 2 + len).toUpperCase();
 
+    // Eliminar jugador cuando se cierra la pestaña
+    window.addEventListener('beforeunload', async () => {
+      if (local.roomId && local.playerKey) {
+        const playerRef = ref(db, `rooms/${local.roomId}/players/${local.playerKey}`);
+        await remove(playerRef);
+        const roomRef = ref(db, `rooms/${local.roomId}`);
+        const roomSnap = await get(roomRef);
+        if (roomSnap.exists()) {
+          const data = roomSnap.val();
+          const players = data.players || {};
+          const playerKeys = Object.keys(players);
+          if (data.organizerKey === local.playerKey && playerKeys.length > 0) {
+            const randomKey = playerKeys[Math.floor(Math.random() * playerKeys.length)];
+            await update(roomRef, { organizerKey: randomKey });
+          }
+          if (playerKeys.length === 0) await remove(roomRef);
+        }
+      }
+    });
+
     $('createBtn').onclick = async () => {
       const name = $('nameInput').value.trim();
       if (!name) return $('status').textContent = 'Escribe tu nombre';
@@ -247,31 +267,47 @@
         }
       } else if (game.state === 'guessing') {
         if (!game.word) return;
-        roleArea.innerHTML = `<h3>Adivina la palabra</h3>
-          <input id="guessInput" placeholder="Tu intento" />
-          <button id="guessBtn">Intentar</button>
-          <div id="feedback"></div>`;
-        const guesses = Object.values(game.guesses || {});
-        const attempts = guesses.filter(g => g.player === local.name).length;
-        let hintMsg = '';
-        if (attempts >= 25) hintMsg = 'Perdiste';
-        else if (attempts >= 20) hintMsg = 'Pista 3: ' + game.hints[2];
-        else if (attempts >= 15) hintMsg = 'Pista 2: ' + game.hints[1];
-        else if (attempts >= 10) hintMsg = 'Pista 1: ' + game.hints[0];
-        else if (attempts >= 5) hintMsg = 'Inicial: ' + game.word[0].toUpperCase();
-        if (hintMsg) $('feedback').innerHTML = `<p>${hintMsg}</p>`;
-
-        $('guessBtn').onclick = async () => {
-          const val = $('guessInput').value.trim().toLowerCase();
-          if (!val) return;
-          const correct = val === game.word.toLowerCase();
-          const newGuess = push(ref(db, `rooms/${local.roomId}/game/guesses`));
-          await set(newGuess, { player: local.name, guess: val });
-          if (correct) {
-            showWinner(local.name);
-            await update(ref(db, `rooms/${local.roomId}/game`), null);
+        
+        // Si el jugador es el que eligió la palabra, muestra el historial
+        if (local.playerKey === game.chooser) {
+          const guesses = Object.values(game.guesses || {});
+          let guessesHTML = '<strong>Intentos:</strong><br>';
+          if (guesses.length > 0) {
+            guesses.forEach(g => {
+              guessesHTML += `<div class="guess-item"><span class="player-name">${g.player}:</span> <strong>${g.guess}</strong></div>`;
+            });
+          } else {
+            guessesHTML += '<div class="guess-item">Sin intentos aún</div>';
           }
-        };
+          roleArea.innerHTML = `<h3>Historial de intentos</h3><div class="guesses-history">${guessesHTML}</div>`;
+        } else {
+          // Los demás jugadores ven la interfaz para adivinar
+          roleArea.innerHTML = `<h3>Adivina la palabra</h3>
+            <input id="guessInput" placeholder="Tu intento" />
+            <button id="guessBtn">Intentar</button>
+            <div id="feedback"></div>`;
+          const guesses = Object.values(game.guesses || {});
+          const attempts = guesses.filter(g => g.player === local.name).length;
+          let hintMsg = '';
+          if (attempts >= 25) hintMsg = 'Perdiste';
+          else if (attempts >= 20) hintMsg = 'Pista 3: ' + game.hints[2];
+          else if (attempts >= 15) hintMsg = 'Pista 2: ' + game.hints[1];
+          else if (attempts >= 10) hintMsg = 'Pista 1: ' + game.hints[0];
+          else if (attempts >= 5) hintMsg = 'Inicial: ' + game.word[0].toUpperCase();
+          if (hintMsg) $('feedback').innerHTML = `<p>${hintMsg}</p>`;
+
+          $('guessBtn').onclick = async () => {
+            const val = $('guessInput').value.trim().toLowerCase();
+            if (!val) return;
+            const correct = val === game.word.toLowerCase();
+            const newGuess = push(ref(db, `rooms/${local.roomId}/game/guesses`));
+            await set(newGuess, { player: local.name, guess: val });
+            if (correct) {
+              showWinner(local.name);
+              await update(ref(db, `rooms/${local.roomId}/game`), null);
+            }
+          };
+        }
       }
     });
 
@@ -295,6 +331,8 @@
       popup.classList.add('show');
       setTimeout(() => {
         popup.classList.remove('show');
+        $('gameArea').classList.add('hidden');
+        $('roleArea').innerHTML = '';
         $('startGame').classList.remove('hidden');
       }, 3000);
     }
