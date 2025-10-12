@@ -102,22 +102,17 @@
     const randomId = (len = 6) => Math.random().toString(36).substring(2, 2 + len).toUpperCase();
 
     // Eliminar jugador cuando se cierra la pestaña
-    window.addEventListener('beforeunload', async () => {
+    window.addEventListener('beforeunload', () => {
       if (local.roomId && local.playerKey) {
         const playerRef = ref(db, `rooms/${local.roomId}/players/${local.playerKey}`);
-        await remove(playerRef);
-        const roomRef = ref(db, `rooms/${local.roomId}`);
-        const roomSnap = await get(roomRef);
-        if (roomSnap.exists()) {
-          const data = roomSnap.val();
-          const players = data.players || {};
-          const playerKeys = Object.keys(players);
-          if (data.organizerKey === local.playerKey && playerKeys.length > 0) {
-            const randomKey = playerKeys[Math.floor(Math.random() * playerKeys.length)];
-            await update(roomRef, { organizerKey: randomKey });
-          }
-          if (playerKeys.length === 0) await remove(roomRef);
-        }
+        remove(playerRef);
+      }
+    });
+
+    window.addEventListener('unload', () => {
+      if (local.roomId && local.playerKey) {
+        const playerRef = ref(db, `rooms/${local.roomId}/players/${local.playerKey}`);
+        remove(playerRef);
       }
     });
 
