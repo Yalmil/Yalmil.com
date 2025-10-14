@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
+    <title>ChatYLMIA</title>
     <style>
         * {
             margin: 0;
@@ -167,7 +167,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🤖 Chatbot</div>
+        <div class="header">🤖 YLMIA</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -234,7 +234,12 @@
             for (let key in respuestasData) {
                 if (key.includes('[O similares]')) {
                     const variantes = key.split('[O similares]').map(v => normalizarTexto(v.trim()));
+                    // Verifica si alguna variante está contenida en la pregunta del usuario
                     if (variantes.some(v => v && preguntaNormalizada.includes(v))) {
+                        return respuestasData[key];
+                    }
+                    // También verifica si la pregunta del usuario contiene alguna variante
+                    if (variantes.some(v => v && v.includes(preguntaNormalizada))) {
                         return respuestasData[key];
                     }
                 }
