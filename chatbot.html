@@ -167,7 +167,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🤖 YLMIA</div>
+        <div class="header">🐈‍⬛ YLMIA</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -217,7 +217,7 @@
         }
 
         function normalizarTexto(texto) {
-            return texto.toLowerCase().trim();
+            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/g, '').trim();
         }
 
         function buscarRespuesta(pregunta) {
