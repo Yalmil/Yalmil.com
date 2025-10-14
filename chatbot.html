@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .chatbox {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .text {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message .text {
+            background: #e0e0e0;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            border-bottom-left-radius: 4px;
+        }
+
+        .error-message .text {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #ddd;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">🤖 Chatbot</div>
+        <div class="chatbox" id="chatbox"></div>
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Escribe tu pregunta..." 
+                autocomplete="off"
+            >
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        // Cargar el archivo respuestas.txt
+        let respuestasData = {};
+
+        async function cargarRespuestas() {
+            try {
+                const response = await fetch('respuestas.txt');
+                if (!response.ok) throw new Error('No se pudo cargar respuestas.txt');
+                
+                const text = await response.text();
+                respuestasData = parseRespuestas(text);
+            } catch (error) {
+                console.error('Error cargando respuestas:', error);
+                respuestasData = {};
+            }
+        }
+
+        function parseRespuestas(texto) {
+            const datos = {};
+            const bloques = texto.split('<FIN>');
+
+            bloques.forEach(bloque => {
+                const preguntaMatch = bloque.match(/\$Pregunta:\s*([\s\S]*?)(?=\$Respuesta:)/);
+                const respuestaMatch = bloque.match(/\$Respuesta:\s*([\s\S]*?)$/);
+
+                if (preguntaMatch && respuestaMatch) {
+                    const pregunta = preguntaMatch[1].trim();
+                    const respuesta = respuestaMatch[1].trim();
+
+                    datos[pregunta] = respuesta;
+                }
+            });
+
+            return datos;
+        }
+
+        function normalizarTexto(texto) {
+            return texto.toLowerCase().trim();
+        }
+
+        function buscarRespuesta(pregunta) {
+            const preguntaNormalizada = normalizarTexto(pregunta);
+
+            // Búsqueda exacta
+            for (let key in respuestasData) {
+                if (normalizarTexto(key) === preguntaNormalizada) {
+                    return respuestasData[key];
+                }
+            }
+
+            // Búsqueda con variantes [O similares]
+            for (let key in respuestasData) {
+                if (key.includes('[O similares]')) {
+                    const variantes = key.split('[O similares]').map(v => normalizarTexto(v.trim()));
+                    if (variantes.some(v => v && preguntaNormalizada.includes(v))) {
+                        return respuestasData[key];
+                    }
+                }
+            }
+
+            // Si no encuentra, retornar error
+            return null;
+        }
+
+        function agregarMensaje(texto, tipo) {
+            const chatbox = document.getElementById('chatbox');
+            const mensaje = document.createElement('div');
+            mensaje.className = `message ${tipo}-message`;
+
+            if (tipo === 'loading') {
+                mensaje.innerHTML = `
+                    <div class="text loading">
+                        <div class="spinner"></div>
+                        <span>Escribiendo...</span>
+                    </div>
+                `;
+            } else {
+                const textoDiv = document.createElement('div');
+                textoDiv.className = 'text';
+                textoDiv.textContent = texto;
+                mensaje.appendChild(textoDiv);
+            }
+
+            chatbox.appendChild(mensaje);
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            return mensaje;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const pregunta = input.value.trim();
+
+            if (!pregunta) return;
+
+            // Mostrar mensaje del usuario
+            agregarMensaje(pregunta, 'user');
+            input.value = '';
+
+            // Mostrar loading
+            const loadingMsg = agregarMensaje('', 'loading');
+
+            // Simular pequeño delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Remover loading
+            loadingMsg.remove();
+
+            // Buscar respuesta
+            const respuesta = buscarRespuesta(pregunta);
+
+            if (respuesta) {
+                agregarMensaje(respuesta, 'bot');
+            } else {
+                const errorMsg = 'Parece que hubo un error al contestar está pregunta. Obtén más información en https://yalmil.pages.dev/errors (Error-101 o 204)';
+                agregarMensaje(errorMsg, 'error');
+            }
+
+            input.focus();
+        }
+
+        // Permitir enviar con Enter
+        document.getElementById('userInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Cargar respuestas al iniciar
+        cargarRespuestas();
+    </script>
+</body>
+</html>
