@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatYLMIA</title>
+    <title>Chatbot</title>
     <style>
         * {
             margin: 0;
@@ -167,7 +167,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🐈‍⬛ YLMIA</div>
+        <div class="header">🤖 Chatbot</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -225,7 +225,8 @@
 
             // Búsqueda exacta
             for (let key in respuestasData) {
-                if (normalizarTexto(key) === preguntaNormalizada) {
+                const keyNormalizada = normalizarTexto(key);
+                if (keyNormalizada === preguntaNormalizada) {
                     return respuestasData[key];
                 }
             }
