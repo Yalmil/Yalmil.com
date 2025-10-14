@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta property="og:title" content="Registrarse en Yalmil.com" />
+  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+
+  <title>Yalmil.com</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      position: relative;
+      background-color: #4d1a00;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #ff8c00;
+      text-align: center;
+      box-shadow: 0 0 12px #ff8c0055;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+    }
+
+    header h3 {
+      margin: 0.5rem 0;
+      font-weight: 400;
+      color: #ffd8a6;
+    }
+
+    /* Foto de perfil */
+    #profilePic {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff8c00;
+      box-shadow: 0 0 10px #ff8c00aa;
+      cursor: pointer;
+      object-fit: cover;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #profilePic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #ffb84d;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    main h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: #ff8c00;
+      text-shadow: 0 0 6px #ff8c0088;
+    }
+
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .subpage {
+      background: rgba(60, 20, 0, 0.2);
+      backdrop-filter: blur(6px);
+      padding: 1.5rem;
+      border: 2px solid #ff8c00;
+      border-radius: 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: #ffd8a6;
+      font-weight: 500;
+      box-shadow: 0 0 10px #ff8c0055;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .subpage:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px #ff8c00;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #ffb366;
+      background-color: #330800;
+      border-top: 1px solid #662200;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Errores comunes</h1>
+    <h3 id="bienvenida">Aqui encontrarás los errores mas comunes (Tanto para la pagina como para YLMIA)</h3>
+  </header>
+
+  <main>
+    <div class="subpage-list">
+      <h2>Error 403</h2>
+      <h3>Este error significa que la página no existe</h3>
+    </div>
+
+    <div class="subpage-list">
+      <h2>Error 101 (o 204)</h2>
+      <h3>Este error significa que la solicitud se realizo correctamente pero hubo un eror al mostrar la información que se obtuvo</h3>
+  </main>
+
+  <footer>
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
+  </footer>
+</body>
+</html>
