@@ -217,8 +217,15 @@
         }
 
         function normalizarTexto(texto) {
-            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/g, '').trim();
-        }
+    return texto
+        .toLowerCase()
+        .trim()
+        // elimina cualquier aparición de "ylmia" aunque tenga signos o espacios
+        .replace(/\s*ylmia[!?.,]*\s*/gi, '')
+        // elimina signos innecesarios
+        .replace(/[¡¿]/g, '')
+        .trim();
+}
 
         function buscarRespuesta(pregunta) {
             const preguntaNormalizada = normalizarTexto(pregunta);
