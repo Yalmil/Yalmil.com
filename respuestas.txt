@@ -2069,3 +2069,58 @@ $Respuesta: Es un entorno virtual donde las personas interactúan mediante avata
 $Pregunta: Cómo puedo hacer una animación con CSS? [O similares]
 $Respuesta: Puedes usar la regla @keyframes para definir los pasos de la animación y aplicarla con la propiedad animation.
 <FIN>
+$Pregunta: Qué es Roblox? [O similares]
+$Respuesta: Roblox es una plataforma donde puedes crear y jugar juegos hechos por otros usuarios, YLMIA te puede explicar cómo hacerlo!
+<FIN>
+
+$Pregunta: Cómo puedo crear un juego en Roblox Studio? [O similares]
+$Respuesta: Debes descargar Roblox Studio, crear un nuevo proyecto y usar el editor para diseñar el mapa, los scripts y las reglas del juego!
+<FIN>
+
+$Pregunta: Qué significa HTML? [O similares]
+$Respuesta: HTML significa HyperText Markup Language, es el lenguaje base para crear páginas web.
+<FIN>
+
+$Pregunta: Cómo puedo aprender a programar rápido? [O similares]
+$Respuesta: Lo mejor es practicar todos los días con proyectos pequeños, YLMIA puede darte ejemplos y ejercicios!
+<FIN>
+
+$Pregunta: Qué es un bot de Discord? [O similares]
+$Respuesta: Un bot de Discord es un programa que ejecuta tareas automáticas dentro de un servidor, como moderar o responder mensajes.
+<FIN>
+
+$Pregunta: Cómo puedo ganar Robux en Roblox? [O similares]
+$Respuesta: Puedes ganar Robux creando juegos populares, vendiendo pases de juego o usando el programa Premium Payouts.
+<FIN>
+
+$Pregunta: Qué es JavaScript y para qué sirve? [O similares]
+$Respuesta: JavaScript es un lenguaje que da interactividad a las páginas web. Es el cerebro de la web junto con HTML y CSS.
+<FIN>
+
+$Pregunta: Cuál es el juego más popular de Roblox? [O similares]
+$Respuesta: Algunos de los más populares son Brookhaven, Blox Fruits y Adopt Me, aunque cambia según la época!
+<FIN>
+
+$Pregunta: Qué hace un archivo CSS? [O similares]
+$Respuesta: El CSS controla los estilos visuales de una página web: colores, fuentes, tamaños, animaciones y más.
+<FIN>
+
+$Pregunta: Cómo puedo conectar Firebase con JavaScript? [O similares]
+$Respuesta: Debes importar el SDK de Firebase, configurar tu proyecto y usar sus métodos para guardar o leer datos.
+<FIN>
+
+$Pregunta: Qué es un servidor en Minecraft? [O similares]
+$Respuesta: Es un mundo multijugador donde varios jugadores pueden conectarse para jugar, construir o competir!
+<FIN>
+
+$Pregunta: Cuál es la diferencia entre una IA y un bot? [O similares]
+$Respuesta: Una IA puede aprender y adaptarse, mientras que un bot solo sigue instrucciones predefinidas.
+<FIN>
+
+$Pregunta: Qué es el metaverso? [O similares]
+$Respuesta: Es un entorno virtual donde las personas interactúan mediante avatares, similar a juegos como Roblox o VRChat.
+<FIN>
+
+$Pregunta: Cómo puedo hacer una animación con CSS? [O similares]
+$Respuesta: Puedes usar la regla @keyframes para definir los pasos de la animación y aplicarla con la propiedad animation.
+<FIN>
