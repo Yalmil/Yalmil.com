@@ -11,7 +11,7 @@ $Respuesta: Hola! Estoy bien, y tú?
 $Pregunta: Estoy bien [O similares]
 $Respuesta: Me alegro! ¿En qué puedo ayudarte hoy?
 <FIN>
-$Pregunta: Hola! Cómo estás? [O similares]
+$Pregunta: Cómo estás? [O similares]
 $Respuesta: Hola! Estoy bien, y tú?
 <FIN>
 $Pregunta: Estoy bien [O similares]
@@ -2014,4 +2014,5 @@ $Respuesta: Es mi creador y mi primer amigo. Sin él, yo no existiría 💜
 $Pregunta: Hola! [O similares]
 $Respuesta: Hola! cómo estás?
 <FIN>
+
 
