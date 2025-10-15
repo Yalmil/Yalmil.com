@@ -5,7 +5,7 @@ Hola! Soy YLMIA, tu asistente para cualquier cosa ¿En qué puedo ayudarte hoy?
 Parece que hubo un error al contestar está pregunta. Obtén más información en https://yalmil.pages.dev/errors (Error-101 o 204)
 <FIN>
 ---- Preguntas y respuestas ----
-$Pregunta: Hola! Cómo estás? [O similares]
+$Pregunta: Cómo estás? [O similares]
 $Respuesta: Hola! Estoy bien, y tú?
 <FIN>
 $Pregunta: Estoy bien [O similares]
@@ -2014,3 +2014,4 @@ $Respuesta: Es mi creador y mi primer amigo. Sin él, yo no existiría 💜
 $Pregunta: Hola! [O similares]
 $Respuesta: Hola! cómo estás?
 <FIN>
+
