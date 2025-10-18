@@ -15,6 +15,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -22,6 +23,8 @@
       background: linear-gradient(to bottom, #5c94fc 0%, #5c94fc 70%, #8b4513 70%, #8b4513 100%);
       overflow: hidden;
       height: 100vh;
+      touch-action: none;
+      user-select: none;
     }
 
     #game-container {
@@ -38,6 +41,7 @@
       background: #5c94fc;
       border: 4px solid #000;
       image-rendering: pixelated;
+      touch-action: none;
     }
 
     #ui {
@@ -52,16 +56,66 @@
 
     #editor-panel {
       position: absolute;
-      right: 10px;
-      top: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 15px;
-      border-radius: 8px;
+      right: 0;
+      top: 0;
+      background: rgba(0, 0, 0, 0.95);
+      padding: 10px;
       color: white;
-      font-size: 10px;
-      max-height: 90vh;
+      font-size: 8px;
+      max-height: 100vh;
       overflow-y: auto;
       z-index: 10;
+      width: 180px;
+      transition: transform 0.3s;
+    }
+
+    @media (max-width: 768px) {
+      #editor-panel {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+        top: auto;
+        bottom: 0;
+        transform: translateY(calc(100% - 50px));
+      }
+
+      #editor-panel.open {
+        transform: translateY(0);
+      }
+
+      #ui {
+        font-size: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+
+      #mode-indicator {
+        right: 10px;
+        font-size: 10px;
+        padding: 5px 10px;
+      }
+    }
+
+    #panel-toggle {
+      display: none;
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      border: 2px solid white;
+      padding: 5px 20px;
+      font-size: 10px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      #panel-toggle {
+        display: block;
+      }
     }
 
     .block-selector, .enemy-selector {
@@ -118,9 +172,63 @@
     }
 
     .help-text {
-      font-size: 8px;
+      font-size: 7px;
       color: #ccc;
       margin: 5px 0;
+    }
+
+    #mobile-controls {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      display: none;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 9;
+    }
+
+    @media (max-width: 768px) {
+      #mobile-controls {
+        display: flex;
+      }
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 3px solid white;
+      border-radius: 50%;
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .control-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 5px;
+    }
+
+    .dpad .control-btn {
+      border-radius: 10px;
+    }
+
+    .jump-btn {
+      width: 80px;
+      height: 80px;
+      font-size: 16px;
     }
 
     #victory-screen {
@@ -155,6 +263,7 @@
     <div id="mode-indicator">MODO: <span id="current-mode">EDITOR</span></div>
 
     <div id="editor-panel">
+      <button id="panel-toggle">▲ EDITOR ▲</button>
       <h3>EDITOR</h3>
       <button id="toggle-mode">JUGAR NIVEL</button>
       <button id="reset-level">LIMPIAR NIVEL</button>
@@ -182,11 +291,26 @@
       <button id="delete-mode">MODO BORRAR</button>
       
       <div class="help-text" style="margin-top: 15px;">
-        Click para colocar<br>
+        Click/Tap para colocar<br>
         Arrastra para múltiples<br>
-        Espacio: Pausa<br>
-        Flechas: Movimiento<br>
-        Shift: Saltar
+        Espacio/Pausa: Pausar
+      </div>
+    </div>
+
+    <div id="mobile-controls">
+      <div class="dpad">
+        <div></div>
+        <div class="control-btn" data-key="ArrowUp">▲</div>
+        <div></div>
+        <div class="control-btn" data-key="ArrowLeft">◄</div>
+        <div></div>
+        <div class="control-btn" data-key="ArrowRight">►</div>
+        <div></div>
+        <div class="control-btn" data-key="ArrowDown">▼</div>
+        <div></div>
+      </div>
+      <div>
+        <div class="control-btn jump-btn" data-key="Shift">SALTAR</div>
       </div>
     </div>
 
@@ -205,8 +329,20 @@
     const GRID_WIDTH = 25;
     const GRID_HEIGHT = 18;
     
-    canvas.width = GRID_WIDTH * GRID_SIZE;
-    canvas.height = GRID_HEIGHT * GRID_SIZE;
+    // Ajustar canvas para móviles
+    function resizeCanvas() {
+      const maxWidth = window.innerWidth - 20;
+      const maxHeight = window.innerHeight - 200;
+      const scale = Math.min(maxWidth / (GRID_WIDTH * GRID_SIZE), maxHeight / (GRID_HEIGHT * GRID_SIZE), 1);
+      
+      canvas.width = GRID_WIDTH * GRID_SIZE;
+      canvas.height = GRID_HEIGHT * GRID_SIZE;
+      canvas.style.width = (GRID_WIDTH * GRID_SIZE * scale) + 'px';
+      canvas.style.height = (GRID_HEIGHT * GRID_SIZE * scale) + 'px';
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     let mode = 'editor';
     let selectedBlock = 1;
@@ -306,6 +442,27 @@
       document.getElementById('toggle-mode').textContent = 'JUGAR NIVEL';
     });
 
+    // Panel toggle para móvil
+    document.getElementById('panel-toggle').addEventListener('click', () => {
+      const panel = document.getElementById('editor-panel');
+      panel.classList.toggle('open');
+    });
+
+    // Controles táctiles
+    document.querySelectorAll('.control-btn').forEach(btn => {
+      const key = btn.dataset.key;
+      if (key) {
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          keys[key] = true;
+        });
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          keys[key] = false;
+        });
+      }
+    });
+
     canvas.addEventListener('mousedown', (e) => {
       isMouseDown = true;
       handleCanvasClick(e);
@@ -321,12 +478,35 @@
       }
     });
 
+    // Touch events para móviles
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isMouseDown = true;
+      const touch = e.touches[0];
+      handleCanvasClick(touch);
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      isMouseDown = false;
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (isMouseDown && mode === 'editor') {
+        const touch = e.touches[0];
+        handleCanvasClick(touch);
+      }
+    });
+
     function handleCanvasClick(e) {
       if (mode !== 'editor') return;
 
       const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / GRID_SIZE);
-      const y = Math.floor((e.clientY - rect.top) / GRID_SIZE);
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.floor(((e.clientX - rect.left) * scaleX) / GRID_SIZE);
+      const y = Math.floor(((e.clientY - rect.top) * scaleY) / GRID_SIZE);
 
       if (deleteMode) {
         level.blocks = level.blocks.filter(b => !(b.x === x && b.y === y));
