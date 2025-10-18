@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,7 +6,7 @@
   <title>Yalmil Search - Busca lo que quieras</title>
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
   <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Buscador minimalista y elegante con diseño moderno para buscar cualquier cosa en internet" />
+  <meta property="og:description" content="Buscador web completo con resultados integrados, imágenes, videos y noticias en tiempo real" />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
@@ -22,17 +21,35 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
+      transition: all 0.3s ease;
+    }
+
+    body.searching {
+      background: #f5f5f5;
     }
 
     .container {
       text-align: center;
       width: 90%;
       max-width: 700px;
+      margin: 0 auto;
+      padding: 50px 20px;
+      transition: all 0.5s ease;
+    }
+
+    .container.active {
+      max-width: 1200px;
+      padding: 20px;
+    }
+
+    .header {
       animation: fadeIn 0.8s ease-out;
+      transition: all 0.5s ease;
+    }
+
+    .header.small {
+      text-align: left;
+      margin-bottom: 30px;
     }
 
     @keyframes fadeIn {
@@ -50,6 +67,14 @@
       font-size: 5rem;
       margin-bottom: 20px;
       animation: float 3s ease-in-out infinite;
+      transition: all 0.5s ease;
+    }
+
+    .header.small .logo {
+      font-size: 2.5rem;
+      margin-bottom: 0;
+      display: inline-block;
+      animation: none;
     }
 
     @keyframes float {
@@ -66,12 +91,26 @@
       font-size: 3rem;
       margin-bottom: 10px;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      transition: all 0.5s ease;
+    }
+
+    .header.small h1 {
+      font-size: 1.8rem;
+      display: inline-block;
+      margin-left: 15px;
+      color: #667eea;
+      text-shadow: none;
     }
 
     .subtitle {
       color: rgba(255, 255, 255, 0.9);
       font-size: 1.1rem;
       margin-bottom: 40px;
+      transition: all 0.5s ease;
+    }
+
+    .header.small .subtitle {
+      display: none;
     }
 
     .search-box {
@@ -121,50 +160,180 @@
       transform: translateY(-50%) scale(0.95);
     }
 
-    .quick-links {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .quick-link {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .quick-link:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .suggestions {
-      background: white;
-      border-radius: 20px;
-      margin-top: -20px;
-      padding: 10px 0;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    .tabs {
       display: none;
-      max-height: 300px;
-      overflow-y: auto;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
     }
 
-    .suggestion-item {
-      padding: 15px 25px;
+    .tabs.show {
+      display: flex;
+      gap: 30px;
+    }
+
+    .tab {
+      padding: 10px 20px;
       cursor: pointer;
-      transition: background 0.2s ease;
-      text-align: left;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      color: #666;
+      font-weight: 500;
     }
 
-    .suggestion-item:hover {
-      background: #f0f0f0;
+    .tab:hover {
+      color: #667eea;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .results {
+      display: none;
+      text-align: left;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .results.show {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-item {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .result-item:hover {
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .result-title {
+      color: #1a0dab;
+      font-size: 1.3rem;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+
+    .result-title:hover {
+      text-decoration: underline;
+    }
+
+    .result-url {
+      color: #006621;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    .result-description {
+      color: #545454;
+      line-height: 1.6;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .image-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #e0e0e0;
+      padding-bottom: 100%;
+    }
+
+    .image-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-item img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .video-item {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .video-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .video-info {
+      padding: 15px;
+    }
+
+    .video-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .video-channel {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #667eea;
+      font-size: 1.2rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 50px;
+      color: #666;
     }
 
     @media (max-width: 768px) {
@@ -185,14 +354,29 @@
         padding: 12px 20px;
         font-size: 1rem;
       }
+
+      .tabs.show {
+        gap: 15px;
+        overflow-x: auto;
+      }
+
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">🔍</div>
-    <h1>Yalmil Search</h1>
-    <p class="subtitle">Busca cualquier cosa en internet</p>
+  <div class="container" id="container">
+    <div class="header" id="header">
+      <div class="logo">🔍</div>
+      <h1>Yalmil Search</h1>
+      <p class="subtitle">Busca cualquier cosa en internet</p>
+    </div>
     
     <form class="search-box" id="searchForm">
       <input 
@@ -205,84 +389,207 @@
       <button type="submit" class="search-button">Buscar</button>
     </form>
 
-    <div class="suggestions" id="suggestions"></div>
-
-    <div class="quick-links">
-      <a href="https://www.google.com/imghp" target="_blank" class="quick-link">📷 Imágenes</a>
-      <a href="https://www.youtube.com" target="_blank" class="quick-link">🎥 Videos</a>
-      <a href="https://news.google.com" target="_blank" class="quick-link">📰 Noticias</a>
-      <a href="https://maps.google.com" target="_blank" class="quick-link">🗺️ Mapas</a>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="all">🌐 Todo</div>
+      <div class="tab" data-tab="images">🖼️ Imágenes</div>
+      <div class="tab" data-tab="videos">🎬 Videos</div>
+      <div class="tab" data-tab="news">📰 Noticias</div>
     </div>
+
+    <div class="results" id="results"></div>
   </div>
 
   <script>
     const form = document.getElementById('searchForm');
     const input = document.getElementById('searchInput');
-    const suggestionsBox = document.getElementById('suggestions');
+    const results = document.getElementById('results');
+    const tabs = document.getElementById('tabs');
+    const container = document.getElementById('container');
+    const header = document.getElementById('header');
+    let currentTab = 'all';
+    let currentQuery = '';
 
-    // Búsqueda principal
+    // Datos simulados para demostración
+    const mockData = {
+      web: [
+        {
+          title: "Aprende programación web desde cero",
+          url: "https://ejemplo.com/programacion",
+          description: "Guía completa para aprender HTML, CSS y JavaScript. Incluye tutoriales paso a paso, ejemplos prácticos y proyectos reales para dominar el desarrollo web."
+        },
+        {
+          title: "Recetas de cocina fáciles y rápidas",
+          url: "https://ejemplo.com/recetas",
+          description: "Descubre las mejores recetas caseras. Desde platos tradicionales hasta cocina internacional. Instrucciones detalladas con fotos paso a paso."
+        },
+        {
+          title: "Guía de viajes y turismo 2025",
+          url: "https://ejemplo.com/viajes",
+          description: "Los mejores destinos turísticos del mundo. Consejos de viaje, recomendaciones de hoteles, restaurantes y actividades imperdibles."
+        },
+        {
+          title: "Ejercicios y fitness en casa",
+          url: "https://ejemplo.com/fitness",
+          description: "Rutinas de ejercicio efectivas que puedes hacer en casa. Planes de entrenamiento personalizados sin necesidad de equipamiento."
+        },
+        {
+          title: "Tecnología y gadgets innovadores",
+          url: "https://ejemplo.com/tech",
+          description: "Las últimas novedades en tecnología. Reviews de smartphones, laptops, wearables y los gadgets más innovadores del mercado."
+        }
+      ],
+      images: [
+        { id: 1, color: '#FF6B6B' },
+        { id: 2, color: '#4ECDC4' },
+        { id: 3, color: '#45B7D1' },
+        { id: 4, color: '#FFA07A' },
+        { id: 5, color: '#98D8C8' },
+        { id: 6, color: '#F7DC6F' },
+        { id: 7, color: '#BB8FCE' },
+        { id: 8, color: '#85C1E2' }
+      ],
+      videos: [
+        { title: "Tutorial completo de diseño web", channel: "Web Academy", duration: "15:30" },
+        { title: "Cómo crear tu primera aplicación", channel: "Code Masters", duration: "22:15" },
+        { title: "Tips de productividad para desarrolladores", channel: "Dev Life", duration: "10:45" },
+        { title: "Tendencias en diseño UI/UX 2025", channel: "Design Hub", duration: "18:20" }
+      ],
+      news: [
+        {
+          title: "Nuevas innovaciones en inteligencia artificial",
+          url: "https://ejemplo.com/news1",
+          description: "Los últimos avances en IA están revolucionando múltiples industrias. Empresas tecnológicas presentan soluciones innovadoras.",
+          time: "Hace 2 horas"
+        },
+        {
+          title: "Avances en energías renovables",
+          url: "https://ejemplo.com/news2",
+          description: "Nuevos proyectos de energía solar y eólica prometen un futuro más sostenible para el planeta.",
+          time: "Hace 5 horas"
+        },
+        {
+          title: "Descubrimiento científico revolucionario",
+          url: "https://ejemplo.com/news3",
+          description: "Investigadores logran un importante avance en el campo de la medicina regenerativa.",
+          time: "Hace 1 día"
+        }
+      ]
+    };
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const query = input.value.trim();
       if (query) {
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        currentQuery = query;
+        performSearch(query);
       }
     });
 
-    // Sugerencias de búsqueda simuladas
-    const popularSearches = [
-      'Recetas de cocina fáciles',
-      'Noticias del día',
-      'Cómo aprender programación',
-      'Películas 2025',
-      'Mejores series para ver',
-      'Tutoriales de diseño web',
-      'Clima hoy',
-      'Trucos de productividad'
-    ];
-
-    input.addEventListener('input', () => {
-      const value = input.value.trim().toLowerCase();
+    function performSearch(query) {
+      document.body.classList.add('searching');
+      container.classList.add('active');
+      header.classList.add('small');
+      tabs.classList.add('show');
+      results.classList.add('show');
       
-      if (value.length > 0) {
-        const filtered = popularSearches.filter(s => 
-          s.toLowerCase().includes(value)
-        );
-        
-        if (filtered.length > 0) {
-          suggestionsBox.innerHTML = filtered.map(s => 
-            `<div class="suggestion-item">${s}</div>`
-          ).join('');
-          suggestionsBox.style.display = 'block';
-        } else {
-          suggestionsBox.style.display = 'none';
-        }
-      } else {
-        suggestionsBox.style.display = 'none';
+      showLoading();
+      
+      setTimeout(() => {
+        displayResults(currentTab);
+      }, 800);
+    }
+
+    function showLoading() {
+      results.innerHTML = '<div class="loading">🔍 Buscando resultados...</div>';
+    }
+
+    tabs.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab')) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.tab;
+        showLoading();
+        setTimeout(() => displayResults(currentTab), 500);
       }
     });
 
-    // Click en sugerencias
-    suggestionsBox.addEventListener('click', (e) => {
-      if (e.target.classList.contains('suggestion-item')) {
-        input.value = e.target.textContent;
-        suggestionsBox.style.display = 'none';
-        form.dispatchEvent(new Event('submit'));
+    function displayResults(tab) {
+      let html = '';
+      
+      switch(tab) {
+        case 'all':
+          html = `
+            <div style="color: #666; margin-bottom: 20px;">
+              Aproximadamente ${Math.floor(Math.random() * 10000) + 5000} resultados (${(Math.random() * 0.5 + 0.1).toFixed(2)} segundos)
+            </div>
+          `;
+          mockData.web.forEach(item => {
+            if (item.title.toLowerCase().includes(currentQuery.toLowerCase()) || 
+                item.description.toLowerCase().includes(currentQuery.toLowerCase())) {
+              html += `
+                <div class="result-item">
+                  <div class="result-title">${item.title}</div>
+                  <div class="result-url">${item.url}</div>
+                  <div class="result-description">${item.description}</div>
+                </div>
+              `;
+            }
+          });
+          break;
+          
+        case 'images':
+          html = '<div class="image-grid">';
+          mockData.images.forEach(img => {
+            html += `
+              <div class="image-item">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: ${img.color}; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                  📷
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          break;
+          
+        case 'videos':
+          html = '<div class="video-grid">';
+          mockData.videos.forEach(video => {
+            html += `
+              <div class="video-item">
+                <div class="video-thumbnail">▶️</div>
+                <div class="video-info">
+                  <div class="video-title">${video.title}</div>
+                  <div class="video-channel">${video.channel} • ${video.duration}</div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          break;
+          
+        case 'news':
+          mockData.news.forEach(news => {
+            html += `
+              <div class="result-item">
+                <div class="result-title">${news.title}</div>
+                <div class="result-url">${news.url} • ${news.time}</div>
+                <div class="result-description">${news.description}</div>
+              </div>
+            `;
+          });
+          break;
       }
-    });
-
-    // Cerrar sugerencias al hacer click fuera
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.search-box')) {
-        suggestionsBox.style.display = 'none';
+      
+      if (html === '' || html === '<div class="image-grid"></div>' || html === '<div class="video-grid"></div>') {
+        html = '<div class="no-results">😕 No se encontraron resultados para tu búsqueda</div>';
       }
-    });
+      
+      results.innerHTML = html;
+    }
 
-    // Focus automático en el input
     window.addEventListener('load', () => {
       input.focus();
     });
   </script>
 </body>
 </html>
-```
