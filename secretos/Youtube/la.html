@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +7,7 @@
   <title>Yalmil Search - Buscador Web</title>
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
   <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Buscador web funcional con resultados reales, imágenes, videos y noticias usando API de búsqueda" />
+  <meta property="og:description" content="Buscador web funcional con resultados reales, navegador integrado para ver sitios web directamente" />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
@@ -187,6 +188,134 @@
     .tab.active {
       color: #667eea;
       border-bottom-color: #667eea;
+    }
+
+    .browser-container {
+      display: none;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .browser-container.show {
+      display: block;
+    }
+
+    .browser-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .browser-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .browser-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .browser-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .browser-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .browser-url-bar {
+      flex: 1;
+      background: white;
+      padding: 10px 15px;
+      border-radius: 25px;
+      color: #333;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .url-icon {
+      color: #667eea;
+    }
+
+    .url-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .close-browser {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .close-browser:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .browser-iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      background: white;
+    }
+
+    .iframe-error {
+      padding: 50px;
+      text-align: center;
+      color: #666;
+    }
+
+    .iframe-error h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .iframe-error p {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .open-external {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .open-external:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .results {
@@ -397,6 +526,20 @@
       .video-grid {
         grid-template-columns: 1fr;
       }
+
+      .browser-controls {
+        gap: 5px;
+      }
+
+      .browser-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+      }
+
+      .browser-iframe {
+        height: 70vh;
+      }
     }
   </style>
 </head>
@@ -405,7 +548,7 @@
     <div class="header" id="header">
       <div class="logo">🔍</div>
       <h1>Yalmil Search</h1>
-      <p class="subtitle">Busca cualquier cosa en internet</p>
+      <p class="subtitle">Busca cualquier cosa o navega directamente con https://</p>
     </div>
     
     <form class="search-box" id="searchForm">
@@ -413,10 +556,10 @@
         type="text" 
         class="search-input" 
         id="searchInput" 
-        placeholder="¿Qué deseas buscar hoy?"
+        placeholder="Busca algo o escribe https://ejemplo.com"
         autocomplete="off"
       >
-      <button type="submit" class="search-button">Buscar</button>
+      <button type="submit" class="search-button">Ir</button>
     </form>
 
     <div class="tabs" id="tabs">
@@ -424,6 +567,22 @@
       <div class="tab" data-tab="images">🖼️ Imágenes</div>
       <div class="tab" data-tab="videos">🎬 Videos</div>
       <div class="tab" data-tab="news">📰 Noticias</div>
+    </div>
+
+    <div class="browser-container" id="browserContainer">
+      <div class="browser-header">
+        <div class="browser-controls">
+          <button class="browser-btn" id="backBtn" title="Atrás">←</button>
+          <button class="browser-btn" id="forwardBtn" title="Adelante">→</button>
+          <button class="browser-btn" id="reloadBtn" title="Recargar">↻</button>
+        </div>
+        <div class="browser-url-bar">
+          <span class="url-icon">🔒</span>
+          <span class="url-text" id="currentUrl"></span>
+        </div>
+        <button class="close-browser" id="closeBrowser">✕ Cerrar</button>
+      </div>
+      <iframe id="browserIframe" class="browser-iframe"></iframe>
     </div>
 
     <div class="results" id="results"></div>
@@ -436,19 +595,146 @@
     const tabs = document.getElementById('tabs');
     const container = document.getElementById('container');
     const header = document.getElementById('header');
+    const browserContainer = document.getElementById('browserContainer');
+    const browserIframe = document.getElementById('browserIframe');
+    const currentUrlDisplay = document.getElementById('currentUrl');
+    const backBtn = document.getElementById('backBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const closeBrowser = document.getElementById('closeBrowser');
+    
     let currentTab = 'web';
     let currentQuery = '';
+    let currentUrl = '';
+    let historyStack = [];
+    let historyIndex = -1;
 
-    // API de DuckDuckGo (sin necesidad de API key)
-    const SEARCH_API = 'https://api.duckduckgo.com/?q=';
+    // Detectar si es una URL
+    function isUrl(text) {
+      return text.match(/^https?:\/\/.+/i) || text.match(/^www\..+/i);
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = input.value.trim();
       if (query) {
-        currentQuery = query;
-        await performSearch(query);
+        if (isUrl(query)) {
+          let url = query;
+          if (!url.match(/^https?:\/\//i)) {
+            url = 'https://' + url;
+          }
+          loadWebsite(url);
+        } else {
+          currentQuery = query;
+          await performSearch(query);
+        }
       }
+    });
+
+    function loadWebsite(url) {
+      document.body.classList.add('searching');
+      container.classList.add('active');
+      header.classList.add('small');
+      tabs.classList.remove('show');
+      results.classList.remove('show');
+      browserContainer.classList.add('show');
+      
+      currentUrl = url;
+      currentUrlDisplay.textContent = url;
+      
+      // Agregar al historial
+      if (historyIndex < historyStack.length - 1) {
+        historyStack = historyStack.slice(0, historyIndex + 1);
+      }
+      historyStack.push(url);
+      historyIndex++;
+      updateBrowserButtons();
+      
+      // Intentar cargar en iframe
+      browserIframe.src = url;
+      
+      // Manejar errores de carga
+      browserIframe.onerror = function() {
+        showIframeError(url);
+      };
+      
+      // Timeout para detectar si no carga
+      setTimeout(() => {
+        try {
+          // Si no podemos acceder al contenido del iframe, probablemente está bloqueado
+          const iframeDoc = browserIframe.contentDocument || browserIframe.contentWindow.document;
+          if (!iframeDoc.body || iframeDoc.body.children.length === 0) {
+            showIframeError(url);
+          }
+        } catch (e) {
+          // Error de CORS - el sitio no permite ser embebido
+          showIframeError(url);
+        }
+      }, 3000);
+    }
+
+    function showIframeError(url) {
+      browserIframe.style.display = 'none';
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'iframe-error';
+      errorDiv.innerHTML = `
+        <h2>🔒 Este sitio no puede mostrarse aquí</h2>
+        <p>Por razones de seguridad, algunos sitios web no permiten ser mostrados dentro de otros sitios.</p>
+        <p>Pero no te preocupes, puedes abrirlo en una nueva pestaña:</p>
+        <button class="open-external" onclick="window.open('${url}', '_blank')">
+          🔗 Abrir ${url} en nueva pestaña
+        </button>
+      `;
+      
+      // Reemplazar iframe con mensaje de error
+      if (!document.querySelector('.iframe-error')) {
+        browserIframe.parentNode.appendChild(errorDiv);
+      }
+    }
+
+    function updateBrowserButtons() {
+      backBtn.disabled = historyIndex <= 0;
+      forwardBtn.disabled = historyIndex >= historyStack.length - 1;
+    }
+
+    backBtn.addEventListener('click', () => {
+      if (historyIndex > 0) {
+        historyIndex--;
+        const url = historyStack[historyIndex];
+        currentUrl = url;
+        currentUrlDisplay.textContent = url;
+        browserIframe.src = url;
+        updateBrowserButtons();
+      }
+    });
+
+    forwardBtn.addEventListener('click', () => {
+      if (historyIndex < historyStack.length - 1) {
+        historyIndex++;
+        const url = historyStack[historyIndex];
+        currentUrl = url;
+        currentUrlDisplay.textContent = url;
+        browserIframe.src = url;
+        updateBrowserButtons();
+      }
+    });
+
+    reloadBtn.addEventListener('click', () => {
+      browserIframe.src = currentUrl;
+    });
+
+    closeBrowser.addEventListener('click', () => {
+      browserContainer.classList.remove('show');
+      browserIframe.src = '';
+      const errorDiv = document.querySelector('.iframe-error');
+      if (errorDiv) {
+        errorDiv.remove();
+      }
+      browserIframe.style.display = 'block';
+      
+      // Volver a la vista de búsqueda
+      tabs.classList.add('show');
+      results.classList.add('show');
     });
 
     async function performSearch(query) {
@@ -457,6 +743,7 @@
       header.classList.add('small');
       tabs.classList.add('show');
       results.classList.add('show');
+      browserContainer.classList.remove('show');
       
       showLoading();
       
@@ -511,7 +798,6 @@
     }
 
     async function searchWeb(query) {
-      // Usar Wikipedia API para resultados reales
       const url = `https://es.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=10&format=json&origin=*`;
       
       try {
@@ -545,12 +831,8 @@
     }
 
     async function searchImages(query) {
-      // Usar Unsplash API (acceso público, no requiere key para búsqueda básica)
-      const url = `https://source.unsplash.com/featured/?${encodeURIComponent(query)}`;
-      
       let html = '<div class="image-grid">';
       
-      // Generar imágenes de Unsplash con diferentes términos relacionados
       const terms = [query, `${query} nature`, `${query} art`, `${query} design`, 
                      `${query} photo`, `${query} creative`, `${query} beautiful`, `${query} amazing`];
       
@@ -569,7 +851,6 @@
     }
 
     async function searchVideos(query) {
-      // Simular resultados de videos con datos relacionados
       const videos = [
         { title: `Tutorial de ${query}`, channel: 'TechChannel', duration: '15:30' },
         { title: `Aprende ${query} desde cero`, channel: 'EduTube', duration: '22:15' },
@@ -601,7 +882,6 @@
     }
 
     async function searchNews(query) {
-      // Usar NewsAPI (para demo usamos Wikipedia noticias recientes)
       const url = `https://es.wikinews.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=10&format=json&origin=*`;
       
       try {
@@ -636,12 +916,10 @@
       }
     }
 
-    // Focus automático
     window.addEventListener('load', () => {
       input.focus();
     });
 
-    // Buscar con Enter
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         form.dispatchEvent(new Event('submit'));
@@ -649,4 +927,4 @@
     });
   </script>
 </body>
-</html
+</html>
