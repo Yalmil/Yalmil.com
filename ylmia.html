@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatYLMIA</title>
+    <title>Chatbot</title>
     <style>
         * {
             margin: 0;
@@ -167,7 +167,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🐈‍⬛ YLMIA</div>
+        <div class="header">🤖 Chatbot</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -217,17 +217,53 @@
         }
 
         function normalizarTexto(texto) {
-    return texto
-        .toLowerCase()
-        .trim()
-        // elimina cualquier aparición de "ylmia" aunque tenga signos o espacios
-        .replace(/\s*ylmia[!?.,]*\s*/gi, '')
-        // elimina signos innecesarios
-        .replace(/[¡¿]/g, '')
-        .trim();
-}
+            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/g, '').trim();
+        }
+
+        function calcularOperacion(pregunta) {
+            // Reemplazar símbolos alternativos
+            let operacion = pregunta.replace(/×/g, '*').replace(/÷/g, '/');
+            
+            // Detectar si hay una operación matemática
+            const operacionMatch = operacion.match(/(-?\d+\.?\d*)\s*([\+\-\*\/])\s*(-?\d+\.?\d*)/);
+            
+            if (operacionMatch) {
+                const num1 = parseFloat(operacionMatch[1]);
+                const operador = operacionMatch[2];
+                const num2 = parseFloat(operacionMatch[3]);
+                
+                let resultado;
+                switch(operador) {
+                    case '+':
+                        resultado = num1 + num2;
+                        break;
+                    case '-':
+                        resultado = num1 - num2;
+                        break;
+                    case '*':
+                        resultado = num1 * num2;
+                        break;
+                    case '/':
+                        if (num2 === 0) {
+                            return 'No se puede dividir entre cero';
+                        }
+                        resultado = num1 / num2;
+                        break;
+                }
+                
+                return `El resultado es: ${resultado}`;
+            }
+            
+            return null;
+        }
 
         function buscarRespuesta(pregunta) {
+            // Primero verificar si es una operación matemática
+            const resultadoCalculo = calcularOperacion(pregunta);
+            if (resultadoCalculo) {
+                return resultadoCalculo;
+            }
+
             const preguntaNormalizada = normalizarTexto(pregunta);
 
             // Búsqueda exacta
