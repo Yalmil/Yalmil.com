@@ -1,0 +1,288 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yalmil Search - Busca lo que quieras</title>
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Buscador minimalista y elegante con diseño moderno para buscar cualquier cosa en internet" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 700px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    h1 {
+      color: white;
+      font-size: 3rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 20px 60px 20px 25px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      outline: none;
+      background: white;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .search-button {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 15px 25px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .search-button:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-button:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .quick-links {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .quick-link {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .quick-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .suggestions {
+      background: white;
+      border-radius: 20px;
+      margin-top: -20px;
+      padding: 10px 0;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      display: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .suggestion-item {
+      padding: 15px 25px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-align: left;
+    }
+
+    .suggestion-item:hover {
+      background: #f0f0f0;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .logo {
+        font-size: 3rem;
+      }
+
+      .search-input {
+        font-size: 1rem;
+        padding: 15px 50px 15px 20px;
+      }
+
+      .search-button {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🔍</div>
+    <h1>Yalmil Search</h1>
+    <p class="subtitle">Busca cualquier cosa en internet</p>
+    
+    <form class="search-box" id="searchForm">
+      <input 
+        type="text" 
+        class="search-input" 
+        id="searchInput" 
+        placeholder="¿Qué deseas buscar hoy?"
+        autocomplete="off"
+      >
+      <button type="submit" class="search-button">Buscar</button>
+    </form>
+
+    <div class="suggestions" id="suggestions"></div>
+
+    <div class="quick-links">
+      <a href="https://www.google.com/imghp" target="_blank" class="quick-link">📷 Imágenes</a>
+      <a href="https://www.youtube.com" target="_blank" class="quick-link">🎥 Videos</a>
+      <a href="https://news.google.com" target="_blank" class="quick-link">📰 Noticias</a>
+      <a href="https://maps.google.com" target="_blank" class="quick-link">🗺️ Mapas</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    // Búsqueda principal
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const query = input.value.trim();
+      if (query) {
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+      }
+    });
+
+    // Sugerencias de búsqueda simuladas
+    const popularSearches = [
+      'Recetas de cocina fáciles',
+      'Noticias del día',
+      'Cómo aprender programación',
+      'Películas 2025',
+      'Mejores series para ver',
+      'Tutoriales de diseño web',
+      'Clima hoy',
+      'Trucos de productividad'
+    ];
+
+    input.addEventListener('input', () => {
+      const value = input.value.trim().toLowerCase();
+      
+      if (value.length > 0) {
+        const filtered = popularSearches.filter(s => 
+          s.toLowerCase().includes(value)
+        );
+        
+        if (filtered.length > 0) {
+          suggestionsBox.innerHTML = filtered.map(s => 
+            `<div class="suggestion-item">${s}</div>`
+          ).join('');
+          suggestionsBox.style.display = 'block';
+        } else {
+          suggestionsBox.style.display = 'none';
+        }
+      } else {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+
+    // Click en sugerencias
+    suggestionsBox.addEventListener('click', (e) => {
+      if (e.target.classList.contains('suggestion-item')) {
+        input.value = e.target.textContent;
+        suggestionsBox.style.display = 'none';
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Cerrar sugerencias al hacer click fuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-box')) {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+
+    // Focus automático en el input
+    window.addEventListener('load', () => {
+      input.focus();
+    });
+  </script>
+</body>
+</html>
+```
