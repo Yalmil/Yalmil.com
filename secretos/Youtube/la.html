@@ -845,97 +845,83 @@
       browserContent.innerHTML = `
         <div class="ylm-page">
           <div class="ylm-header">
-            <div class="ylm-logo">🌟</div>
-            <h1 class="ylm-title">Bienvenido a YLM</h1>
-            <p class="ylm-subtitle">La página secreta de Yalmil Search</p>
+            <div class="ylm-logo">🐈‍⬛</div>
+            <h1 class="ylm-title">Bienvenido a YMG</h1>
+            <p class="ylm-subtitle">¿Quieres alojar tu página en yalmil search?</p>
           </div>
           
           <div class="ylm-content">
             <div class="ylm-section">
-              <h2>🎉 ¡Felicidades!</h2>
-              <p>Has descubierto la página especial de Yalmil Search. Esta es una zona exclusiva que solo puede ser accedida desde nuestro buscador.</p>
-              <p>Aquí encontrarás herramientas especiales, funciones ocultas y contenido único que no está disponible en ningún otro lugar de internet.</p>
-            </div>
+              <h2>🎉 ¡Felicidades encontraste el mejor lugar para alojar tu página web!</h2>
+              <p>Rellena los datos de abajo para solicitar una página.</p>
+<form id="formulario">
+    <h2>Guardar datos</h2>
+    <input type="text" id="nombre" placeholder="Nombre" required>
+    <input type="url" id="url" placeholder="URL" required>
+    <input type="text" id="funcion" placeholder="Función" required>
+    <button type="submit">Guardar</button>
+    <div class="mensaje" id="mensaje"></div>
+  </form>
 
-            <div class="ylm-section">
-              <h2>✨ Características Exclusivas</h2>
-              <div class="ylm-features">
-                <div class="ylm-feature">
-                  <div class="ylm-feature-icon">🚀</div>
-                  <div class="ylm-feature-title">Súper Rápido</div>
-                  <div class="ylm-feature-desc">Búsquedas optimizadas con resultados instantáneos</div>
-                </div>
-                <div class="ylm-feature">
-                  <div class="ylm-feature-icon">🔒</div>
-                  <div class="ylm-feature-title">Privado</div>
-                  <div class="ylm-feature-desc">Tu privacidad es nuestra prioridad número uno</div>
-                </div>
-                <div class="ylm-feature">
-                  <div class="ylm-feature-icon">🎨</div>
-                  <div class="ylm-feature-title">Personalizable</div>
-                  <div class="ylm-feature-desc">Diseño único y totalmente personalizado</div>
-                </div>
-                <div class="ylm-feature">
-                  <div class="ylm-feature-icon">🌐</div>
-                  <div class="ylm-feature-title">Sin Límites</div>
-                  <div class="ylm-feature-desc">Acceso ilimitado a toda la web</div>
-                </div>
-              </div>
-            </div>
+  <!-- Firebase -->
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-            <div class="ylm-section">
-              <h2>📊 Estadísticas de YLM</h2>
-              <div class="ylm-stats">
-                <div class="ylm-stat">
-                  <div class="ylm-stat-number">∞</div>
-                  <div class="ylm-stat-label">Búsquedas Posibles</div>
-                </div>
-                <div class="ylm-stat">
-                  <div class="ylm-stat-number">100%</div>
-                  <div class="ylm-stat-label">Privacidad</div>
-                </div>
-                <div class="ylm-stat">
-                  <div class="ylm-stat-number">0ms</div>
-                  <div class="ylm-stat-label">Tiempo de Carga</div>
-                </div>
-                <div class="ylm-stat">
-                  <div class="ylm-stat-number">24/7</div>
-                  <div class="ylm-stat-label">Disponibilidad</div>
-                </div>
-              </div>
-            </div>
+    // Configura tu Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+    };
 
-            <div class="ylm-section">
-              <h2>🎯 Sobre Yalmil Search</h2>
-              <p>Yalmil Search es más que un simple buscador. Es una puerta de entrada a toda la información del mundo, diseñada con amor y atención al detalle.</p>
-              <p>Nuestro objetivo es proporcionar la mejor experiencia de búsqueda posible, con un diseño hermoso y funcionalidades innovadoras.</p>
-              <p>Esta página especial (ylm.ylm) es un ejemplo de las sorpresas que puedes encontrar mientras exploras. ¿Quién sabe qué más descubrirás?</p>
-            </div>
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-            <div class="ylm-section">
-              <h2>🛠️ Comandos Especiales</h2>
-              <p>Prueba estos comandos especiales en la barra de búsqueda:</p>
-              <ul style="list-style: none; padding: 0; margin-top: 20px;">
-                <li style="padding: 10px; background: rgba(102, 126, 234, 0.1); margin-bottom: 10px; border-radius: 8px;">
-                  <strong style="color: #667eea;">ylm.ylm</strong> - Volver a esta página secreta
-                </li>
-                <li style="padding: 10px; background: rgba(102, 126, 234, 0.1); margin-bottom: 10px; border-radius: 8px;">
-                  <strong style="color: #667eea;">https://ejemplo.com</strong> - Navegar a cualquier sitio web
-                </li>
-                <li style="padding: 10px; background: rgba(102, 126, 234, 0.1); margin-bottom: 10px; border-radius: 8px;">
-                  <strong style="color: #667eea;">Cualquier texto</strong> - Buscar en toda la web
-                </li>
-              </ul>
-            </div>
+    // Referencia al formulario
+    const formulario = document.getElementById('formulario');
+    const mensaje = document.getElementById('mensaje');
 
-            <div class="ylm-easter-egg">
-              <h3 style="color: #667eea; margin-bottom: 15px;">🥚 Easter Egg</h3>
-              <p>"En un lugar de la web, de cuyo nombre no quiero acordarme, existe una página llamada ylm.ylm..."</p>
-              <p style="margin-top: 15px; font-size: 0.9rem;">Gracias por descubrir este secreto. Eres parte de los usuarios especiales de Yalmil Search 💜</p>
-            </div>
-          </div>
-        </div>
-      `;
+    formulario.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const url = document.getElementById('url').value.trim();
+      const funcion = document.getElementById('funcion').value.trim();
+
+      if (!nombre || !url || !funcion) {
+        mensaje.textContent = "Por favor, completa todos los campos.";
+        mensaje.style.color = "red";
+        return;
+      }
+
+      // Guardar datos
+      const refDatos = ref(db, 'datos/');
+      const nuevoDato = push(refDatos);
+
+      set(nuevoDato, {
+        nombre: nombre,
+        url: url,
+        funcion: funcion,
+        fecha: new Date().toISOString()
+      })
+      .then(() => {
+        mensaje.textContent = "✅ Datos guardados correctamente!";
+        mensaje.style.color = "lime";
+        formulario.reset();
+      })
+      .catch((error) => {
+        mensaje.textContent = "❌ Error al guardar: " + error;
+        mensaje.style.color = "red";
+      });
+    });
+            `;
     }
 
     function loadWebsite(url) {
