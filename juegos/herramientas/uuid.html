@@ -1,3 +1,4 @@
+<h1>CÓDIGO</h1>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,117 +14,122 @@
 
   <title>Generador de UUID v4</title>
 
+  <!-- NUEVO CSS -->
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #330a00, #662000);
+      color: #ffd8a6;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
     }
 
-    .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    h1 {
-      color: #333;
-      margin-bottom: 30px;
-      font-size: 2.5em;
-      font-weight: 300;
-    }
-
-    .generate-btn {
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    .uuid-container { display: none; animation: fadeIn 0.5s ease-in; }
-    .uuid-container.show { display: block; }
-
-    .uuid-item {
-      background: #f8f9fa;
-      border: 2px solid #e9ecef;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 15px;
+    header {
       position: relative;
-      transition: all 0.3s ease;
+      background-color: #4d1a00;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #ff8c00;
+      text-align: center;
+      box-shadow: 0 0 12px #ff8c0055;
     }
 
-    .uuid-item:hover { border-color: #667eea; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1); }
-    .uuid-label { font-weight: 600; color: #667eea; margin-bottom: 10px; font-size: 1.1em; }
-    .uuid-value { font-family: 'Courier New', monospace; font-size: 0.95em; color: #333; background: white; padding: 15px; border-radius: 10px; border: 1px solid #dee2e6; word-break: break-all; line-height: 1.4; }
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: #ff8c00;
+      text-shadow: 0 0 10px #ff8c00aa;
+    }
 
-    .copy-btn {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 25px;
-      font-size: 0.9em;
-      cursor: pointer;
+    header h3 {
+      margin: 0.5rem 0;
+      font-weight: 400;
+      color: #ffd8a6;
+    }
+
+    #profilePic {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-    }
-
-    .copy-btn:hover { background: #218838; transform: translateY(-1px); }
-    .actions { margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-
-    .action-btn {
-      background: #6c757d;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      font-size: 1em;
+      top: 10px;
+      right: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff8c00;
+      box-shadow: 0 0 10px #ff8c00aa;
       cursor: pointer;
-      transition: all 0.3s ease;
+      object-fit: cover;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .action-btn:hover { background: #5a6268; transform: translateY(-1px); }
-    .copy-all-btn { background: linear-gradient(45deg, #28a745, #20c997); }
-    .copy-all-btn:hover { background: linear-gradient(45deg, #218838, #1ba388); }
-
-    .toast {
-      position: fixed; top: 20px; right: 20px;
-      background: #28a745; color: white;
-      padding: 15px 20px; border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      transform: translateX(400px);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+    #profilePic:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #ffb84d;
     }
 
-    .toast.show { transform: translateX(0); }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
 
-    @keyframes fadeIn { from {opacity:0;transform:translateY(20px);} to {opacity:1;transform:translateY(0);} }
+    main h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: #ff8c00;
+      text-shadow: 0 0 6px #ff8c0088;
+    }
+
+    .subpage-list {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .subpage {
+      background: rgba(60, 20, 0, 0.2);
+      backdrop-filter: blur(6px);
+      padding: 1.5rem;
+      border: 2px solid #ff8c00;
+      border-radius: 1rem;
+      text-align: center;
+      text-decoration: none;
+      color: #ffd8a6;
+      font-weight: 500;
+      box-shadow: 0 0 10px #ff8c0055;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .subpage:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px #ff8c00;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: #ffb366;
+      background-color: #330800;
+      border-top: 1px solid #662200;
+    }
   </style>
 </head>
 
