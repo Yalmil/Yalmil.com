@@ -1,326 +1,223 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de UUID v4</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Generador UUID v4 con copiado automático en formato JSON" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
+  <title>Generador de UUID v4</title>
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            font-weight: 300;
-        }
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .generate-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
 
-        .generate-btn:active {
-            transform: translateY(0);
-        }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      font-weight: 300;
+    }
 
-        .uuid-container {
-            display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
+    .generate-btn {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
 
-        .uuid-container.show {
-            display: block;
-        }
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
 
-        .uuid-item {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            position: relative;
-            transition: all 0.3s ease;
-        }
+    .uuid-container { display: none; animation: fadeIn 0.5s ease-in; }
+    .uuid-container.show { display: block; }
 
-        .uuid-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
-        }
+    .uuid-item {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
 
-        .uuid-label {
-            font-weight: 600;
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
+    .uuid-item:hover { border-color: #667eea; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1); }
+    .uuid-label { font-weight: 600; color: #667eea; margin-bottom: 10px; font-size: 1.1em; }
+    .uuid-value { font-family: 'Courier New', monospace; font-size: 0.95em; color: #333; background: white; padding: 15px; border-radius: 10px; border: 1px solid #dee2e6; word-break: break-all; line-height: 1.4; }
 
-        .uuid-value {
-            font-family: 'Courier New', monospace;
-            font-size: 0.95em;
-            color: #333;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            word-break: break-all;
-            line-height: 1.4;
-        }
+    .copy-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.9em;
+      cursor: pointer;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+    }
 
-        .copy-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            cursor: pointer;
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-        }
+    .copy-btn:hover { background: #218838; transform: translateY(-1px); }
+    .actions { margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
 
-        .copy-btn:hover {
-            background: #218838;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-        }
+    .action-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .copy-btn.copied {
-            background: #17a2b8;
-            animation: pulse 0.6s ease;
-        }
+    .action-btn:hover { background: #5a6268; transform: translateY(-1px); }
+    .copy-all-btn { background: linear-gradient(45deg, #28a745, #20c997); }
+    .copy-all-btn:hover { background: linear-gradient(45deg, #218838, #1ba388); }
 
-        .actions {
-            margin-top: 25px;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+    .toast {
+      position: fixed; top: 20px; right: 20px;
+      background: #28a745; color: white;
+      padding: 15px 20px; border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
 
-        .action-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
-        }
+    .toast.show { transform: translateX(0); }
 
-        .action-btn:hover {
-            background: #5a6268;
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-        }
-
-        .copy-all-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-        }
-
-        .copy-all-btn:hover {
-            background: linear-gradient(45deg, #218838, #1ba388);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .actions {
-                flex-direction: column;
-            }
-            
-            .copy-btn {
-                position: static;
-                margin-top: 10px;
-                width: 100%;
-            }
-            
-            .uuid-item {
-                padding-bottom: 60px;
-            }
-        }
-    </style>
+    @keyframes fadeIn { from {opacity:0;transform:translateY(20px);} to {opacity:1;transform:translateY(0);} }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>🔐 Generador UUID v4</h1>
-        
-        <button class="generate-btn" onclick="generateUUIDs()">
-            Generar UUIDs
-        </button>
-        
-        <div class="uuid-container" id="uuidContainer">
-            <div class="uuid-item">
-                <button class="copy-btn" onclick="copyUUID('uuid1')">Copiar</button>
-                <div class="uuid-label">UUID 1</div>
-                <div class="uuid-value" id="uuid1"></div>
-            </div>
-            
-            <div class="uuid-item">
-                <button class="copy-btn" onclick="copyUUID('uuid2')">Copiar</button>
-                <div class="uuid-label">UUID 2</div>
-                <div class="uuid-value" id="uuid2"></div>
-            </div>
-            
-            <div class="actions">
-                <button class="action-btn copy-all-btn" onclick="copyBothUUIDs()">
-                    Copiar Ambos
-                </button>
-                <button class="action-btn" onclick="generateUUIDs()">
-                    Generar Nuevos
-                </button>
-            </div>
-        </div>
+  <div class="container">
+    <h1>🔐 Generador UUID v4</h1>
+    <button class="generate-btn" onclick="generateUUIDs()">Generar UUIDs</button>
+
+    <div class="uuid-container" id="uuidContainer">
+      <div class="uuid-item">
+        <button class="copy-btn" onclick="copyUUID('uuid1')">Copiar</button>
+        <div class="uuid-label">UUID 1</div>
+        <div class="uuid-value" id="uuid1"></div>
+      </div>
+
+      <div class="uuid-item">
+        <button class="copy-btn" onclick="copyUUID('uuid2')">Copiar</button>
+        <div class="uuid-label">UUID 2</div>
+        <div class="uuid-value" id="uuid2"></div>
+      </div>
+
+      <div class="actions">
+        <button class="action-btn copy-all-btn" onclick="copyBothUUIDs()">Copiar Ambos</button>
+        <button class="action-btn" onclick="generateUUIDs()">Generar Nuevos</button>
+      </div>
     </div>
+  </div>
 
-    <div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-    <script>
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
+  <script>
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
 
-        function generateUUIDs() {
-            const uuid1 = generateUUID();
-            const uuid2 = generateUUID();
-            
-            document.getElementById('uuid1').textContent = uuid1;
-            document.getElementById('uuid2').textContent = uuid2;
-            
-            const container = document.getElementById('uuidContainer');
-            container.classList.add('show');
-        }
+    function generateUUIDs() {
+      const uuid1 = generateUUID();
+      const uuid2 = generateUUID();
+      document.getElementById('uuid1').textContent = uuid1;
+      document.getElementById('uuid2').textContent = uuid2;
+      document.getElementById('uuidContainer').classList.add('show');
+    }
 
-        function copyUUID(elementId) {
-            const uuidElement = document.getElementById(elementId);
-            const uuid = uuidElement.textContent;
-            
-            navigator.clipboard.writeText(uuid).then(() => {
-                const btn = uuidElement.parentElement.querySelector('.copy-btn');
-                const originalText = btn.textContent;
-                
-                btn.textContent = '¡Copiado!';
-                btn.classList.add('copied');
-                
-                showToast(`UUID copiado al portapapeles`);
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.classList.remove('copied');
-                }, 2000);
-            });
-        }
+    function copyUUID(elementId) {
+      const uuid = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(uuid);
+      showToast('UUID copiado al portapapeles');
+    }
 
-        function copyBothUUIDs() {
-            const uuid1 = document.getElementById('uuid1').textContent;
-            const uuid2 = document.getElementById('uuid2').textContent;
-            const bothUUIDs = `${uuid1}\n${uuid2}`;
-            
-            navigator.clipboard.writeText(bothUUIDs).then(() => {
-                showToast('Ambos UUIDs copiados al portapapeles');
-            });
-        }
+    function copyBothUUIDs() {
+      const uuid1 = document.getElementById('uuid1').textContent;
+      const uuid2 = document.getElementById('uuid2').textContent;
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+      const jsonText = `{
+  "format_version": 2,
+  "header": {
+    "description": "REMPLAZAME",
+    "name": "REMPLAZAME",
+    "uuid": "${uuid1}",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 0]
+  },
+  "modules": [
+    {
+      "description": "REMPLAZAME",
+      "type": "resources",
+      "uuid": "${uuid2}",
+      "version": [1, 0, 0]
+    }
+  ],
+  "metadata": {
+    "authors": ["TU NOMBRE AQUÍ"],
+    "license": "MIT",
+    "url": "https://yalmil.pages.dev/"
+  }
+}`;
 
-        // Generar UUIDs automáticamente al cargar la página
-        window.onload = function() {
-            generateUUIDs();
-        };
-    </script>
+      navigator.clipboard.writeText(jsonText).then(() => {
+        showToast('Texto completo copiado al portapapeles');
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    window.onload = generateUUIDs;
+  </script>
 </body>
 </html>
