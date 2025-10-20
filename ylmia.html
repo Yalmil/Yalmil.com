@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot</title>
+    <title>Chatbot - Yalmil.com</title>
+    <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+    <meta property="og:title" content="Yalmil.com" />
+    <meta property="og:description" content="Chatbot inteligente con respuestas automáticas y APIs integradas" />
+    <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+    <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+    <meta property="og:type" content="website" />
     <style>
         * {
             margin: 0;
@@ -167,7 +173,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🤖 Chatbot</div>
+        <div class="header">🐈‍⬛ YLMIA</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -181,7 +187,6 @@
     </div>
 
     <script>
-        // Cargar el archivo respuestas.txt
         let respuestasData = {};
 
         async function cargarRespuestas() {
@@ -217,14 +222,11 @@
         }
 
         function normalizarTexto(texto) {
-            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/g, '').trim();
+            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/gi, '').trim();
         }
 
         function calcularOperacion(pregunta) {
-            // Reemplazar símbolos alternativos
             let operacion = pregunta.replace(/×/g, '*').replace(/÷/g, '/');
-            
-            // Detectar si hay una operación matemática
             const operacionMatch = operacion.match(/(-?\d+\.?\d*)\s*([\+\-\*\/])\s*(-?\d+\.?\d*)/);
             
             if (operacionMatch) {
@@ -257,13 +259,121 @@
             return null;
         }
 
-        function buscarRespuesta(pregunta) {
-            // Primero verificar si es una operación matemática
+        // API: Clima
+        async function obtenerClima(ciudad) {
+            try {
+                const response = await fetch(`https://wttr.in/${ciudad}?format=3&lang=es`);
+                if (!response.ok) return null;
+                const texto = await response.text();
+                return texto.trim();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // API: Hora actual
+        function obtenerHora() {
+            const ahora = new Date();
+            return `La hora actual es ${ahora.toLocaleTimeString('es-ES')}`;
+        }
+
+        // API: Fecha actual
+        function obtenerFecha() {
+            const ahora = new Date();
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return `Hoy es ${ahora.toLocaleDateString('es-ES', opciones)}`;
+        }
+
+        // API: Chiste aleatorio
+        async function obtenerChiste() {
+            try {
+                const response = await fetch('https://official-joke-api.appspot.com/jokes/random');
+                if (!response.ok) return null;
+                const data = await response.json();
+                return `${data.setup}\n${data.punchline}`;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // API: Consejo aleatorio
+        async function obtenerConsejo() {
+            try {
+                const response = await fetch('https://api.adviceslip.com/advice');
+                if (!response.ok) return null;
+                const data = await response.json();
+                return data.slip.advice;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // API: Dato curioso aleatorio
+        async function obtenerDatoCurioso() {
+            try {
+                const response = await fetch('https://uselessfacts.jsph.pl/random.json?language=en');
+                if (!response.ok) return null;
+                const data = await response.json();
+                return `Dato curioso: ${data.text}`;
+            } catch (error) {
+                return null;
+           Chatbot    }
+
+        // Detectar consultas de API automáticas
+        async function procesarConsultasAPI(pregunta) {
+            const preguntaNorm = normalizarTexto(pregunta);
+
+            // Clima
+            if (preguntaNorm.match(/clima|temperatura|tiempo.*en/i)) {
+                const ciudadMatch = pregunta.match(/en\s+(\w+)/i);
+                if (ciudadMatch) {
+                    const clima = await obtenerClima(ciudadMatch[1]);
+                    if (clima) return clima;
+                }
+            }
+
+            // Hora
+            if (preguntaNorm.match(/qué hora|hora actual|dame la hora/i)) {
+                return obtenerHora();
+            }
+
+            // Fecha
+            if (preguntaNorm.match(/qué día|fecha|día.*hoy|hoy.*es/i)) {
+                return obtenerFecha();
+            }
+
+            // Chiste
+            if (preguntaNorm.match(/chiste|cuéntame.*chiste|dame.*chiste/i)) {
+                return await obtenerChiste();
+            }
+
+            // Consejo
+            if (preguntaNorm.match(/consejo|dame.*consejo|recomienda/i)) {
+                return await obtenerConsejo();
+            }
+
+            // Dato curioso
+            if (preguntaNorm.match(/dato curioso|curiosidad|dato interesante/i)) {
+                return await obtenerDatoCurioso();
+            }
+
+            return null;
+        }
+
+        async function buscarRespuesta(pregunta) {
+            // 1. Verificar operación matemática
             const resultadoCalculo = calcularOperacion(pregunta);
             if (resultadoCalculo) {
                 return resultadoCalculo;
             }
 
+            // 2. Verificar APIs automáticas
+            const resultadoAPI = await procesarConsultasAPI(pregunta);
+            if (resultadoAPI) {
+                return resultadoAPI;
+            }
+
+            // 3. Buscar en respuestas.txt
             const preguntaNormalizada = normalizarTexto(pregunta);
 
             // Búsqueda exacta
@@ -278,18 +388,15 @@
             for (let key in respuestasData) {
                 if (key.includes('[O similares]')) {
                     const variantes = key.split('[O similares]').map(v => normalizarTexto(v.trim()));
-                    // Verifica si alguna variante está contenida en la pregunta del usuario
                     if (variantes.some(v => v && preguntaNormalizada.includes(v))) {
                         return respuestasData[key];
                     }
-                    // También verifica si la pregunta del usuario contiene alguna variante
                     if (variantes.some(v => v && v.includes(preguntaNormalizada))) {
                         return respuestasData[key];
                     }
                 }
             }
 
-            // Si no encuentra, retornar error
             return null;
         }
 
@@ -302,7 +409,7 @@
                 mensaje.innerHTML = `
                     <div class="text loading">
                         <div class="spinner"></div>
-                        <span>Escribiendo...</span>
+                        <span>Procesando...</span>
                     </div>
                 `;
             } else {
@@ -324,21 +431,16 @@
 
             if (!pregunta) return;
 
-            // Mostrar mensaje del usuario
             agregarMensaje(pregunta, 'user');
             input.value = '';
 
-            // Mostrar loading
             const loadingMsg = agregarMensaje('', 'loading');
 
-            // Simular pequeño delay
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Remover loading
-            loadingMsg.remove();
+            const respuesta = await buscarRespuesta(pregunta);
 
-            // Buscar respuesta
-            const respuesta = buscarRespuesta(pregunta);
+            loadingMsg.remove();
 
             if (respuesta) {
                 agregarMensaje(respuesta, 'bot');
@@ -350,14 +452,12 @@
             input.focus();
         }
 
-        // Permitir enviar con Enter
         document.getElementById('userInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         });
 
-        // Cargar respuestas al iniciar
         cargarRespuestas();
     </script>
 </body>
