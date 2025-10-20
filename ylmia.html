@@ -182,7 +182,7 @@
                 placeholder="Escribe tu pregunta..." 
                 autocomplete="off"
             >
-            <button onclick="sendMessage()">Enviar</button>
+            <button id="sendButton">Enviar</button>
         </div>
     </div>
 
@@ -317,7 +317,8 @@
                 return `Dato curioso: ${data.text}`;
             } catch (error) {
                 return null;
-           Chatbot    }
+            }
+        }
 
         // Detectar consultas de API automáticas
         async function procesarConsultasAPI(pregunta) {
@@ -456,6 +457,10 @@
             if (event.key === 'Enter') {
                 sendMessage();
             }
+        });
+
+        document.getElementById('sendButton').addEventListener('click', function() {
+            sendMessage();
         });
 
         cargarRespuestas();
