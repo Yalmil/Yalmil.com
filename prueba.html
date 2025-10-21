@@ -448,9 +448,12 @@
             blockDiv.style.backgroundImage = `url(${texture})`;
           }
 
-          if (!block.defeated && isTopBlock(towerIndex, blockIndex)) {
-            blockDiv.onclick = () => attackBlock(towerIndex, blockIndex);
-          }
+          blockDiv.onclick = () => {
+            console.log('Click en bloque:', towerIndex, blockIndex, block.value, 'Derrotado:', block.defeated, 'Es top?', isTopBlock(towerIndex, blockIndex));
+            if (!block.defeated && isTopBlock(towerIndex, blockIndex)) {
+              attackBlock(towerIndex, blockIndex);
+            }
+          };
 
           blocksDiv.appendChild(blockDiv);
         });
@@ -462,9 +465,14 @@
 
     function isTopBlock(towerIndex, blockIndex) {
       const tower = gameState.towers[towerIndex];
+      // Recorrer desde el final hacia el índice actual
       for (let i = tower.length - 1; i > blockIndex; i--) {
-        if (!tower[i].defeated) return false;
+        if (!tower[i].defeated) {
+          console.log('No es top block porque', i, 'no está derrotado');
+          return false;
+        }
       }
+      console.log('Es top block:', blockIndex);
       return true;
     }
 
