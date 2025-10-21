@@ -1,578 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tower Game - Yalmil</title>
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Juego de torres estratégico donde derrotas enemigos y usas objetos especiales para aumentar tu poder" />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #333;
-      overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-      font-size: 2.5em;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .level-selector {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      margin-bottom: 30px;
-    }
-
-    .level-selector h2 {
-      color: #667eea;
-      margin-bottom: 20px;
-    }
-
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-    }
-
-    .level-btn {
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    .level-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
-
-    .game-container {
-      display: none;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .game-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .power-display {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px 40px;
-      border-radius: 10px;
-      font-size: 2em;
-      font-weight: bold;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-
-    .back-btn {
-      padding: 15px 30px;
-      background: #f44336;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .back-btn:hover {
-      background: #d32f2f;
-      transform: scale(1.05);
-    }
-
-    .towers-game {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin-top: 30px;
-    }
-
-    .tower {
-      min-width: 120px;
-      text-align: center;
-    }
-
-    .tower-title {
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 15px;
-      font-size: 1.2em;
-    }
-
-    .tower-blocks {
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 8px;
-    }
-
-    .block {
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1.3em;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-      position: relative;
-      background-size: cover;
-      background-position: center;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    }
-
-    .block:hover:not(.defeated) {
-      transform: scale(1.1);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-    }
-
-    .block.defeated {
-      opacity: 0.3;
-      cursor: not-allowed;
-      filter: grayscale(100%);
-    }
-
-    .block.enemy {
-      background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
-    }
-
-    .block.subtract {
-      background: linear-gradient(135deg, #ffd43b 0%, #f08c00 100%);
-    }
-
-    .block.multiply {
-      background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%);
-    }
-
-    .block.divide {
-      background: linear-gradient(135deg, #4dabf7 0%, #1864ab 100%);
-    }
-
-    .message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      z-index: 1000;
-      text-align: center;
-      transition: transform 0.3s;
-    }
-
-    .message.show {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .message h2 {
-      color: #667eea;
-      margin-bottom: 20px;
-      font-size: 2em;
-    }
-
-    .message button {
-      padding: 15px 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.2em;
-      cursor: pointer;
-      margin: 5px;
-      transition: all 0.3s;
-    }
-
-    .message button:hover {
-      transform: scale(1.05);
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 999;
-      display: none;
-    }
-
-    .overlay.show {
-      display: block;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: white;
-      font-size: 1.5em;
-    }
-
-    .stats {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
-    }
-
-    .stats-item {
-      display: inline-block;
-      margin: 5px 15px;
-      font-weight: bold;
-      color: #555;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visor de Archivos .ton</title>
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<meta property="og:title" content="Yalmil.com" />
+<meta property="og:description" content="Visualiza archivos .ton y su descripción de juego" />
+<meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+<meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+<meta property="og:type" content="website" />
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+h1 { color: #333; }
+#fileList { margin-top: 10px; }
+#fileContent { margin-top: 20px; white-space: pre-wrap; background: #f9f9f9; padding: 10px; border: 1px solid #ccc; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🗼 Tower Game</h1>
+<h1>Visor de Archivos .ton</h1>
+<input type="file" id="fileInput" multiple accept=".ton"><br>
+<div id="fileList"></div>
+<div id="fileContent"></div>
 
-    <div id="levelSelector" class="level-selector">
-      <h2>📋 Selecciona un Nivel</h2>
-      <div class="loading" id="loading">Buscando archivos .ton...</div>
-      <div class="levels-grid" id="levelsGrid"></div>
-    </div>
+<script>
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
+const fileContent = document.getElementById('fileContent');
 
-    <div id="gameContainer" class="game-container">
-      <div class="game-header">
-        <div class="power-display">
-          💪 Poder: <span id="currentPower">0</span>
-        </div>
-        <button class="back-btn" onclick="backToMenu()">⬅️ Volver al Menú</button>
-      </div>
+fileInput.addEventListener('change', () => {
+    fileList.innerHTML = '';
+    fileContent.innerHTML = '';
+    const files = Array.from(fileInput.files).filter(f => f.name.endsWith('.ton'));
+    if(files.length === 0) {
+        fileList.innerHTML = 'No se encontraron archivos .ton';
+        return;
+    }
+    files.forEach((file, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${index + 1}. ${file.name}`;
+        btn.style.display = 'block';
+        btn.style.marginTop = '5px';
+        btn.addEventListener('click', () => readFile(file));
+        fileList.appendChild(btn);
+    });
+});
 
-      <div class="stats">
-        <span class="stats-item">🎯 Movimientos: <span id="moves">0</span></span>
-        <span class="stats-item">👾 Enemigos derrotados: <span id="enemiesDefeated">0</span></span>
-        <span class="stats-item">🏆 Nivel: <span id="currentLevel">-</span></span>
-      </div>
-
-      <div class="towers-game" id="towersGame"></div>
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay"></div>
-  <div class="message" id="message">
-    <h2 id="messageTitle">🎉</h2>
-    <p id="messageText"></p>
-    <button onclick="restartLevel()">🔄 Reintentar</button>
-    <button onclick="backToMenu()">📋 Menú</button>
-  </div>
-
-  <script>
-    // TEXTURAS - Reemplaza estos URLs con tus propias imágenes
-    const TEXTURES = {
-      enemy: 'URL_TEXTURA_ENEMIGO.png',
-      subtract: 'URL_TEXTURA_RESTA.png',
-      multiply: 'URL_TEXTURA_MULTIPLICAR.png',
-      divide: 'URL_TEXTURA_DIVIDIR.png',
-      background: 'URL_FONDO_JUEGO.png'
+function readFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const text = e.target.result;
+        fileContent.innerHTML = `<strong>Contenido de ${file.name}:</strong>\n\n${text}\n\n${parseTON(text)}`;
     };
+    reader.readAsText(file);
+}
 
-    let levels = [];
-    let currentLevelData = null;
-    let gameState = {
-      power: 0,
-      moves: 0,
-      enemiesDefeated: 0,
-      towers: []
-    };
+function parseTON(text) {
+    const lines = text.split('.');
+    let description = "Descripción del juego:\nLos números sin signos son enemigos, el número indica el poder necesario para derrotarlos, si tu poder es mayor a él lo matas y se suma tu poder más el suyo.\nLos signos (-, ×, ÷) son objetos que modifican los valores indicados después del signo.\n\n";
 
-    // Buscar archivos .ton en el repositorio
-    async function searchTonFiles() {
-      const loading = document.getElementById('loading');
-      const levelsGrid = document.getElementById('levelsGrid');
-      
-      try {
-        // Lista de posibles ubicaciones de archivos .ton
-        const possiblePaths = [
-          'level1.ton',
-          'level2.ton',
-          'level3.ton',
-          'level4.ton',
-          'level5.ton',
-          'levels/level1.ton',
-          'levels/level2.ton',
-          'levels/level3.ton',
-          'game/level1.ton',
-          'game/level2.ton',
-          'data/level1.ton',
-          'data/level2.ton'
-        ];
-
-        for (const path of possiblePaths) {
-          try {
-            const response = await fetch(path);
-            if (response.ok) {
-              const content = await response.text();
-              const fileName = path.split('/').pop();
-              levels.push({
-                name: fileName,
-                path: path,
-                content: content
-              });
-            }
-          } catch (e) {
-            // Archivo no encontrado, continuar
-          }
+    lines.forEach(line => {
+        line = line.trim();
+        if(line.startsWith('initialVal')) {
+            description += `Valor inicial: ${line.split('=')[1].trim()}\n`;
+        } else if(line.startsWith('not')) {
+            description += `Número de torres: ${line.split('=')[1].trim()}\n`;
+        } else if(line.startsWith('nwt')) {
+            const values = line.split('=')[1].trim();
+            description += `Nueva torre: ${values.replace(/,/g, ';')}\n`;
+        } else if(line.startsWith('+')) {
+            // Comentario, opcional mostrar
         }
+    });
 
-        loading.style.display = 'none';
-
-        if (levels.length === 0) {
-          levelsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No se encontraron archivos .ton en el repositorio. Coloca archivos .ton en la raíz o en carpetas como /levels/ o /data/</p>';
-        } else {
-          levels.forEach((level, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'level-btn';
-            btn.textContent = level.name.replace('.ton', '');
-            btn.onclick = () => loadLevel(index);
-            levelsGrid.appendChild(btn);
-          });
-        }
-      } catch (error) {
-        loading.innerHTML = '❌ Error al buscar archivos: ' + error.message;
-      }
-    }
-
-    function parseContent(content) {
-      const result = {
-        initialVal: 0,
-        not: 0,
-        towers: []
-      };
-
-      const lines = content.split('.').map(l => l.trim()).filter(l => l && !l.startsWith('+'));
-
-      lines.forEach(line => {
-        if (line.startsWith('initialVal=')) {
-          result.initialVal = parseInt(line.split('=')[1]);
-        } else if (line.startsWith('not=')) {
-          result.not = parseInt(line.split('=')[1]);
-        } else if (line.startsWith('nwt=')) {
-          const values = line.split('=')[1].split(',').map(v => v.trim());
-          result.towers.push(values);
-        }
-      });
-
-      return result;
-    }
-
-    function loadLevel(index) {
-      currentLevelData = parseContent(levels[index].content);
-      document.getElementById('currentLevel').textContent = levels[index].name.replace('.ton', '');
-      
-      gameState = {
-        power: currentLevelData.initialVal,
-        moves: 0,
-        enemiesDefeated: 0,
-        towers: currentLevelData.towers.map(tower => 
-          tower.map(block => ({ value: block, defeated: false }))
-        )
-      };
-
-      document.getElementById('levelSelector').style.display = 'none';
-      document.getElementById('gameContainer').style.display = 'block';
-      
-      updateDisplay();
-      renderTowers();
-    }
-
-    function renderTowers() {
-      const towersGame = document.getElementById('towersGame');
-      towersGame.innerHTML = '';
-
-      gameState.towers.forEach((tower, towerIndex) => {
-        const towerDiv = document.createElement('div');
-        towerDiv.className = 'tower';
-        
-        const title = document.createElement('div');
-        title.className = 'tower-title';
-        title.textContent = `Torre ${towerIndex + 1}`;
-        towerDiv.appendChild(title);
-
-        const blocksDiv = document.createElement('div');
-        blocksDiv.className = 'tower-blocks';
-
-        tower.forEach((block, blockIndex) => {
-          const blockDiv = document.createElement('div');
-          blockDiv.className = `block ${getBlockClass(block.value)}`;
-          if (block.defeated) blockDiv.classList.add('defeated');
-          
-          blockDiv.textContent = block.value;
-          
-          // Aplicar textura si está configurada
-          const texture = getTexture(block.value);
-          if (texture && texture !== '') {
-            blockDiv.style.backgroundImage = `url(${texture})`;
-          }
-
-          blockDiv.onclick = () => {
-            console.log('Click en bloque:', towerIndex, blockIndex, block.value, 'Derrotado:', block.defeated, 'Es top?', isTopBlock(towerIndex, blockIndex));
-            if (!block.defeated && isTopBlock(towerIndex, blockIndex)) {
-              attackBlock(towerIndex, blockIndex);
-            }
-          };
-
-          blocksDiv.appendChild(blockDiv);
-        });
-
-        towerDiv.appendChild(blocksDiv);
-        towersGame.appendChild(towerDiv);
-      });
-    }
-
-    function isTopBlock(towerIndex, blockIndex) {
-      const tower = gameState.towers[towerIndex];
-      // El bloque de arriba visualmente es el último del array (index más alto)
-      // Solo puede atacarse si todos los bloques posteriores están derrotados
-      // Y si es el bloque con mayor índice no derrotado
-      for (let i = blockIndex + 1; i < tower.length; i++) {
-        if (!tower[i].defeated) {
-          console.log('No es top block porque', i, 'no está derrotado');
-          return false;
-        }
-      }
-      console.log('Es top block:', blockIndex);
-      return true;
-    }
-
-    function getBlockClass(value) {
-      if (value.includes('-')) return 'subtract';
-      if (value.includes('×')) return 'multiply';
-      if (value.includes('÷')) return 'divide';
-      return 'enemy';
-    }
-
-    function getTexture(value) {
-      if (value.includes('-')) return TEXTURES.subtract;
-      if (value.includes('×')) return TEXTURES.multiply;
-      if (value.includes('÷')) return TEXTURES.divide;
-      return TEXTURES.enemy;
-    }
-
-    function attackBlock(towerIndex, blockIndex) {
-      const block = gameState.towers[towerIndex][blockIndex];
-      const value = block.value;
-
-      if (block.defeated) return;
-
-      gameState.moves++;
-
-      if (value.includes('-')) {
-        const num = parseInt(value.replace('-', ''));
-        gameState.power -= num;
-        block.defeated = true;
-      } else if (value.includes('×')) {
-        const num = parseInt(value.replace('×', ''));
-        gameState.power *= num;
-        block.defeated = true;
-      } else if (value.includes('÷')) {
-        const num = parseInt(value.replace('÷', ''));
-        gameState.power = Math.floor(gameState.power / num);
-        block.defeated = true;
-      } else {
-        // Es un enemigo (número sin signo)
-        const enemyPower = parseInt(value.trim());
-        console.log('Atacando enemigo:', enemyPower, 'Tu poder:', gameState.power);
-        
-        if (gameState.power > enemyPower) {
-          gameState.power += enemyPower;
-          gameState.enemiesDefeated++;
-          block.defeated = true;
-          console.log('Enemigo derrotado! Nuevo poder:', gameState.power);
-        } else {
-          showMessage('💀 ¡Derrota!', `Tu poder (${gameState.power}) no es suficiente para derrotar al enemigo (${enemyPower})`);
-          gameState.moves--;
-          return;
-        }
-      }
-
-      updateDisplay();
-      renderTowers();
-      checkWin();
-    }
-
-    function checkWin() {
-      const allDefeated = gameState.towers.every(tower => 
-        tower.every(block => block.defeated)
-      );
-
-      if (allDefeated) {
-        showMessage('🎉 ¡Victoria!', `¡Completaste el nivel con ${gameState.moves} movimientos y poder final de ${gameState.power}!`);
-      }
-    }
-
-    function updateDisplay() {
-      document.getElementById('currentPower').textContent = gameState.power;
-      document.getElementById('moves').textContent = gameState.moves;
-      document.getElementById('enemiesDefeated').textContent = gameState.enemiesDefeated;
-    }
-
-    function showMessage(title, text) {
-      document.getElementById('messageTitle').textContent = title;
-      document.getElementById('messageText').textContent = text;
-      document.getElementById('message').classList.add('show');
-      document.getElementById('overlay').classList.add('show');
-    }
-
-    function restartLevel() {
-      document.getElementById('message').classList.remove('show');
-      document.getElementById('overlay').classList.remove('show');
-      const levelIndex = levels.findIndex(l => l.name === document.getElementById('currentLevel').textContent + '.ton');
-      loadLevel(levelIndex);
-    }
-
-    function backToMenu() {
-      document.getElementById('message').classList.remove('show');
-      document.getElementById('overlay').classList.remove('show');
-      document.getElementById('gameContainer').style.display = 'none';
-      document.getElementById('levelSelector').style.display = 'block';
-    }
-
-    // Iniciar búsqueda de archivos al cargar
-    searchTonFiles();
-  </script>
+    return description;
+}
+</script>
 </body>
 </html>
