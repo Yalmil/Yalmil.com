@@ -486,6 +486,8 @@
       const block = gameState.towers[towerIndex][blockIndex];
       const value = block.value;
 
+      if (block.defeated) return;
+
       gameState.moves++;
 
       if (value.includes('-')) {
@@ -501,13 +503,18 @@
         gameState.power = Math.floor(gameState.power / num);
         block.defeated = true;
       } else {
-        const enemyPower = parseInt(value);
+        // Es un enemigo (número sin signo)
+        const enemyPower = parseInt(value.trim());
+        console.log('Atacando enemigo:', enemyPower, 'Tu poder:', gameState.power);
+        
         if (gameState.power > enemyPower) {
           gameState.power += enemyPower;
           gameState.enemiesDefeated++;
           block.defeated = true;
+          console.log('Enemigo derrotado! Nuevo poder:', gameState.power);
         } else {
           showMessage('💀 ¡Derrota!', `Tu poder (${gameState.power}) no es suficiente para derrotar al enemigo (${enemyPower})`);
+          gameState.moves--;
           return;
         }
       }
