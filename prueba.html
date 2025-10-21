@@ -465,8 +465,10 @@
 
     function isTopBlock(towerIndex, blockIndex) {
       const tower = gameState.towers[towerIndex];
-      // Recorrer desde el final hacia el índice actual
-      for (let i = tower.length - 1; i > blockIndex; i--) {
+      // El bloque de arriba visualmente es el último del array (index más alto)
+      // Solo puede atacarse si todos los bloques posteriores están derrotados
+      // Y si es el bloque con mayor índice no derrotado
+      for (let i = blockIndex + 1; i < tower.length; i++) {
         if (!tower[i].defeated) {
           console.log('No es top block porque', i, 'no está derrotado');
           return false;
