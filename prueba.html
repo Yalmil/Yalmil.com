@@ -130,6 +130,19 @@
     .tower {
       min-width: 120px;
       text-align: center;
+      transition: all 0.3s;
+    }
+
+    .tower.inactive {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .tower.active {
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+      border-radius: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .tower-title {
@@ -304,15 +317,16 @@
   <script>
     // TEXTURAS - Reemplaza estos URLs con tus propias imágenes
     const TEXTURES = {
-      enemy: 'https://cdn.discordapp.com/attachments/1355008732576088204/1430286555011874826/file_0000000081f861f695b273156cac7fe4.png?ex=68f939a8&is=68f7e828&hm=13e08749439648d1b776b4533d118e67240bf2e9f28ecdc2a88cbfab36032231&',
+      enemy: 'URL_TEXTURA_ENEMIGO.png',
       subtract: 'URL_TEXTURA_RESTA.png',
       multiply: 'URL_TEXTURA_MULTIPLICAR.png',
       divide: 'URL_TEXTURA_DIVIDIR.png',
-      background: 'https://cdn.discordapp.com/attachments/1355008732576088204/1430286787229646899/0d2485bf4f29efa2de697cc0edbe7464.png?ex=68f939df&is=68f7e85f&hm=043197303e96937764c9890cadd100db5d0b92d109df921c70c743141e398c76&'
+      background: 'URL_FONDO_JUEGO.png'
     };
 
     let levels = [];
     let currentLevelData = null;
+    let currentTowerIndex = 0; // Torre actual activa
     let gameState = {
       power: 0,
       moves: 0,
@@ -328,11 +342,11 @@
       try {
         // Lista de posibles ubicaciones de archivos .ton
         const possiblePaths = [
-          'Nivel 1.ton',
-          'Nivel 2.ton',
-          'Nivel 3.ton',
-          'Nivel 4.ton',
-          'Nivel 5.ton',
+          'level1.ton',
+          'level2.ton',
+          'level3.ton',
+          'level4.ton',
+          'level5.ton',
           'levels/level1.ton',
           'levels/level2.ton',
           'levels/level3.ton',
@@ -404,6 +418,8 @@
       currentLevelData = parseContent(levels[index].content);
       document.getElementById('currentLevel').textContent = levels[index].name.replace('.ton', '');
       
+      currentTowerIndex = 0; // Reiniciar a la primera torre
+      
       gameState = {
         power: currentLevelData.initialVal,
         moves: 0,
@@ -428,9 +444,19 @@
         const towerDiv = document.createElement('div');
         towerDiv.className = 'tower';
         
+        // Marcar torre activa o inactiva
+        if (towerIndex === currentTowerIndex) {
+          towerDiv.classList.add('active');
+        } else {
+          towerDiv.classList.add('inactive');
+        }
+        
         const title = document.createElement('div');
         title.className = 'tower-title';
         title.textContent = `Torre ${towerIndex + 1}`;
+        if (towerIndex === currentTowerIndex) {
+          title.textContent += ' ⭐';
+        }
         towerDiv.appendChild(title);
 
         const blocksDiv = document.createElement('div');
@@ -449,12 +475,15 @@
             blockDiv.style.backgroundImage = `url(${texture})`;
           }
 
-          blockDiv.onclick = () => {
-            console.log('Click en bloque:', towerIndex, blockIndex, block.value, 'Derrotado:', block.defeated);
-            if (!block.defeated) {
-              attackBlock(towerIndex, blockIndex);
-            }
-          };
+          // Solo permitir clicks en la torre actual
+          if (towerIndex === currentTowerIndex) {
+            blockDiv.onclick = () => {
+              console.log('Click en bloque:', towerIndex, blockIndex, block.value, 'Derrotado:', block.defeated);
+              if (!block.defeated) {
+                attackBlock(towerIndex, blockIndex);
+              }
+            };
+          }
 
           blocksDiv.appendChild(blockDiv);
         });
@@ -531,8 +560,20 @@
       }
 
       updateDisplay();
+      checkTowerComplete(towerIndex);
       renderTowers();
       checkWin();
+    }
+
+    function checkTowerComplete(towerIndex) {
+      const tower = gameState.towers[towerIndex];
+      const allDefeated = tower.every(block => block.defeated);
+      
+      if (allDefeated && towerIndex === currentTowerIndex) {
+        // Torre completada, avanzar a la siguiente
+        currentTowerIndex++;
+        console.log('Torre completada! Avanzando a torre:', currentTowerIndex + 1);
+      }
     }
 
     function checkWin() {
@@ -562,6 +603,7 @@
       document.getElementById('message').classList.remove('show');
       document.getElementById('overlay').classList.remove('show');
       const levelIndex = levels.findIndex(l => l.name === document.getElementById('currentLevel').textContent + '.ton');
+      currentTowerIndex = 0; // Reiniciar torre actual
       loadLevel(levelIndex);
     }
 
