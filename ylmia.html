@@ -107,6 +107,77 @@
             max-width: 70%;
             word-wrap: break-word;
             border-bottom-left-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .add-response-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .add-response-btn:hover {
+            background: #5568d3;
+        }
+
+        .response-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .response-input {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .response-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .save-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .success-message .text {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            border-bottom-left-radius: 4px;
         }
 
         .input-area {
@@ -173,7 +244,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">🐈‍⬛ YLMIA</div>
+        <div class="header">🤖 Chatbot</div>
         <div class="chatbox" id="chatbox"></div>
         <div class="input-area">
             <input 
@@ -188,6 +259,53 @@
 
     <script>
         let respuestasData = {};
+        let respuestasPersonalizadas = JSON.parse(localStorage.getItem('respuestasPersonalizadas') || '{}');
+
+        // Lista de palabras altisonantes (español, inglés y otros idiomas)
+        const palabrasProhibidas = [
+            // Español
+            'idiota', 'estúpido', 'tonto', 'imbécil', 'pendejo', 'cabrón',
+            'mierda', 'puta', 'puto', 'joder', 'coño', 'carajo', 'verga',
+            'chingada', 'mamón', 'culero', 'hijo de puta', 'hdp', 'bastardo',
+            'maldito', 'pinche', 'ojete', 'perra', 'zorra', 'gilipollas',
+            'marica', 'maricón', 'maricon', 'bollera', 'prostituta', 'ramera',
+            'cagada', 'cagar', 'mear', 'meada', 'cretino', 'huevón', 'huevon',
+            'güey', 'wey', 'pendeja', 'cabrona', 'chingar', 'jodido', 'jodida',
+            
+            // Inglés
+            'fuck', 'shit', 'bitch', 'ass', 'asshole', 'bastard', 'damn',
+            'hell', 'crap', 'dick', 'cock', 'pussy', 'whore', 'slut',
+            'motherfucker', 'nigger', 'nigga', 'fag', 'faggot', 'retard',
+            'cunt', 'piss', 'bullshit', 'dumbass', 'jackass', 'moron',
+            
+            // Portugués
+            'porra', 'caralho', 'merda', 'puta', 'fodido', 'bosta',
+            'cacete', 'buceta', 'cu', 'viado', 'bicha',
+            
+            // Francés
+            'merde', 'putain', 'connard', 'salope', 'enculé', 'bordel',
+            
+            // Italiano
+            'cazzo', 'merda', 'puttana', 'stronzo', 'fottuto', 'culo',
+            
+            // Alemán
+            'scheiße', 'scheisse', 'arschloch', 'fotze', 'hurensohn', 'schlampe'
+        ];
+
+        function verificarPalabrasAltisonantes(texto) {
+            const textoLower = texto.toLowerCase();
+            for (let palabra of palabrasProhibidas) {
+                if (textoLower.includes(palabra)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function guardarRespuestaPersonalizada(pregunta, respuesta) {
+            respuestasPersonalizadas[normalizarTexto(pregunta)] = respuesta;
+            localStorage.setItem('respuestasPersonalizadas', JSON.stringify(respuestasPersonalizadas));
+        }
 
         async function cargarRespuestas() {
             try {
@@ -221,9 +339,16 @@
             return datos;
         }
 
-        function normalizarTexto(texto) {
-            return texto.toLowerCase().trim().replace(/\s*YLMIA\s*/gi, '').trim();
-        }
+function normalizarTexto(texto) {
+    return texto
+        .toLowerCase()
+        .trim()
+        // elimina cualquier aparición de "ylmia" aunque tenga signos o espacios
+        .replace(/\s*ylmia[!?.,]*\s*/gi, '')
+        // elimina signos innecesarios
+        .replace(/[¡¿]/g, '')
+        .trim();
+}        }
 
         function calcularOperacion(pregunta) {
             let operacion = pregunta.replace(/×/g, '*').replace(/÷/g, '/');
@@ -374,10 +499,14 @@
                 return resultadoAPI;
             }
 
-            // 3. Buscar en respuestas.txt
             const preguntaNormalizada = normalizarTexto(pregunta);
 
-            // Búsqueda exacta
+            // 3. Buscar en respuestas personalizadas del usuario
+            if (respuestasPersonalizadas[preguntaNormalizada]) {
+                return respuestasPersonalizadas[preguntaNormalizada];
+            }
+
+            // 4. Buscar en respuestas.txt - Búsqueda exacta
             for (let key in respuestasData) {
                 const keyNormalizada = normalizarTexto(key);
                 if (keyNormalizada === preguntaNormalizada) {
@@ -385,7 +514,7 @@
                 }
             }
 
-            // Búsqueda con variantes [O similares]
+            // 5. Búsqueda con variantes [O similares]
             for (let key in respuestasData) {
                 if (key.includes('[O similares]')) {
                     const variantes = key.split('[O similares]').map(v => normalizarTexto(v.trim()));
@@ -401,7 +530,7 @@
             return null;
         }
 
-        function agregarMensaje(texto, tipo) {
+        function agregarMensaje(texto, tipo, preguntaOriginal = null) {
             const chatbox = document.getElementById('chatbox');
             const mensaje = document.createElement('div');
             mensaje.className = `message ${tipo}-message`;
@@ -413,6 +542,21 @@
                         <span>Procesando...</span>
                     </div>
                 `;
+            } else if (tipo === 'error' && preguntaOriginal) {
+                const textoDiv = document.createElement('div');
+                textoDiv.className = 'text';
+                
+                const mensajeTexto = document.createElement('div');
+                mensajeTexto.textContent = texto;
+                textoDiv.appendChild(mensajeTexto);
+                
+                const btnAgregar = document.createElement('button');
+                btnAgregar.className = 'add-response-btn';
+                btnAgregar.textContent = '➕ Agregar respuesta';
+                btnAgregar.onclick = () => mostrarFormularioRespuesta(textoDiv, preguntaOriginal);
+                textoDiv.appendChild(btnAgregar);
+                
+                mensaje.appendChild(textoDiv);
             } else {
                 const textoDiv = document.createElement('div');
                 textoDiv.className = 'text';
@@ -424,6 +568,54 @@
             chatbox.scrollTop = chatbox.scrollHeight;
 
             return mensaje;
+        }
+
+        function mostrarFormularioRespuesta(contenedor, preguntaOriginal) {
+            const formulario = document.createElement('div');
+            formulario.className = 'response-input-area';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'response-input';
+            input.placeholder = 'Escribe la respuesta...';
+            
+            const botones = document.createElement('div');
+            botones.className = 'response-buttons';
+            
+            const btnGuardar = document.createElement('button');
+            btnGuardar.className = 'save-btn';
+            btnGuardar.textContent = '✓ Guardar';
+            btnGuardar.onclick = () => {
+                const respuesta = input.value.trim();
+                if (!respuesta) {
+                    alert('Por favor escribe una respuesta');
+                    return;
+                }
+                
+                if (verificarPalabrasAltisonantes(respuesta)) {
+                    agregarMensaje('❌ La respuesta contiene palabras inapropiadas y ha sido rechazada', 'error');
+                    formulario.remove();
+                    return;
+                }
+                
+                guardarRespuestaPersonalizada(preguntaOriginal, respuesta);
+                agregarMensaje(`✓ Respuesta guardada correctamente. Ahora cuando preguntes "${preguntaOriginal}" te responderé: "${respuesta}"`, 'success');
+                formulario.remove();
+            };
+            
+            const btnCancelar = document.createElement('button');
+            btnCancelar.className = 'cancel-btn';
+            btnCancelar.textContent = '✗ Cancelar';
+            btnCancelar.onclick = () => formulario.remove();
+            
+            botones.appendChild(btnGuardar);
+            botones.appendChild(btnCancelar);
+            
+            formulario.appendChild(input);
+            formulario.appendChild(botones);
+            
+            contenedor.appendChild(formulario);
+            input.focus();
         }
 
         async function sendMessage() {
@@ -447,7 +639,7 @@
                 agregarMensaje(respuesta, 'bot');
             } else {
                 const errorMsg = 'Parece que hubo un error al contestar está pregunta. Obtén más información en https://yalmil.pages.dev/errors (Error-101 o 204)';
-                agregarMensaje(errorMsg, 'error');
+                agregarMensaje(errorMsg, 'error', pregunta);
             }
 
             input.focus();
