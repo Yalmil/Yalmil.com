@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test de IQ - Yalmil.com</title>
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Test de IQ interactivo para medir tu coeficiente intelectual con preguntas de lógica, matemáticas y razonamiento" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .question-section {
+      display: none;
+    }
+
+    .question-section.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .question {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .question h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .option:hover {
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+
+    .option.selected {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .progress {
+      background: #e0e0e0;
+      height: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 100%;
+      transition: width 0.5s;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: transform 0.3s;
+      display: block;
+      margin: 20px auto;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-section {
+      display: none;
+      text-align: center;
+    }
+
+    .result-section.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+
+    .iq-score {
+      font-size: 5em;
+      font-weight: bold;
+      color: #667eea;
+      margin: 30px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .result-description {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+
+    .intro-section {
+      text-align: center;
+    }
+
+    .intro-section p {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 Test de IQ</h1>
+    <p class="subtitle">Descubre tu coeficiente intelectual</p>
+
+    <div class="intro-section active" id="intro">
+      <p>Este test evaluará tu capacidad de razonamiento lógico, matemático y espacial a través de 10 preguntas cuidadosamente seleccionadas.</p>
+      <p><strong>Duración estimada:</strong> 5-10 minutos</p>
+      <button class="btn" onclick="startTest()">Comenzar Test</button>
+    </div>
+
+    <div id="test-container" style="display: none;">
+      <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="question-section active" id="q1">
+        <div class="question">
+          <h3>1. ¿Qué número continúa la serie? 2, 4, 8, 16, __</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(1, 'a')">A) 24</div>
+            <div class="option" onclick="selectAnswer(1, 'b')">B) 32</div>
+            <div class="option" onclick="selectAnswer(1, 'c')">C) 20</div>
+            <div class="option" onclick="selectAnswer(1, 'd')">D) 28</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q2">
+        <div class="question">
+          <h3>2. Si todos los Bloops son Razzies y todos los Razzies son Lazzies, entonces todos los Bloops son definitivamente Lazzies.</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(2, 'a')">A) Verdadero</div>
+            <div class="option" onclick="selectAnswer(2, 'b')">B) Falso</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q3">
+        <div class="question">
+          <h3>3. ¿Qué palabra no pertenece al grupo?</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(3, 'a')">A) Perro</div>
+            <div class="option" onclick="selectAnswer(3, 'b')">B) Gato</div>
+            <div class="option" onclick="selectAnswer(3, 'c')">C) León</div>
+            <div class="option" onclick="selectAnswer(3, 'd')">D) Mesa</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q4">
+        <div class="question">
+          <h3>4. Si 5 máquinas hacen 5 productos en 5 minutos, ¿cuánto tiempo tardarán 100 máquinas en hacer 100 productos?</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(4, 'a')">A) 100 minutos</div>
+            <div class="option" onclick="selectAnswer(4, 'b')">B) 5 minutos</div>
+            <div class="option" onclick="selectAnswer(4, 'c')">C) 20 minutos</div>
+            <div class="option" onclick="selectAnswer(4, 'd')">D) 50 minutos</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q5">
+        <div class="question">
+          <h3>5. ¿Qué número falta? 3, 6, 11, 18, 27, __</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(5, 'a')">A) 36</div>
+            <div class="option" onclick="selectAnswer(5, 'b')">B) 38</div>
+            <div class="option" onclick="selectAnswer(5, 'c')">C) 35</div>
+            <div class="option" onclick="selectAnswer(5, 'd')">D) 40</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q6">
+        <div class="question">
+          <h3>6. LIBRO es a LECTURA como TENEDOR es a:</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(6, 'a')">A) Cuchara</div>
+            <div class="option" onclick="selectAnswer(6, 'b')">B) Comida</div>
+            <div class="option" onclick="selectAnswer(6, 'c')">C) Plato</div>
+            <div class="option" onclick="selectAnswer(6, 'd')">D) Cocina</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q7">
+        <div class="question">
+          <h3>7. Si reorganizas las letras "CIFAPI" obtienes el nombre de:</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(7, 'a')">A) Un país</div>
+            <div class="option" onclick="selectAnswer(7, 'b')">B) Un animal</div>
+            <div class="option" onclick="selectAnswer(7, 'c')">C) Un océano</div>
+            <div class="option" onclick="selectAnswer(7, 'd')">D) Una ciudad</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q8">
+        <div class="question">
+          <h3>8. ¿Qué número debería reemplazar el signo de interrogación? 4, 9, 16, 25, 36, ?</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(8, 'a')">A) 42</div>
+            <div class="option" onclick="selectAnswer(8, 'b')">B) 45</div>
+            <div class="option" onclick="selectAnswer(8, 'c')">C) 49</div>
+            <div class="option" onclick="selectAnswer(8, 'd')">D) 48</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q9">
+        <div class="question">
+          <h3>9. María es más alta que Juan. Pedro es más bajo que Juan. ¿Quién es el más bajo?</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(9, 'a')">A) María</div>
+            <div class="option" onclick="selectAnswer(9, 'b')">B) Juan</div>
+            <div class="option" onclick="selectAnswer(9, 'c')">C) Pedro</div>
+            <div class="option" onclick="selectAnswer(9, 'd')">D) No se puede determinar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section" id="q10">
+        <div class="question">
+          <h3>10. ¿Qué viene después en la secuencia? A, C, F, J, O, __</h3>
+          <div class="options">
+            <div class="option" onclick="selectAnswer(10, 'a')">A) S</div>
+            <div class="option" onclick="selectAnswer(10, 'b')">B) T</div>
+            <div class="option" onclick="selectAnswer(10, 'c')">C) U</div>
+            <div class="option" onclick="selectAnswer(10, 'd')">D) V</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Siguiente</button>
+    </div>
+
+    <div class="result-section" id="results">
+      <h2>¡Test Completado!</h2>
+      <div class="iq-score" id="iqScore">0</div>
+      <p><strong>Tu Coeficiente Intelectual</strong></p>
+      <div class="result-description" id="resultDesc"></div>
+      <button class="btn" onclick="location.reload()">Repetir Test</button>
+    </div>
+  </div>
+
+  <script>
+    const answers = {};
+    const correctAnswers = {
+      1: 'b', 2: 'a', 3: 'd', 4: 'b', 5: 'b',
+      6: 'b', 7: 'c', 8: 'c', 9: 'c', 10: 'c'
+    };
+    let currentQuestion = 1;
+    const totalQuestions = 10;
+
+    function startTest() {
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('test-container').style.display = 'block';
+      updateProgress();
+    }
+
+    function selectAnswer(question, answer) {
+      answers[question] = answer;
+      
+      const options = document.querySelectorAll(`#q${question} .option`);
+      options.forEach(opt => opt.classList.remove('selected'));
+      event.target.classList.add('selected');
+      
+      document.getElementById('nextBtn').disabled = false;
+    }
+
+    function nextQuestion() {
+      document.getElementById(`q${currentQuestion}`).classList.remove('active');
+      currentQuestion++;
+      
+      if (currentQuestion <= totalQuestions) {
+        document.getElementById(`q${currentQuestion}`).classList.add('active');
+        document.getElementById('nextBtn').disabled = true;
+        updateProgress();
+      } else {
+        showResults();
+      }
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    function showResults() {
+      document.getElementById('test-container').style.display = 'none';
+      document.getElementById('results').classList.add('active');
+      
+      let correctCount = 0;
+      for (let i = 1; i <= totalQuestions; i++) {
+        if (answers[i] === correctAnswers[i]) {
+          correctCount++;
+        }
+      }
+      
+      const iq = Math.round(85 + (correctCount * 3.5));
+      document.getElementById('iqScore').textContent = iq;
+      
+      let description = '';
+      if (iq >= 130) {
+        description = '🌟 <strong>Excepcional:</strong> Tu puntuación indica un nivel de inteligencia muy superior al promedio. Tienes excelentes habilidades de razonamiento lógico y resolución de problemas.';
+      } else if (iq >= 115) {
+        description = '🎯 <strong>Superior:</strong> Tu puntuación está por encima del promedio. Tienes muy buenas capacidades cognitivas y de análisis.';
+      } else if (iq >= 100) {
+        description = '✅ <strong>Promedio Alto:</strong> Tu puntuación está en el rango promedio-alto. Tienes buenas habilidades de razonamiento.';
+      } else if (iq >= 85) {
+        description = '📊 <strong>Promedio:</strong> Tu puntuación está en el rango promedio. Con práctica puedes mejorar tus habilidades cognitivas.';
+      } else {
+        description = '💪 <strong>En desarrollo:</strong> Hay espacio para mejorar. La práctica regular de ejercicios mentales puede ayudarte a desarrollar tus habilidades.';
+      }
+      
+      description += `<br><br>Respondiste correctamente <strong>${correctCount} de ${totalQuestions}</strong> preguntas.`;
+      document.getElementById('resultDesc').innerHTML = description;
+    }
+  </script>
+</body>
+  </html>
