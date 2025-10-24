@@ -10,172 +10,243 @@
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
-  <style>
+<style>
     * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .container {
-      background: white;
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        max-width: 1200px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
     }
 
     h1 {
-      color: #667eea;
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 2.5em;
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #667eea;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        opacity: 0.9;
     }
 
     .question-section {
-      display: none;
+        display: none;
     }
 
     .question-section.active {
-      display: block;
-      animation: fadeIn 0.5s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+        display: block;
+        animation: fadeIn 0.5s;
     }
 
     .question {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border-left: 4px solid #667eea;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
     }
 
     .question h3 {
-      color: #333;
-      margin-bottom: 15px;
-      font-size: 1.2em;
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
     }
 
     .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .option {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      border: 2px solid #ddd;
-      cursor: pointer;
-      transition: all 0.3s;
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px solid #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
     .option:hover {
-      border-color: #667eea;
-      transform: translateX(5px);
+        border-color: #667eea;
+        transform: translateX(5px);
     }
 
     .option.selected {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-color: #667eea;
     }
 
     .progress {
-      background: #e0e0e0;
-      height: 10px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      overflow: hidden;
+        background: #e0e0e0;
+        height: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        overflow: hidden;
     }
 
     .progress-bar {
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      height: 100%;
-      transition: width 0.5s;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        height: 100%;
+        transition: width 0.5s;
     }
 
     .btn {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      border-radius: 10px;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: transform 0.3s;
-      display: block;
-      margin: 20px auto;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        margin: 20px auto;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .btn:hover {
-      transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:active {
+        transform: translateY(0);
     }
 
     .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .result-section {
-      display: none;
-      text-align: center;
+        display: none;
+        text-align: center;
     }
 
     .result-section.active {
-      display: block;
-      animation: fadeIn 0.5s;
+        display: block;
+        animation: fadeIn 0.5s;
     }
 
     .iq-score {
-      font-size: 5em;
-      font-weight: bold;
-      color: #667eea;
-      margin: 30px 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        font-size: 5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin: 30px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
 
     .result-description {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      line-height: 1.6;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        line-height: 1.6;
+    }
+
+    .input-section {
+        margin-bottom: 30px;
+    }
+
+    .input-label {
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    #htmlInput {
+        width: 100%;
+        min-height: 200px;
+        padding: 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        background: #f8f9fa;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    #htmlInput:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .intro-section {
-      text-align: center;
+        text-align: center;
     }
 
     .intro-section p {
-      color: #666;
-      line-height: 1.8;
-      margin-bottom: 20px;
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 20px;
     }
-  </style>
-</head>
+
+    @media (max-width: 768px) {
+        .container {
+            margin: 10px;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        #htmlInput {
+            min-height: 150px;
+            padding: 15px;
+        }
+
+        .question h3 {
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+    }
+</style></head>
 <body>
   <div class="container">
     <h1>🧠 Test de IQ</h1>
