@@ -540,6 +540,10 @@
     const db = getDatabase(app);
     const storage = getStorage(app);
     const provider = new GoogleAuthProvider();
+    
+    // Persistir sesión
+    import { setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    setPersistence(auth, browserLocalPersistence);
 
     let currentUser = null;
     let selectedMedia = [];
@@ -789,7 +793,16 @@
         postBtn.disabled = true;
         postBtn.textContent = 'Publicando...';
 
-        const userData = (await get(ref(db, `users/${currentUser.uid}`))).val();
+        const userSnapshot = await get(ref(db, `users/${currentUser.uid}`));
+        const userData = userSnapshot.val();
+        
+        if (!userData) {
+          alert('Error: No se encontró tu perfil. Por favor configura tu perfil primero.');
+          postBtn.disabled = false;
+          postBtn.textContent = 'Publicar';
+          return;
+        }
+
         const mediaURLs = [];
 
         for (const media of selectedMedia) {
@@ -800,13 +813,13 @@
         }
 
         const postData = {
-          text,
+          text: text,
           media: mediaURLs,
           author: {
             uid: currentUser.uid,
-            name: userData.name,
-            username: userData.username,
-            photoURL: userData.photoURL
+            name: userData.name || currentUser.displayName || 'Usuario',
+            username: userData.username || '@usuario',
+            photoURL: userData.photoURL || currentUser.photoURL || ''
           },
           timestamp: serverTimestamp()
         };
@@ -861,6 +874,11 @@
         minute: '2-digit'
       }) : 'Ahora';
 
+      // Validación de datos del autor
+      const authorName = post.author?.name || 'Usuario';
+      const authorUsername = post.author?.username || '@usuario';
+      const authorPhoto = post.author?.photoURL || 'https://via.placeholder.com/48';
+
       let mediaHTML = '';
       if (post.media && post.media.length > 0) {
         mediaHTML = '<div class="post-media">';
@@ -876,11 +894,11 @@
 
       div.innerHTML = `
         <div class="post-header">
-          <img class="user-avatar" src="${post.author.photoURL}" alt="${post.author.name}">
+          <img class="user-avatar" src="${authorPhoto}" alt="${authorName}">
           <div class="post-user-info">
             <div>
-              <span class="post-user-name">${post.author.name}</span>
-              <span class="post-user-handle">${post.author.username}</span>
+              <span class="post-user-name">${authorName}</span>
+              <span class="post-user-handle">${authorUsername}</span>
             </div>
             <div class="post-timestamp">${date}</div>
           </div>
