@@ -395,28 +395,33 @@
         const snapshot = await get(stateRef);
         let currentIndex = 0;
         let currentGrid = 1;
+        let baseTimestamp = Date.now();
 
         if (snapshot.exists()) {
           const state = snapshot.val();
-          currentIndex = state.currentIndex || 0;
-          currentGrid = state.currentGrid || 1;
-          console.log('✓ Estado cargado desde Firebase:', currentIndex);
+          const savedIndex = state.currentIndex || 0;
+          const savedGrid = state.currentGrid || 1;
+          const savedTime = state.lastUpdate || Date.now();
           
-          // Verificar si hay un líder activo (última actualización menor a 10 segundos)
-          const lastUpdate = state.lastUpdate || 0;
-          const timeSinceUpdate = Date.now() - lastUpdate;
+          // Calcular píxeles generados mientras nadie estaba conectado
+          const timeElapsed = Date.now() - savedTime;
+          const pixelsPerSecond = 5000; // Velocidad de generación
+          const pixelsGenerated = Math.floor((timeElapsed / 1000) * pixelsPerSecond);
           
-          if (timeSinceUpdate > 10000) {
-            // No hay líder activo, este usuario será el líder
-            isLeader = true;
-            console.log('🎯 Convirtiéndose en líder (líder anterior inactivo)');
-          } else {
-            console.log('👁️ Modo espectador - hay un líder activo');
-          }
+          currentIndex = savedIndex + pixelsGenerated;
+          const pos = getPositionFromIndex(currentIndex);
+          currentGrid = pos.grid;
+          
+          console.log(`✓ Estado cargado - Tiempo offline: ${Math.floor(timeElapsed/1000)}s`);
+          console.log(`✓ Píxeles generados offline: ${pixelsGenerated.toLocaleString()}`);
+          console.log(`✓ Índice calculado: ${currentIndex.toLocaleString()}`);
+          
+          baseTimestamp = savedTime;
+          isLeader = true; // Siempre ser líder para actualizar el estado
         } else {
           console.log('✓ Creando nuevo estado en Firebase');
           isLeader = true;
-          console.log('🎯 Este es el primer usuario - se convierte en líder');
+          console.log('🎯 Este es el primer usuario - iniciando desde cero');
         }
 
         document.getElementById('statusText').textContent = 'Cargando visualización...';
@@ -425,7 +430,7 @@
         drawCurrentGrid(currentIndex, currentGrid);
         updateInfo(currentIndex);
 
-        document.getElementById('statusText').textContent = isLeader ? '✓ Generando - Líder activo' : '✓ Sincronizado - Espectador';
+        document.getElementById('statusText').textContent = '✓ Generando píxeles continuamente';
         document.getElementById('syncIndicator').className = 'sync-indicator';
 
         // Escuchar cambios en tiempo real
