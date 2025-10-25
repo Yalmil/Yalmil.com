@@ -1,1 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- LÍNEAS REQUERIDAS -->
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="aqui pon un texto relacionado al html" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <title>Yalmil.com - Sobre mí</title>
+
+  <style>
+    /* Tipografía y reset ligero */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg, #0f1724, #1f2937);
+      color: #e6eef8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0b1220, #112033);
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    }
+
+    header h1 { color: #ffd28a; font-size: 1.35rem; margin-bottom: 0.25rem; }
+    header p { color: #cfe6ff; font-size: 0.88rem; opacity: 0.95; }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .terms {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      padding: 1.25rem;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: calc(100vh - 10rem);
+    }
+
+    .terms h2 { color: #ffd28a; margin-bottom: 0.5rem; font-size: 1.05rem; }
+    .terms h3 { color: #fff; margin-top: 0.75rem; margin-bottom: 0.25rem; font-size: 0.95rem; }
+    .terms p, .terms li {
+      color: #dbeeff;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .terms ol { margin-left: 1rem; margin-bottom: 0.5rem; }
+    .terms li { margin-bottom: 0.45rem; }
+
+    aside {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      padding: 1rem;
+      border-radius: 10px;
+      height: fit-content;
+    }
+
+    .meta { font-size: 0.85rem; color: #cfe6ff; margin-bottom: 0.5rem; }
+    .meta strong { color: #ffd28a; }
+
+    footer {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #a9c6e6;
+      padding: 0.75rem;
+      background: transparent;
+    }
+
+    a.contact {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    }
+
+    @media (max-width: 880px) {
+      main { grid-template-columns: 1fr; }
+      .terms { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NSC</h1>
+  </header>
+<h2>Traduzco mods de Minecraft, me gusta programar (Se Luau, html, css, Javascript y BDSCRIPT</h2>
+<h3>Mi color favorito es morado, país Perú (México) y nsc, si quieres preguntarme algo más mándame un correo</h3>
+  <main>
+
+      <div style="margin-top:0.6rem">
+        <div style="font-weight:600; margin-bottom:0.4rem">Contacto</div>
+        <div style="font-size:0.9rem; color:#dbeeff">Correo: yalmil63@gmail.com</div>
+        <a class="contact" href="mailto:yalmil63@gmail.com">Enviar mensaje</a>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    &copy; 2025 Yalmil.com – Todos los derechos reservados.
+  </footer>
+
+  <!-- Lineas innecesarias -->
+  <script>
+    (function() {
+      console.debug('Ola');
+    })();
+  </script>
+</body>
+</html>
