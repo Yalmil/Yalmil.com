@@ -75,6 +75,12 @@
 
     .google-btn:hover {
       transform: scale(1.05);
+      background: #f8f8f8;
+    }
+
+    .google-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     /* Profile Setup */
@@ -425,6 +431,15 @@
       padding: 20px;
       color: #536471;
     }
+
+    .error-message {
+      background: #f44336;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -442,6 +457,7 @@
         </svg>
         Iniciar sesión con Google
       </button>
+      <div id="loginError"></div>
     </div>
   </div>
 
@@ -518,6 +534,7 @@
       measurementId: "G-M5CBRMJ9BN"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
@@ -532,6 +549,7 @@
     const profileSetup = document.getElementById('profileSetup');
     const mainApp = document.getElementById('mainApp');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const loginError = document.getElementById('loginError');
     const logoutBtn = document.getElementById('logoutBtn');
 
     // Profile Setup Elements
@@ -555,47 +573,83 @@
     // Google Login
     googleLoginBtn.addEventListener('click', async () => {
       try {
-        await signInWithPopup(auth, provider);
+        googleLoginBtn.disabled = true;
+        googleLoginBtn.textContent = 'Iniciando sesión...';
+        loginError.innerHTML = '';
+        
+        const result = await signInWithPopup(auth, provider);
+        console.log('Login exitoso:', result.user);
+        
       } catch (error) {
         console.error('Error en login:', error);
-        alert('Error al iniciar sesión');
+        googleLoginBtn.disabled = false;
+        googleLoginBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Iniciar sesión con Google
+        `;
+        
+        let errorMessage = 'Error al iniciar sesión. ';
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage += 'Por favor permite ventanas emergentes en tu navegador.';
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage += 'Ventana cerrada. Intenta nuevamente.';
+        } else {
+          errorMessage += error.message;
+        }
+        
+        loginError.innerHTML = `<div class="error-message">${errorMessage}</div>`;
       }
     });
 
     // Auth State Observer
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        console.log('Usuario autenticado:', user);
         currentUser = user;
         const userRef = ref(db, `users/${user.uid}`);
-        const snapshot = await get(userRef);
         
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          showMainApp(userData);
-        } else {
+        try {
+          const snapshot = await get(userRef);
+          
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            console.log('Perfil encontrado:', userData);
+            showMainApp(userData);
+          } else {
+            console.log('Perfil no encontrado, mostrando configuración');
+            showProfileSetup(user);
+          }
+        } catch (error) {
+          console.error('Error verificando perfil:', error);
           showProfileSetup(user);
         }
       } else {
+        console.log('Usuario no autenticado');
         showLogin();
       }
     });
 
     function showLogin() {
-      loginScreen.classList.remove('hidden');
-      profileSetup.classList.add('hidden');
-      mainApp.classList.add('hidden');
+      loginScreen.style.display = 'flex';
+      profileSetup.style.display = 'none';
+      mainApp.style.display = 'none';
     }
 
     function showProfileSetup(user) {
-      loginScreen.classList.add('hidden');
+      loginScreen.style.display = 'none';
       profileSetup.style.display = 'block';
-      mainApp.classList.add('hidden');
+      mainApp.style.display = 'none';
       
       nameInput.value = user.displayName || '';
     }
 
     function showMainApp(userData) {
-      loginScreen.classList.add('hidden');
+      loginScreen.style.display = 'none';
       profileSetup.style.display = 'none';
       mainApp.style.display = 'block';
       
@@ -661,7 +715,7 @@
         showMainApp(userData);
       } catch (error) {
         console.error('Error guardando perfil:', error);
-        alert('Error al guardar el perfil');
+        alert('Error al guardar el perfil: ' + error.message);
         saveProfileBtn.disabled = false;
         saveProfileBtn.textContent = 'Guardar perfil';
       }
@@ -739,4 +793,115 @@
         const mediaURLs = [];
 
         for (const media of selectedMedia) {
-          const mediaRef = storageRef(storage, `posts/${currentUser.uid}/${Date.now(
+          const mediaRef = storageRef(storage, `posts/${currentUser.uid}/${Date.now()}_${media.file.name}`);
+          await uploadBytes(mediaRef, media.file);
+          const url = await getDownloadURL(mediaRef);
+          mediaURLs.push({ type: media.type, url });
+        }
+
+        const postData = {
+          text,
+          media: mediaURLs,
+          author: {
+            uid: currentUser.uid,
+            name: userData.name,
+            username: userData.username,
+            photoURL: userData.photoURL
+          },
+          timestamp: serverTimestamp()
+        };
+
+        await push(ref(db, 'posts'), postData);
+        
+        postTextarea.value = '';
+        selectedMedia = [];
+        renderMediaPreviews();
+        postBtn.disabled = false;
+        postBtn.textContent = 'Publicar';
+      } catch (error) {
+        console.error('Error publicando:', error);
+        alert('Error al publicar: ' + error.message);
+        postBtn.disabled = false;
+        postBtn.textContent = 'Publicar';
+      }
+    });
+
+    // Load Posts
+    function loadPosts() {
+      const postsRef = ref(db, 'posts');
+      onValue(postsRef, (snapshot) => {
+        feed.innerHTML = '';
+        const posts = [];
+        
+        snapshot.forEach((child) => {
+          posts.push({ id: child.key, ...child.val() });
+        });
+
+        posts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        posts.forEach(post => {
+          const postEl = createPostElement(post);
+          feed.appendChild(postEl);
+        });
+
+        if (posts.length === 0) {
+          feed.innerHTML = '<div class="loading">No hay publicaciones aún. ¡Sé el primero en publicar!</div>';
+        }
+      });
+    }
+
+    function createPostElement(post) {
+      const div = document.createElement('div');
+      div.className = 'post';
+      
+      const date = post.timestamp ? new Date(post.timestamp).toLocaleString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : 'Ahora';
+
+      let mediaHTML = '';
+      if (post.media && post.media.length > 0) {
+        mediaHTML = '<div class="post-media">';
+        post.media.forEach(m => {
+          if (m.type === 'image') {
+            mediaHTML += `<img src="${m.url}" alt="Imagen">`;
+          } else if (m.type === 'video') {
+            mediaHTML += `<video src="${m.url}" controls></video>`;
+          }
+        });
+        mediaHTML += '</div>';
+      }
+
+      div.innerHTML = `
+        <div class="post-header">
+          <img class="user-avatar" src="${post.author.photoURL}" alt="${post.author.name}">
+          <div class="post-user-info">
+            <div>
+              <span class="post-user-name">${post.author.name}</span>
+              <span class="post-user-handle">${post.author.username}</span>
+            </div>
+            <div class="post-timestamp">${date}</div>
+          </div>
+        </div>
+        <div class="post-content">
+          ${post.text ? `<div class="post-text">${post.text}</div>` : ''}
+          ${mediaHTML}
+        </div>
+      `;
+
+      return div;
+    }
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    });
+  </script>
+</body>
+</html>
