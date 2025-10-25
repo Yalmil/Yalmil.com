@@ -240,8 +240,8 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getDatabase, ref, set, get, onValue, onDisconnect, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+    import { getDatabase, ref, set, get, onValue, onDisconnect, serverTimestamp, connectDatabaseEmulator } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -254,9 +254,18 @@
       measurementId: "G-M5CBRMJ9BN"
     };
 
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    let app, database;
+    
+    try {
+      // Inicializar Firebase
+      app = initializeApp(firebaseConfig);
+      database = getDatabase(app);
+      console.log('✓ Firebase inicializado correctamente');
+    } catch (error) {
+      console.error('Error inicializando Firebase:', error);
+      document.getElementById('statusText').textContent = '❌ Error de conexión';
+      document.getElementById('syncIndicator').className = 'sync-indicator offline';
+    }
 
     const canvas = document.getElementById('piCanvas');
     const ctx = canvas.getContext('2d');
@@ -340,123 +349,144 @@
     }
 
     async function startVisualization() {
+      if (!database) {
+        document.getElementById('statusText').textContent = '❌ Firebase no disponible';
+        document.getElementById('syncIndicator').className = 'sync-indicator offline';
+        return;
+      }
+
       piDigits = generatePiDigits();
       
-      const stateRef = ref(database, 'piVisualization/state');
-      const usersRef = ref(database, 'piVisualization/users');
-      const userRef = ref(database, `piVisualization/users/${userId}`);
+      try {
+        const stateRef = ref(database, 'piVisualization/state');
+        const usersRef = ref(database, 'piVisualization/users');
+        const userRef = ref(database, `piVisualization/users/${userId}`);
 
-      // Registrar usuario
-      await set(userRef, {
-        connected: true,
-        lastSeen: serverTimestamp()
-      });
-
-      // Configurar desconexión
-      onDisconnect(userRef).remove();
-
-      // Escuchar usuarios conectados
-      onValue(usersRef, (snapshot) => {
-        const users = snapshot.val();
-        const count = users ? Object.keys(users).length : 0;
-        document.getElementById('onlineUsers').textContent = `👥 ${count} usuario${count !== 1 ? 's' : ''} en línea`;
-      });
-
-      // Actualizar presencia cada 30 segundos
-      setInterval(() => {
-        set(userRef, {
+        console.log('Conectando a Firebase...');
+        
+        // Registrar usuario
+        await set(userRef, {
           connected: true,
           lastSeen: serverTimestamp()
         });
-      }, 30000);
 
-      // Obtener estado inicial
-      const snapshot = await get(stateRef);
-      let currentIndex = 0;
-      let currentGrid = 1;
+        console.log('✓ Usuario registrado en Firebase');
 
-      if (snapshot.exists()) {
-        const state = snapshot.val();
-        currentIndex = state.currentIndex || 0;
-        currentGrid = state.currentGrid || 1;
-        console.log('✓ Estado cargado desde Firebase:', currentIndex);
-      } else {
-        console.log('✓ Creando nuevo estado en Firebase');
-        isLeader = true;
-      }
+        // Configurar desconexión
+        onDisconnect(userRef).remove();
 
-      document.getElementById('statusText').textContent = 'Cargando visualización...';
-      
-      // Dibujar cuadrícula actual
-      drawCurrentGrid(currentIndex, currentGrid);
-      updateInfo(currentIndex);
+        // Escuchar usuarios conectados
+        onValue(usersRef, (snapshot) => {
+          const users = snapshot.val();
+          const count = users ? Object.keys(users).length : 0;
+          document.getElementById('onlineUsers').textContent = `👥 ${count} usuario${count !== 1 ? 's' : ''} en línea`;
+        });
 
-      document.getElementById('statusText').textContent = '✓ Sincronizado con Firebase';
-      document.getElementById('syncIndicator').className = 'sync-indicator';
+        // Actualizar presencia cada 30 segundos
+        setInterval(() => {
+          set(userRef, {
+            connected: true,
+            lastSeen: serverTimestamp()
+          });
+        }, 30000);
 
-      // Escuchar cambios en tiempo real
-      onValue(stateRef, (snapshot) => {
-        if (snapshot.exists() && !isLeader) {
+        // Obtener estado inicial
+        console.log('Obteniendo estado inicial...');
+        const snapshot = await get(stateRef);
+        let currentIndex = 0;
+        let currentGrid = 1;
+
+        if (snapshot.exists()) {
           const state = snapshot.val();
-          const newIndex = state.currentIndex || 0;
-          const newGrid = state.currentGrid || 1;
+          currentIndex = state.currentIndex || 0;
+          currentGrid = state.currentGrid || 1;
+          console.log('✓ Estado cargado desde Firebase:', currentIndex);
+        } else {
+          console.log('✓ Creando nuevo estado en Firebase');
+          isLeader = true;
+        }
 
-          if (newGrid !== currentGrid) {
-            currentGrid = newGrid;
-            drawCurrentGrid(newIndex, currentGrid);
-          } else {
-            // Dibujar solo los nuevos píxeles
-            for (let i = currentIndex; i < newIndex; i++) {
-              const pos = getPositionFromIndex(i);
-              if (pos.grid === currentGrid) {
-                const digit = piDigits[i % piDigits.length];
-                const color = colors[digit];
-                drawPixel(pos.x, pos.y, color);
+        document.getElementById('statusText').textContent = 'Cargando visualización...';
+        
+        // Dibujar cuadrícula actual
+        drawCurrentGrid(currentIndex, currentGrid);
+        updateInfo(currentIndex);
+
+        document.getElementById('statusText').textContent = '✓ Sincronizado con Firebase';
+        document.getElementById('syncIndicator').className = 'sync-indicator';
+
+        // Escuchar cambios en tiempo real
+        onValue(stateRef, (snapshot) => {
+          if (snapshot.exists() && !isLeader) {
+            const state = snapshot.val();
+            const newIndex = state.currentIndex || 0;
+            const newGrid = state.currentGrid || 1;
+
+            if (newGrid !== currentGrid) {
+              currentGrid = newGrid;
+              drawCurrentGrid(newIndex, currentGrid);
+            } else {
+              // Dibujar solo los nuevos píxeles
+              for (let i = currentIndex; i < newIndex; i++) {
+                const pos = getPositionFromIndex(i);
+                if (pos.grid === currentGrid) {
+                  const digit = piDigits[i % piDigits.length];
+                  const color = colors[digit];
+                  drawPixel(pos.x, pos.y, color);
+                }
               }
             }
+
+            currentIndex = newIndex;
+            updateInfo(currentIndex);
           }
+        });
 
-          currentIndex = newIndex;
-          updateInfo(currentIndex);
-        }
-      });
-
-      // Solo el líder genera nuevos píxeles
-      if (isLeader || !snapshot.exists()) {
-        isLeader = true;
-        console.log('🎯 Este usuario es el generador principal');
-        
-        async function generate() {
-          const batchSize = 5000;
+        // Solo el líder genera nuevos píxeles
+        if (isLeader || !snapshot.exists()) {
+          isLeader = true;
+          console.log('🎯 Este usuario es el generador principal');
           
-          for (let i = 0; i < batchSize; i++) {
-            const pos = getPositionFromIndex(currentIndex);
+          async function generate() {
+            const batchSize = 5000;
             
-            if (pos.grid !== currentGrid) {
-              currentGrid = pos.grid;
-              ctx.fillStyle = '#F0F0F0';
-              ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < batchSize; i++) {
+              const pos = getPositionFromIndex(currentIndex);
+              
+              if (pos.grid !== currentGrid) {
+                currentGrid = pos.grid;
+                ctx.fillStyle = '#F0F0F0';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+              }
+              
+              const digit = piDigits[currentIndex % piDigits.length];
+              const color = colors[digit];
+              drawPixel(pos.x, pos.y, color);
+              currentIndex++;
             }
             
-            const digit = piDigits[currentIndex % piDigits.length];
-            const color = colors[digit];
-            drawPixel(pos.x, pos.y, color);
-            currentIndex++;
+            updateInfo(currentIndex);
+            
+            // Guardar en Firebase cada lote
+            try {
+              await set(stateRef, {
+                currentIndex,
+                currentGrid,
+                lastUpdate: serverTimestamp()
+              });
+            } catch (error) {
+              console.error('Error guardando en Firebase:', error);
+            }
+            
+            requestAnimationFrame(generate);
           }
           
-          updateInfo(currentIndex);
-          
-          // Guardar en Firebase cada lote
-          await set(stateRef, {
-            currentIndex,
-            currentGrid,
-            lastUpdate: serverTimestamp()
-          });
-          
-          requestAnimationFrame(generate);
+          generate();
         }
-        
-        generate();
+      } catch (error) {
+        console.error('Error en startVisualization:', error);
+        document.getElementById('statusText').textContent = '❌ Error de conexión: ' + error.message;
+        document.getElementById('syncIndicator').className = 'sync-indicator offline';
       }
     }
 
