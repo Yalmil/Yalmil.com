@@ -115,10 +115,116 @@
   </div>
 
   <!-- Lineas innecesarias -->
-  <script>
-    (function() {
-      console.debug('Ola');
+<script>
+    // Este script está diseñado para ser totalmente innecesario
+    // Comentarios en español, porque somos elegantes y redundantes
+
+    // 1) rutina de bienvenida que solo calcula la longitud de las palabras del título
+    (function bienvenidaInnecesaria(){
+      const texto = document.querySelector('h1').innerText || '';
+      // calcular longitudes y guardarlas en un array que NUNCA usaremos
+      const longitudes = texto.split(' ').map(w => w.length);
+      console.log('Bienvenida innecesaria: longitudes ->', longitudes);
+      // hacemos una "decisión" basada en la suma, pero no la usamos
+      const suma = longitudes.reduce((a,b)=>a+b, 0);
+      if(suma % 2 === 0){
+        // crear y destruir un nodo por show
+        const n = document.createElement('div');
+        n.innerText = 'Paridad: par';
+        n.style.position = 'fixed';
+        n.style.left = '-9999px';
+        document.body.appendChild(n);
+        // lo eliminamos inmediatamente, porque así es más innecesario
+        document.body.removeChild(n);
+      }
     })();
+
+    // 2) función que cuando se activa genera "huevos de pascua" temporales invisibles
+    function generarHuevoDePascuaInvisible(count = 50){
+      const container = document.getElementById('spectator');
+      const created = [];
+      for(let i = 0; i < count; i++){
+        const d = document.createElement('span');
+        // posición aleatoria pero fuera de la vista
+        d.style.position = 'absolute';
+        d.style.left = (Math.random()*200 - 100) + 'vw';
+        d.style.top = (Math.random()*200 - 100) + 'vh';
+        d.textContent = '•';
+        container.appendChild(d);
+        created.push(d);
+      }
+      // esperar 300ms y limpiar todo sin que el usuario lo note
+      setTimeout(()=> {
+        created.forEach(el => el.remove());
+        console.log(`Se generaron y eliminaron ${created.length} huevos invisibles`);
+      }, 300);
+    }
+
+    // 3) función "ansiosa" que cada vez mide cuánto tarda en NO hacer nada
+    function medirNada(iteraciones = 1000){
+      const t0 = performance.now();
+      for(let i = 0; i < iteraciones; i++){
+        // operación inútil: invertir cadena y no usar el resultado
+        'innecesario'.split('').reverse().join('');
+      }
+      const t1 = performance.now();
+      console.log(`Medición de nada completa: ${(t1 - t0).toFixed(2)} ms para ${iteraciones} operaciones de nada`);
+      return t1 - t0;
+    }
+
+    // 4) función pública ligada al botón
+    document.getElementById('doNothingBtn').addEventListener('click', () => {
+      // 4.1: title alternante que vuelve al original cada 700ms (durante 3 segundos)
+      const originalTitle = document.title;
+      let ticks = 0;
+      const it = setInterval(() => {
+        document.title = Math.random().toString(36).slice(2,7); // título completamente irrelevante
+        ticks++;
+        if(ticks >= 4){
+          clearInterval(it);
+          document.title = originalTitle;
+          console.log('Título restaurado');
+        }
+      }, 700);
+
+      // 4.2: generar huevos invisibles
+      generarHuevoDePascuaInvisible(120);
+
+      // 4.3: medir nada y mostrar resultado en consola
+      const tiempo = medirNada(5000);
+      console.log(`Resultado final de la operación: nada en ${tiempo.toFixed(2)} ms`);
+
+      // 4.4: promesa que se resuelve con un mensaje absolutamente inútil
+      new Promise(resolve => {
+        setTimeout(()=> resolve('Promesa: nada relevante'), 420);
+      }).then(msg => {
+        // no mostramos al usuario, solo al log
+        console.log(msg);
+      });
+
+      // 4.5: efecto visual mínimo y temporal que desaparece después de 900ms
+      const badge = document.createElement('div');
+      badge.innerText = 'Innecesario ✔';
+      badge.style.position = 'fixed';
+      badge.style.right = '18px';
+      badge.style.bottom = '18px';
+      badge.style.padding = '8px 12px';
+      badge.style.borderRadius = '10px';
+      badge.style.background = 'rgba(255,255,255,0.03)';
+      badge.style.backdropFilter = 'blur(4px)';
+      badge.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
+      document.body.appendChild(badge);
+      setTimeout(()=> badge.remove(), 900);
+    });
+
+    // 5) rutina automática programada para ejecutarse una vez después de 2 segundos
+    setTimeout(()=> {
+      // consultar el ancho de la ventana y guardarlo en una variable nunca usada
+      const w = window.innerWidth;
+      console.log('Rutina automática: ancho de ventana medido ->', w);
+      // lanzar una medición "oculta" de nada
+      medirNada(2000);
+    }, 2000);
   </script>
 </body>
 </html>
