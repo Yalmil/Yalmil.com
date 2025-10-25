@@ -405,7 +405,7 @@
           
           // Calcular píxeles generados mientras nadie estaba conectado
           const timeElapsed = Date.now() - savedTime;
-          const pixelsPerSecond = 5000; // Velocidad de generación
+          const pixelsPerSecond = 50000; // Velocidad de generación aumentada 10x
           const pixelsGenerated = Math.floor((timeElapsed / 1000) * pixelsPerSecond);
           
           currentIndex = savedIndex + pixelsGenerated;
@@ -465,7 +465,7 @@
           console.log('🎯 Iniciando generación de píxeles...');
           
           async function generate() {
-            const batchSize = 5000;
+            const batchSize = 50000; // Aumentado 10x (era 5000)
             
             for (let i = 0; i < batchSize; i++) {
               const pos = getPositionFromIndex(currentIndex);
