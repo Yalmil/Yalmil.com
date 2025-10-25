@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yalmil Social</title>
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Red social estilo X donde puedes compartir fotos, videos y mensajes con tu comunidad" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #000;
+      color: #e7e9ea;
+      overflow-x: hidden;
+    }
+
+    /* Login Screen */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1da1f2 0%, #0c7abf 100%);
+    }
+
+    .login-box {
+      background: #000;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(29, 161, 242, 0.3);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .login-logo {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .login-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #fff;
+      color: #000;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+      width: 100%;
+    }
+
+    .google-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Profile Setup */
+    .profile-setup {
+      display: none;
+      min-height: 100vh;
+      padding: 20px;
+      background: #000;
+    }
+
+    .setup-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #16181c;
+      border-radius: 20px;
+      padding: 30px;
+    }
+
+    .setup-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .profile-photo-upload {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .photo-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #1da1f2;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-preview:hover::after {
+      content: '📷';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #8b98a5;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      background: #000;
+      border: 1px solid #2f3336;
+      border-radius: 8px;
+      color: #e7e9ea;
+      font-size: 16px;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #1da1f2;
+    }
+
+    .save-profile-btn {
+      width: 100%;
+      padding: 14px;
+      background: #1da1f2;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .save-profile-btn:hover {
+      background: #1a8cd8;
+    }
+
+    /* Main App */
+    .app-container {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #000;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(12px);
+      padding: 15px 20px;
+      border-bottom: 1px solid #2f3336;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #536471;
+      color: #e7e9ea;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .logout-btn:hover {
+      background: #16181c;
+    }
+
+    .post-composer {
+      padding: 20px;
+      border-bottom: 8px solid #2f3336;
+    }
+
+    .composer-top {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #1da1f2;
+    }
+
+    .composer-input {
+      flex: 1;
+    }
+
+    .post-textarea {
+      width: 100%;
+      min-height: 80px;
+      background: transparent;
+      border: none;
+      color: #e7e9ea;
+      font-size: 18px;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .post-textarea::placeholder {
+      color: #536471;
+    }
+
+    .media-preview-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .media-preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .media-preview-item img,
+    .media-preview-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-media {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.8);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid #2f3336;
+    }
+
+    .media-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .media-btn {
+      padding: 8px;
+      background: transparent;
+      border: none;
+      color: #1da1f2;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .media-btn:hover {
+      background: rgba(29,161,242,0.1);
+    }
+
+    .post-btn {
+      padding: 10px 20px;
+      background: #1da1f2;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .post-btn:hover {
+      background: #1a8cd8;
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .feed {
+      padding-bottom: 20px;
+    }
+
+    .post {
+      padding: 16px 20px;
+      border-bottom: 1px solid #2f3336;
+      transition: background 0.2s;
+    }
+
+    .post:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .post-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .post-user-info {
+      flex: 1;
+    }
+
+    .post-user-name {
+      font-weight: bold;
+      margin-right: 4px;
+    }
+
+    .post-user-handle {
+      color: #536471;
+    }
+
+    .post-timestamp {
+      color: #536471;
+      font-size: 14px;
+    }
+
+    .post-content {
+      margin-left: 60px;
+    }
+
+    .post-text {
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .post-media {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .post-media img,
+    .post-media video {
+      width: 100%;
+      max-height: 500px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #536471;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-container" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">🐦</div>
+      <h1 class="login-title">Yalmil Social</h1>
+      <button class="google-btn" id="googleLoginBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Iniciar sesión con Google
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Setup -->
+  <div class="profile-setup" id="profileSetup">
+    <div class="setup-container">
+      <h2 class="setup-title">Configura tu perfil</h2>
+      <div class="profile-photo-upload">
+        <div class="photo-preview" id="photoPreview">
+          👤
+        </div>
+        <input type="file" id="photoInput" accept="image/*">
+        <button class="google-btn" onclick="document.getElementById('photoInput').click()">
+          📷 Subir foto de perfil
+        </button>
+      </div>
+      <div class="input-group">
+        <label>Nombre completo</label>
+        <input type="text" id="nameInput" placeholder="Ej: Juan Pérez" required>
+      </div>
+      <div class="input-group">
+        <label>Nombre de usuario</label>
+        <input type="text" id="usernameInput" placeholder="@usuario" required>
+      </div>
+      <button class="save-profile-btn" id="saveProfileBtn">Guardar perfil</button>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app-container" id="mainApp">
+    <header class="app-header">
+      <h1 class="header-title">Inicio</h1>
+      <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+    </header>
+
+    <div class="post-composer">
+      <div class="composer-top">
+        <img class="user-avatar" id="composerAvatar" src="" alt="Avatar">
+        <div class="composer-input">
+          <textarea class="post-textarea" id="postTextarea" placeholder="¿Qué está pasando?"></textarea>
+          <div class="media-preview-container" id="mediaPreviewContainer"></div>
+        </div>
+      </div>
+      <div class="composer-actions">
+        <div class="media-buttons">
+          <button class="media-btn" id="addImageBtn" title="Agregar imagen">🖼️</button>
+          <button class="media-btn" id="addVideoBtn" title="Agregar video">🎥</button>
+        </div>
+        <button class="post-btn" id="postBtn">Publicar</button>
+      </div>
+      <input type="file" id="imageInput" accept="image/*" multiple>
+      <input type="file" id="videoInput" accept="video/*">
+    </div>
+
+    <div class="feed" id="feed">
+      <div class="loading">Cargando publicaciones...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getDatabase, ref, set, push, onValue, serverTimestamp, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630",
+      measurementId: "G-M5CBRMJ9BN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let selectedMedia = [];
+
+    // Elements
+    const loginScreen = document.getElementById('loginScreen');
+    const profileSetup = document.getElementById('profileSetup');
+    const mainApp = document.getElementById('mainApp');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Profile Setup Elements
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const nameInput = document.getElementById('nameInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+    // Composer Elements
+    const composerAvatar = document.getElementById('composerAvatar');
+    const postTextarea = document.getElementById('postTextarea');
+    const mediaPreviewContainer = document.getElementById('mediaPreviewContainer');
+    const addImageBtn = document.getElementById('addImageBtn');
+    const addVideoBtn = document.getElementById('addVideoBtn');
+    const imageInput = document.getElementById('imageInput');
+    const videoInput = document.getElementById('videoInput');
+    const postBtn = document.getElementById('postBtn');
+    const feed = document.getElementById('feed');
+
+    // Google Login
+    googleLoginBtn.addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error('Error en login:', error);
+        alert('Error al iniciar sesión');
+      }
+    });
+
+    // Auth State Observer
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          showMainApp(userData);
+        } else {
+          showProfileSetup(user);
+        }
+      } else {
+        showLogin();
+      }
+    });
+
+    function showLogin() {
+      loginScreen.classList.remove('hidden');
+      profileSetup.classList.add('hidden');
+      mainApp.classList.add('hidden');
+    }
+
+    function showProfileSetup(user) {
+      loginScreen.classList.add('hidden');
+      profileSetup.style.display = 'block';
+      mainApp.classList.add('hidden');
+      
+      nameInput.value = user.displayName || '';
+    }
+
+    function showMainApp(userData) {
+      loginScreen.classList.add('hidden');
+      profileSetup.style.display = 'none';
+      mainApp.style.display = 'block';
+      
+      composerAvatar.src = userData.photoURL || currentUser.photoURL;
+      loadPosts();
+    }
+
+    // Profile Photo Upload
+    let profilePhotoFile = null;
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        profilePhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Username validation
+    usernameInput.addEventListener('input', (e) => {
+      let value = e.target.value;
+      if (!value.startsWith('@')) {
+        value = '@' + value.replace(/@/g, '');
+      }
+      e.target.value = value;
+    });
+
+    // Save Profile
+    saveProfileBtn.addEventListener('click', async () => {
+      const name = nameInput.value.trim();
+      const username = usernameInput.value.trim();
+
+      if (!name || !username || username === '@') {
+        alert('Por favor completa todos los campos');
+        return;
+      }
+
+      try {
+        saveProfileBtn.disabled = true;
+        saveProfileBtn.textContent = 'Guardando...';
+
+        let photoURL = currentUser.photoURL;
+        
+        if (profilePhotoFile) {
+          const photoRef = storageRef(storage, `profile-photos/${currentUser.uid}`);
+          await uploadBytes(photoRef, profilePhotoFile);
+          photoURL = await getDownloadURL(photoRef);
+        }
+
+        const userData = {
+          uid: currentUser.uid,
+          name: name,
+          username: username,
+          photoURL: photoURL,
+          email: currentUser.email,
+          createdAt: serverTimestamp()
+        };
+
+        await set(ref(db, `users/${currentUser.uid}`), userData);
+        showMainApp(userData);
+      } catch (error) {
+        console.error('Error guardando perfil:', error);
+        alert('Error al guardar el perfil');
+        saveProfileBtn.disabled = false;
+        saveProfileBtn.textContent = 'Guardar perfil';
+      }
+    });
+
+    // Media Selection
+    addImageBtn.addEventListener('click', () => imageInput.click());
+    addVideoBtn.addEventListener('click', () => videoInput.click());
+
+    imageInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        if (selectedMedia.length < 4) {
+          selectedMedia.push({ type: 'image', file });
+          renderMediaPreviews();
+        }
+      });
+      e.target.value = '';
+    });
+
+    videoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && selectedMedia.length < 4) {
+        selectedMedia.push({ type: 'video', file });
+        renderMediaPreviews();
+      }
+      e.target.value = '';
+    });
+
+    function renderMediaPreviews() {
+      mediaPreviewContainer.innerHTML = '';
+      selectedMedia.forEach((media, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'media-preview-item';
+          
+          if (media.type === 'image') {
+            div.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
+            `;
+          } else {
+            div.innerHTML = `
+              <video src="${e.target.result}" controls></video>
+              <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
+            `;
+          }
+          
+          mediaPreviewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(media.file);
+      });
+    }
+
+    window.removeMedia = (index) => {
+      selectedMedia.splice(index, 1);
+      renderMediaPreviews();
+    };
+
+    // Create Post
+    postBtn.addEventListener('click', async () => {
+      const text = postTextarea.value.trim();
+      
+      if (!text && selectedMedia.length === 0) {
+        alert('Escribe algo o agrega una imagen/video');
+        return;
+      }
+
+      try {
+        postBtn.disabled = true;
+        postBtn.textContent = 'Publicando...';
+
+        const userData = (await get(ref(db, `users/${currentUser.uid}`))).val();
+        const mediaURLs = [];
+
+        for (const media of selectedMedia) {
+          const mediaRef = storageRef(storage, `posts/${currentUser.uid}/${Date.now(
