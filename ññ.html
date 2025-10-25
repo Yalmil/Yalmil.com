@@ -401,9 +401,22 @@
           currentIndex = state.currentIndex || 0;
           currentGrid = state.currentGrid || 1;
           console.log('✓ Estado cargado desde Firebase:', currentIndex);
+          
+          // Verificar si hay un líder activo (última actualización menor a 10 segundos)
+          const lastUpdate = state.lastUpdate || 0;
+          const timeSinceUpdate = Date.now() - lastUpdate;
+          
+          if (timeSinceUpdate > 10000) {
+            // No hay líder activo, este usuario será el líder
+            isLeader = true;
+            console.log('🎯 Convirtiéndose en líder (líder anterior inactivo)');
+          } else {
+            console.log('👁️ Modo espectador - hay un líder activo');
+          }
         } else {
           console.log('✓ Creando nuevo estado en Firebase');
           isLeader = true;
+          console.log('🎯 Este es el primer usuario - se convierte en líder');
         }
 
         document.getElementById('statusText').textContent = 'Cargando visualización...';
@@ -412,7 +425,7 @@
         drawCurrentGrid(currentIndex, currentGrid);
         updateInfo(currentIndex);
 
-        document.getElementById('statusText').textContent = '✓ Sincronizado con Firebase';
+        document.getElementById('statusText').textContent = isLeader ? '✓ Generando - Líder activo' : '✓ Sincronizado - Espectador';
         document.getElementById('syncIndicator').className = 'sync-indicator';
 
         // Escuchar cambios en tiempo real
@@ -443,9 +456,8 @@
         });
 
         // Solo el líder genera nuevos píxeles
-        if (isLeader || !snapshot.exists()) {
-          isLeader = true;
-          console.log('🎯 Este usuario es el generador principal');
+        if (isLeader) {
+          console.log('🎯 Iniciando generación de píxeles...');
           
           async function generate() {
             const batchSize = 5000;
@@ -457,6 +469,7 @@
                 currentGrid = pos.grid;
                 ctx.fillStyle = '#F0F0F0';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                console.log(`✓ Nueva cuadrícula: ${currentGrid}`);
               }
               
               const digit = piDigits[currentIndex % piDigits.length];
@@ -472,7 +485,7 @@
               await set(stateRef, {
                 currentIndex,
                 currentGrid,
-                lastUpdate: serverTimestamp()
+                lastUpdate: Date.now()
               });
             } catch (error) {
               console.error('Error guardando en Firebase:', error);
@@ -482,6 +495,8 @@
           }
           
           generate();
+        } else {
+          console.log('👁️ Modo espectador activado - viendo visualización en tiempo real');
         }
       } catch (error) {
         console.error('Error en startVisualization:', error);
