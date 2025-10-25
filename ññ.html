@@ -269,13 +269,16 @@
 
     async function saveState(currentIndex, currentGrid) {
       try {
-        await window.storage.set('pi-visualization-state', JSON.stringify({
+        const result = await window.storage.set('pi-visualization-state', JSON.stringify({
           currentIndex,
           currentGrid,
           lastUpdate: Date.now()
         }), true);
+        if (!result) {
+          console.log('Storage no disponible, usando modo local');
+        }
       } catch (e) {
-        console.log('No se pudo guardar el estado');
+        console.log('Storage no disponible, continuando en modo local');
       }
     }
 
@@ -339,17 +342,38 @@
       let currentIndex = state.currentIndex;
       let currentGrid = state.currentGrid;
       
-      // Dibujar estado actual
+      // Calcular posición actual
+      const currentPos = getPositionFromIndex(currentIndex);
+      
+      // Limpiar canvas
       ctx.fillStyle = '#F0F0F0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      document.getElementById('statusText').textContent = 'Generando visualización global...';
+      document.getElementById('statusText').textContent = 'Cargando visualización actual...';
       
-      // Dibujar todo el progreso actual de una vez
-      if (currentIndex > 0) {
-        await drawBatch(0, currentIndex, 1);
+      // Calcular el inicio de la cuadrícula actual
+      const currentGridStart = (currentGrid - 1) * gridSize * gridSize;
+      const pixelsInCurrentGrid = currentIndex - currentGridStart;
+      
+      // Solo dibujar los píxeles de la cuadrícula actual
+      if (pixelsInCurrentGrid > 0) {
+        for (let i = 0; i < pixelsInCurrentGrid; i++) {
+          const globalIndex = currentGridStart + i;
+          const x = i % gridSize;
+          const y = Math.floor(i / gridSize);
+          const digit = piDigits[globalIndex];
+          const color = colors[digit];
+          drawPixel(x, y, color);
+          
+          // Actualizar UI cada 10000 píxeles para mostrar progreso
+          if (i % 10000 === 0) {
+            updateInfo(globalIndex);
+            await new Promise(resolve => setTimeout(resolve, 0));
+          }
+        }
       }
       
+      updateInfo(currentIndex);
       document.getElementById('statusText').textContent = '✓ Sincronizado - Generando en tiempo real';
       
       // Continuar generando
@@ -420,4 +444,4 @@
     startVisualization();
   </script>
 </body>
-                                                                   </html>
+</html>
