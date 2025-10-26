@@ -1,11 +1,12 @@
 <colors=red,orange,purple,green,blue>
 <amount=7>
-<potion=red,orange,orange,purple>
-<potion=red,green,purple,blue>
-<potion=purple,orange,blue,green>
-<potion=orange,blue,red,red>
-<potion=green,blue,green,purple>
+<potion=red:orange,orange,purple>
+<potion=red:green,purple,blue>
+<potion=purple:orange,blue,green>
+<potion=orange:blue,red,red>
+<potion=green:blue,green,purple>
 <potion=>
 <potion=>
 <time=0>
+
 
