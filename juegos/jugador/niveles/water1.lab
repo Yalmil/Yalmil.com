@@ -4,7 +4,7 @@
 <potion=red:green,purple,blue>
 <potion=purple:orange,blue,green>
 <potion=orange:blue,red,red>
-<potion=green:blue,green,red>
+<potion=green:blue,green,purple>
 <potion=>
 <potion=>
-<time=100>
+<time=0>
