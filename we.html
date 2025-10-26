@@ -25,7 +25,6 @@
       overflow-x: hidden;
     }
 
-    /* Login Screen */
     .login-container {
       display: flex;
       align-items: center;
@@ -83,7 +82,6 @@
       cursor: not-allowed;
     }
 
-    /* Profile Setup */
     .profile-setup {
       display: none;
       min-height: 100vh;
@@ -186,7 +184,6 @@
       background: #1a8cd8;
     }
 
-    /* Main App */
     .app-container {
       display: none;
       max-width: 600px;
@@ -440,10 +437,16 @@
       margin-top: 10px;
       text-align: center;
     }
+
+    .file-limit-warning {
+      color: #ffa500;
+      font-size: 12px;
+      margin-top: 5px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <!-- Login Screen -->
   <div class="login-container" id="loginScreen">
     <div class="login-box">
       <div class="login-logo">🐦</div>
@@ -461,18 +464,16 @@
     </div>
   </div>
 
-  <!-- Profile Setup -->
   <div class="profile-setup" id="profileSetup">
     <div class="setup-container">
       <h2 class="setup-title">Configura tu perfil</h2>
       <div class="profile-photo-upload">
-        <div class="photo-preview" id="photoPreview">
-          👤
-        </div>
+        <div class="photo-preview" id="photoPreview">👤</div>
         <input type="file" id="photoInput" accept="image/*">
         <button class="google-btn" onclick="document.getElementById('photoInput').click()">
           📷 Subir foto de perfil
         </button>
+        <div class="file-limit-warning">Máximo 500KB</div>
       </div>
       <div class="input-group">
         <label>Nombre completo</label>
@@ -486,7 +487,6 @@
     </div>
   </div>
 
-  <!-- Main App -->
   <div class="app-container" id="mainApp">
     <header class="app-header">
       <h1 class="header-title">Inicio</h1>
@@ -508,6 +508,7 @@
         </div>
         <button class="post-btn" id="postBtn">Publicar</button>
       </div>
+      <div class="file-limit-warning">Máximo 2MB por imagen/video</div>
       <input type="file" id="imageInput" accept="image/*" multiple>
       <input type="file" id="videoInput" accept="video/*">
     </div>
@@ -519,9 +520,8 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { getDatabase, ref, set, push, onValue, serverTimestamp, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -534,36 +534,26 @@
       measurementId: "G-M5CBRMJ9BN"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const storage = getStorage(app);
-    const provider = new GoogleAuthProvider();
     
-    // Persistir sesión
-    import { setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     setPersistence(auth, browserLocalPersistence);
 
     let currentUser = null;
     let selectedMedia = [];
 
-    // Elements
     const loginScreen = document.getElementById('loginScreen');
     const profileSetup = document.getElementById('profileSetup');
     const mainApp = document.getElementById('mainApp');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     const loginError = document.getElementById('loginError');
     const logoutBtn = document.getElementById('logoutBtn');
-
-    // Profile Setup Elements
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
     const nameInput = document.getElementById('nameInput');
     const usernameInput = document.getElementById('usernameInput');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
-
-    // Composer Elements
     const composerAvatar = document.getElementById('composerAvatar');
     const postTextarea = document.getElementById('postTextarea');
     const mediaPreviewContainer = document.getElementById('mediaPreviewContainer');
@@ -574,15 +564,28 @@
     const postBtn = document.getElementById('postBtn');
     const feed = document.getElementById('feed');
 
-    // Google Login
+    // Función para comprimir y convertir a Base64
+    function fileToBase64(file, maxSizeKB = 2048) {
+      return new Promise((resolve, reject) => {
+        if (file.size > maxSizeKB * 1024) {
+          reject(new Error(`El archivo es demasiado grande. Máximo ${maxSizeKB}KB`));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     googleLoginBtn.addEventListener('click', async () => {
       try {
         googleLoginBtn.disabled = true;
         googleLoginBtn.textContent = 'Iniciando sesión...';
         loginError.innerHTML = '';
         
-        const result = await signInWithPopup(auth, provider);
-        console.log('Login exitoso:', result.user);
+        await signInWithPopup(auth, provider);
         
       } catch (error) {
         console.error('Error en login:', error);
@@ -610,10 +613,10 @@
       }
     });
 
-    // Auth State Observer
+    const provider = new GoogleAuthProvider();
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log('Usuario autenticado:', user);
         currentUser = user;
         const userRef = ref(db, `users/${user.uid}`);
         
@@ -621,11 +624,8 @@
           const snapshot = await get(userRef);
           
           if (snapshot.exists()) {
-            const userData = snapshot.val();
-            console.log('Perfil encontrado:', userData);
-            showMainApp(userData);
+            showMainApp(snapshot.val());
           } else {
-            console.log('Perfil no encontrado, mostrando configuración');
             showProfileSetup(user);
           }
         } catch (error) {
@@ -633,7 +633,6 @@
           showProfileSetup(user);
         }
       } else {
-        console.log('Usuario no autenticado');
         showLogin();
       }
     });
@@ -661,21 +660,25 @@
       loadPosts();
     }
 
-    // Profile Photo Upload
     let profilePhotoFile = null;
-    photoInput.addEventListener('change', (e) => {
+    photoInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (file) {
-        profilePhotoFile = file;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-        };
-        reader.readAsDataURL(file);
+        if (file.size > 500 * 1024) {
+          alert('La imagen es demasiado grande. Máximo 500KB');
+          return;
+        }
+        
+        try {
+          const base64 = await fileToBase64(file, 500);
+          profilePhotoFile = base64;
+          photoPreview.innerHTML = `<img src="${base64}" alt="Preview">`;
+        } catch (error) {
+          alert(error.message);
+        }
       }
     });
 
-    // Username validation
     usernameInput.addEventListener('input', (e) => {
       let value = e.target.value;
       if (!value.startsWith('@')) {
@@ -684,7 +687,6 @@
       e.target.value = value;
     });
 
-    // Save Profile
     saveProfileBtn.addEventListener('click', async () => {
       const name = nameInput.value.trim();
       const username = usernameInput.value.trim();
@@ -698,19 +700,11 @@
         saveProfileBtn.disabled = true;
         saveProfileBtn.textContent = 'Guardando...';
 
-        let photoURL = currentUser.photoURL;
-        
-        if (profilePhotoFile) {
-          const photoRef = storageRef(storage, `profile-photos/${currentUser.uid}`);
-          await uploadBytes(photoRef, profilePhotoFile);
-          photoURL = await getDownloadURL(photoRef);
-        }
-
         const userData = {
           uid: currentUser.uid,
           name: name,
           username: username,
-          photoURL: photoURL,
+          photoURL: profilePhotoFile || currentUser.photoURL,
           email: currentUser.email,
           createdAt: serverTimestamp()
         };
@@ -725,53 +719,80 @@
       }
     });
 
-    // Media Selection
     addImageBtn.addEventListener('click', () => imageInput.click());
     addVideoBtn.addEventListener('click', () => videoInput.click());
 
-    imageInput.addEventListener('change', (e) => {
+    imageInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
-      files.forEach(file => {
-        if (selectedMedia.length < 4) {
-          selectedMedia.push({ type: 'image', file });
-          renderMediaPreviews();
+      
+      for (const file of files) {
+        if (selectedMedia.length >= 4) {
+          alert('Máximo 4 archivos por publicación');
+          break;
         }
-      });
+        
+        if (file.size > 2 * 1024 * 1024) {
+          alert(`${file.name} es demasiado grande. Máximo 2MB`);
+          continue;
+        }
+        
+        try {
+          const base64 = await fileToBase64(file);
+          selectedMedia.push({ type: 'image', data: base64 });
+          renderMediaPreviews();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+      
       e.target.value = '';
     });
 
-    videoInput.addEventListener('change', (e) => {
+    videoInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
-      if (file && selectedMedia.length < 4) {
-        selectedMedia.push({ type: 'video', file });
-        renderMediaPreviews();
+      
+      if (!file) return;
+      
+      if (selectedMedia.length >= 4) {
+        alert('Máximo 4 archivos por publicación');
+        return;
       }
+      
+      if (file.size > 2 * 1024 * 1024) {
+        alert('El video es demasiado grande. Máximo 2MB');
+        return;
+      }
+      
+      try {
+        const base64 = await fileToBase64(file);
+        selectedMedia.push({ type: 'video', data: base64 });
+        renderMediaPreviews();
+      } catch (error) {
+        alert(error.message);
+      }
+      
       e.target.value = '';
     });
 
     function renderMediaPreviews() {
       mediaPreviewContainer.innerHTML = '';
       selectedMedia.forEach((media, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const div = document.createElement('div');
-          div.className = 'media-preview-item';
-          
-          if (media.type === 'image') {
-            div.innerHTML = `
-              <img src="${e.target.result}" alt="Preview">
-              <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
-            `;
-          } else {
-            div.innerHTML = `
-              <video src="${e.target.result}" controls></video>
-              <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
-            `;
-          }
-          
-          mediaPreviewContainer.appendChild(div);
-        };
-        reader.readAsDataURL(media.file);
+        const div = document.createElement('div');
+        div.className = 'media-preview-item';
+        
+        if (media.type === 'image') {
+          div.innerHTML = `
+            <img src="${media.data}" alt="Preview">
+            <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
+          `;
+        } else {
+          div.innerHTML = `
+            <video src="${media.data}" controls></video>
+            <button class="remove-media" onclick="window.removeMedia(${index})">✕</button>
+          `;
+        }
+        
+        mediaPreviewContainer.appendChild(div);
       });
     }
 
@@ -780,7 +801,6 @@
       renderMediaPreviews();
     };
 
-    // Create Post
     postBtn.addEventListener('click', async () => {
       const text = postTextarea.value.trim();
       
@@ -797,24 +817,15 @@
         const userData = userSnapshot.val();
         
         if (!userData) {
-          alert('Error: No se encontró tu perfil. Por favor configura tu perfil primero.');
+          alert('Error: No se encontró tu perfil.');
           postBtn.disabled = false;
           postBtn.textContent = 'Publicar';
           return;
         }
 
-        const mediaURLs = [];
-
-        for (const media of selectedMedia) {
-          const mediaRef = storageRef(storage, `posts/${currentUser.uid}/${Date.now()}_${media.file.name}`);
-          await uploadBytes(mediaRef, media.file);
-          const url = await getDownloadURL(mediaRef);
-          mediaURLs.push({ type: media.type, url });
-        }
-
         const postData = {
           text: text,
-          media: mediaURLs,
+          media: selectedMedia,
           author: {
             uid: currentUser.uid,
             name: userData.name || currentUser.displayName || 'Usuario',
@@ -831,6 +842,8 @@
         renderMediaPreviews();
         postBtn.disabled = false;
         postBtn.textContent = 'Publicar';
+        
+        console.log('¡Publicación exitosa!');
       } catch (error) {
         console.error('Error publicando:', error);
         alert('Error al publicar: ' + error.message);
@@ -839,7 +852,6 @@
       }
     });
 
-    // Load Posts
     function loadPosts() {
       const postsRef = ref(db, 'posts');
       onValue(postsRef, (snapshot) => {
@@ -874,7 +886,6 @@
         minute: '2-digit'
       }) : 'Ahora';
 
-      // Validación de datos del autor
       const authorName = post.author?.name || 'Usuario';
       const authorUsername = post.author?.username || '@usuario';
       const authorPhoto = post.author?.photoURL || 'https://via.placeholder.com/48';
@@ -884,9 +895,9 @@
         mediaHTML = '<div class="post-media">';
         post.media.forEach(m => {
           if (m.type === 'image') {
-            mediaHTML += `<img src="${m.url}" alt="Imagen">`;
+            mediaHTML += `<img src="${m.data}" alt="Imagen">`;
           } else if (m.type === 'video') {
-            mediaHTML += `<video src="${m.url}" controls></video>`;
+            mediaHTML += `<video src="${m.data}" controls></video>`;
           }
         });
         mediaHTML += '</div>';
@@ -912,7 +923,6 @@
       return div;
     }
 
-    // Logout
     logoutBtn.addEventListener('click', async () => {
       try {
         await signOut(auth);
