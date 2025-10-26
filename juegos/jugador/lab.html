@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Juego de Pociones - Water Sort</title>
+
+  <!-- LÍNEAS REQUERIDAS -->
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Puzzle de pociones estilo Water Sort — organiza las capas por color" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root{
+      --bg: #0f1724;
+      --panel: rgba(255,255,255,0.04);
+      --accent: #d97706;
+      --glass-width: 90px;
+      --glass-height: 260px;
+      --capacity: 4; /* Valor por defecto visual (se adapta al nivel en JS) */
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial; background: linear-gradient(180deg,#0b1220,#071027); color:#e6eef8;}
+    .app{
+      max-width:1100px;
+      margin:24px auto;
+      padding:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:12px;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    }
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:var(--panel);border:1px solid rgba(255,255,255,0.03);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button:active{transform:translateY(1px)}
+    .board{display:flex;flex-wrap:wrap;gap:18px;margin-top:18px;align-items:flex-end;justify-content:center;padding:12px}
+    .glass{
+      width:var(--glass-width);
+      height:var(--glass-height);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px 12px 18px 18px;
+      padding:8px;
+      box-sizing:border-box;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      position:relative;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .12s ease;
+      border: 2px solid rgba(255,255,255,0.04);
+    }
+    .glass.selected{box-shadow:0 6px 22px rgba(217,119,6,0.14); transform:translateY(-6px)}
+    .glass .neck{
+      position:absolute;
+      top:-10px;
+      width:46px;
+      height:26px;
+      left:50%;
+      transform:translateX(-50%);
+      border-radius:50px 50px 8px 8px;
+      background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .bottle-content{ width:100%; height:100%; display:flex; flex-direction:column-reverse; justify-content:flex-start; align-items:stretch; gap:4px; padding:6px 6px 18px 6px; box-sizing:border-box; overflow:hidden }
+    .layer{
+      height: calc((100% - 18px - 4px* (var(--capacity)-1)) / var(--capacity));
+      border-radius:6px;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+      user-select:none;
+    }
+    .layer.empty{background: transparent; border: 1px dashed rgba(255,255,255,0.03); color: rgba(255,255,255,0.35); font-size:11px}
+    .hud{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .status{background:var(--panel);padding:8px;border-radius:10px}
+    .levels{display:flex;gap:8px;align-items:center}
+    .timer{font-weight:600;color:var(--accent)}
+    /* Textura placeholder: si quieres usar una imagen como "patrón" dentro del color, modificas TEXTURES en JS */
+    .pattern{background-repeat:repeat; background-size:cover}
+    /* Responsive */
+    @media (max-width:700px){
+      :root{--glass-width:70px; --glass-height:200px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Frascos &amp; Pociones — Water Sort Puzzle</h1>
+        <div style="font-size:12px; color:rgba(255,255,255,0.6)">Haz clic en un frasco para seleccionar, luego en otro para verter. Inspírate en Water Sort Puzzle.</div>
+      </div>
+
+      <div class="controls">
+        <div class="levels">
+          <label style="font-size:13px;color:rgba(255,255,255,0.8)">Nivel</label>
+          <input id="levelInput" type="number" min="1" value="1" style="width:70px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+          <button id="loadBtn">Cargar nivel</button>
+        </div>
+        <button id="resetBtn">Reiniciar</button>
+        <button id="hintBtn">Deshacer</button>
+      </div>
+    </header>
+
+    <div class="hud">
+      <div class="status">Movimientos: <span id="moves">0</span></div>
+      <div class="status">Estado: <span id="estado">-</span></div>
+      <div class="status">Timer: <span id="timer">∞</span></div>
+    </div>
+
+    <div id="board" class="board" aria-live="polite"></div>
+
+    <div style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.6)">
+      <strong>Formato .lab:</strong> coloca tus archivos en <code>niveles/water&lt;n&gt;.lab</code>. Ejemplo:
+      <pre style="white-space:pre-wrap;background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;margin-top:6px">
+&lt;colors=red, orange, purple, green&gt;
+&lt;amount=4&gt;
+&lt;potion=red:
+orange, purple, red&gt;
+&lt;potion=green:
+purple, red, red&gt;
+&lt;time=0&gt;
+      </pre>
+    </div>
+  </div>
+
+  <script>
+    /*****************************************
+     *  SECCIÓN CONFIGURABLE DE TEXTURAS
+     *  Cambia aquí las URLs para las texturas
+     *****************************************/
+    const TEXTURES = {
+      // POCION - textura de la "línea" de color dentro de la poción (puede usarse para un patrón)
+      // Ejemplo: "POCION": "assets/patterns/potion-pattern.png"
+      // Deja vacío "" para usar color sólido.
+      "POCION": "",
+
+      // BOTELLA - imagen de fondo del frasco (si quieres)
+      "BOTELLA": ""
+    };
+    /*****************************************
+     *  FIN DE SECCIÓN CONFIGURABLE
+     *****************************************/
+
+    // Mapear nombres simples a colores CSS (puedes ampliar)
+    const COLOR_MAP = {
+      red: "#ef4444",
+      orange: "#fb923c",
+      yellow: "#f59e0b",
+      green: "#10b981",
+      blue: "#3b82f6",
+      purple: "#8b5cf6",
+      pink: "#f472b6",
+      brown: "#7c3aed",
+      gray: "#9ca3af"
+    };
+
+    // Estado del juego
+    let state = {
+      potions: [], // array de arrays: cada poción es array bottom->top (index 0 = fondo)
+      capacity: 4,
+      selected: null, // índice de poción seleccionada
+      moves: 0,
+      history: [],
+      timer: null,
+      timeLeft: 0, // 0 = infinito
+      levelNumber: 1
+    };
+
+    const boardEl = document.getElementById('board');
+    const movesEl = document.getElementById('moves');
+    const estadoEl = document.getElementById('estado');
+    const timerEl = document.getElementById('timer');
+
+    document.getElementById('loadBtn').addEventListener('click', () => {
+      const n = parseInt(document.getElementById('levelInput').value) || 1;
+      loadLevel(n);
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => { loadLevel(state.levelNumber); });
+    document.getElementById('hintBtn').addEventListener('click', undoMove);
+
+    // Cargar primer nivel por defecto
+    loadLevel(1);
+
+    /***********************
+     *  FUNCIONES PRINCIPALES
+     ***********************/
+    async function loadLevel(n){
+      state.levelNumber = n;
+      const path = `niveles/water${n}.lab`;
+      try {
+        const res = await fetch(path);
+        if(!res.ok) throw new Error('Archivo no encontrado: ' + path);
+        const text = await res.text();
+        parseLab(text);
+        state.moves = 0;
+        state.history = [];
+        render();
+        estadoEl.textContent = 'En juego';
+        movesEl.textContent = state.moves;
+        setupTimer();
+      } catch (err){
+        alert('Error cargando nivel: ' + err.message + '\nAsegúrate de servir desde un servidor (no abrir el archivo localmente).');
+      }
+    }
+
+    function parseLab(text){
+      // Simple parser basado en tu especificación
+      // Limpia comentarios y líneas vacías
+      const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      let colorsLine = lines.find(l => l.startsWith('<colors='));
+      let amountLine = lines.find(l => l.startsWith('<amount='));
+      let timeLine = lines.find(l => l.startsWith('<time='));
+      const potionLines = lines.filter(l => l.startsWith('<potion='));
+      // Colors disponibles (no los necesitamos demasiado pero los guardamos)
+      const colors = colorsLine ? colorsLine.replace(/^<colors=|>$/g,'').split(',').map(s=>s.trim()) : [];
+      const amount = amountLine ? parseInt(amountLine.replace(/^<amount=|>$/g,'')) : potionLines.length;
+      const time = timeLine ? parseInt(timeLine.replace(/^<time=|>$/g,'')) : 0;
+
+      // Parse potions: pueden tener saltos de línea entre '<potion=name:' y las capas >
+      const potions = [];
+      for(let i=0;i<potionLines.length;i++){
+        // potionLines contiene algo como "<potion=red:" o "<potion=red: orange, purple, red>"
+        let full = potionLines[i];
+        // Si la línea no contiene el cierre '>' entonces busco concatenando siguientes líneas hasta '>'
+        if(!full.includes('>')){
+          let j = lines.indexOf(potionLines[i])+1;
+          while(j < lines.length && !lines[j].includes('>')){
+            full += ' ' + lines[j];
+            j++;
+          }
+          if(j < lines.length) full += ' ' + lines[j];
+        }
+        // Extraer contenido entre ':' y '>'
+        const m = full.match(/<potion=([^:>]+)\s*:\s*([^>]+)>/i);
+        if(m){
+          const name = m[1].trim();
+          const layerText = m[2].trim();
+          const layers = layerText.split(',').map(s=>s.trim()).filter(Boolean);
+          potions.push(layers);
+        }
+      }
+
+      // Si no hay potionLines y en vez de eso la definición fue multiline con "<potion=red:" en una línea
+      if(potions.length === 0){
+        // fallback: buscar bloques que empiecen con <potion=
+        const fullText = text;
+        const regex = /<potion=([^:>]+)\s*:\s*([\s\S]*?)>/gi;
+        let m;
+        while((m = regex.exec(fullText)) !== null){
+          const layers = m[2].replace(/\r?\n/g,' ').split(',').map(s=>s.trim()).filter(Boolean);
+          potions.push(layers);
+        }
+      }
+
+      // Ajustar capacidad = max layers por poción o 4 por defecto
+      const cap = Math.max(4, ...potions.map(p=>p.length));
+      state.capacity = cap;
+      document.documentElement.style.setProperty('--capacity', cap);
+
+      // Construir el arreglo final: cada potion -> bottom..top
+      state.potions = potions.map(arr => {
+        // En el .lab, el orden que diste parece top->down? En tu ejemplo:
+        // <potion=red:
+        // orange, purple, red>
+        // interpreto que la primera palabra es la capa superior o inferior?
+        // En la explicación dijiste: "la primera es rojo, después naranja, morado y otra vez rojo"
+        // Para que la visual sea bottom->top en el array, invertimos para que arr[0] sea fondo.
+        const copy = arr.slice().reverse();
+        return copy;
+      });
+
+      // Si amount indica más pociones que las definidas, añadimos frascos vacíos
+      while(state.potions.length < amount){
+        state.potions.push([]);
+      }
+
+      // Time
+      state.timeLeft = time || 0; // 0 => infinito
+    }
+
+    function render(){
+      boardEl.innerHTML = '';
+      state.potions.forEach((potion, idx) => {
+        const g = document.createElement('div');
+        g.className = 'glass';
+        if(state.selected === idx) g.classList.add('selected');
+        g.dataset.idx = idx;
+
+        // cuello de la botella
+        const neck = document.createElement('div');
+        neck.className = 'neck';
+        g.appendChild(neck);
+
+        // contenido
+        const content = document.createElement('div');
+        content.className = 'bottle-content';
+        content.style.setProperty('--capacity', state.capacity);
+
+        // rellenar desde fondo hasta tope (capacidad). Si faltan capas, se muestran vacías.
+        for(let layerIndex = 0; layerIndex < state.capacity; layerIndex++){
+          const layerEl = document.createElement('div');
+          const color = potion[layerIndex]; // record: array bottom->top; layerIndex 0 es fondo
+          if(color){
+            layerEl.className = 'layer pattern';
+            const cssColor = COLOR_MAP[color] || color || '#ffffff';
+            layerEl.style.background = TEXTURES.POCION ? `url(${TEXTURES.POCION}), ${cssColor}` : cssColor;
+            layerEl.textContent = ''; // si quieres mostrar nombre del color, quita esta línea
+          } else {
+            layerEl.className = 'layer empty';
+            layerEl.textContent = '';
+          }
+          content.appendChild(layerEl);
+        }
+
+        g.appendChild(content);
+        g.addEventListener('click', () => onGlassClick(idx));
+        boardEl.appendChild(g);
+      });
+
+      movesEl.textContent = state.moves;
+      timerEl.textContent = state.timeLeft > 0 ? formatTime(state.timeLeft) : '∞';
+      checkWin();
+    }
+
+    /***********************
+     *  LÓGICA DE VACIADO / VERTIDO
+     ***********************/
+    function onGlassClick(i){
+      if(state.selected === null){
+        // seleccionar si tiene contenido
+        if(state.potions[i].length === 0) {
+          // seleccionar frasco vacío es válido (para verter luego), pero no tiene sentido como origen
+          state.selected = i;
+          render();
+          return;
+        }
+        state.selected = i;
+        render();
+      } else if(state.selected === i){
+        // deseleccionar
+        state.selected = null;
+        render();
+      } else {
+        // intentar verter de selected -> i
+        const from = state.selected;
+        const to = i;
+        const moved = tryPour(from, to);
+        if(moved){
+          state.moves++;
+          movesEl.textContent = state.moves;
+          state.history.push({ from, to, movedStack: moved }); // guardamos para deshacer
+        }
+        state.selected = null;
+        render();
+      }
+    }
+
+    function tryPour(fromIdx, toIdx){
+      const from = state.potions[fromIdx];
+      const to = state.potions[toIdx];
+      if(from.length === 0) return null; // nada que verter
+      if(to.length >= state.capacity) return null; // destino lleno
+
+      // top color y cuantos consecutivos iguales hay en origen (desde tope)
+      const topColor = from[from.length - 1];
+      let sameCount = 1;
+      for(let i = from.length - 2; i>=0; i--){
+        if(from[i] === topColor) sameCount++;
+        else break;
+      }
+
+      // en destino, comprobar top color (si no vacío, debe coincidir)
+      if(to.length > 0){
+        const topTo = to[to.length - 1];
+        if(topTo !== topColor) return null;
+      }
+
+      // espacio disponible
+      const space = state.capacity - to.length;
+      const amountToMove = Math.min(sameCount, space);
+
+      // mover
+      const movedStack = [];
+      for(let k=0;k<amountToMove;k++){
+        const c = from.pop();
+        to.push(c);
+        movedStack.push(c);
+      }
+      return movedStack; // devolver lo movido
+    }
+
+    function undoMove(){
+      const last = state.history.pop();
+      if(!last) return;
+      const { from, to, movedStack } = last;
+      // revertir: sacar movedStack.length de 'to' y poner en 'from' (en orden)
+      for(let k=0;k<movedStack.length;k++){
+        const c = state.potions[to].pop();
+        state.potions[from].push(c);
+      }
+      state.moves = Math.max(0, state.moves - 1);
+      movesEl.textContent = state.moves;
+      render();
+    }
+
+    /***********************
+     *  VICTORIA
+     ***********************/
+    function checkWin(){
+      const allOk = state.potions.every(p => {
+        if(p.length === 0) return true;
+        // todos los elementos iguales y llenos o no necesariamente llenos?
+        const unique = new Set(p);
+        return unique.size === 1 && p.length === state.capacity;
+      });
+      if(allOk){
+        estadoEl.textContent = '¡Completado!';
+        // si quieres avanzar al siguiente nivel automáticamente, lo puedes activar aquí:
+        // setTimeout(()=> loadLevel(state.levelNumber + 1), 1000);
+      }
+      return allOk;
+    }
+
+    /***********************
+     *  TIMER
+     ***********************/
+    function setupTimer(){
+      if(state.timer) { clearInterval(state.timer); state.timer = null; }
+      if(state.timeLeft > 0){
+        timerEl.textContent = formatTime(state.timeLeft);
+        state.timer = setInterval(()=>{
+          if(state.timeLeft <= 0){
+            clearInterval(state.timer);
+            estadoEl.textContent = 'Tiempo agotado';
+            timerEl.textContent = '00:00';
+            return;
+          }
+          state.timeLeft--;
+          timerEl.textContent = formatTime(state.timeLeft);
+        }, 1000);
+      } else {
+        timerEl.textContent = '∞';
+      }
+    }
+
+    function formatTime(sec){
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = Math.floor(sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    // Te dejo una función pública por si quieres cargar niveles desde consola
+    window.loadLevelNumber = (n) => loadLevel(n);
+
+    /***********************
+     *  SUGERENCIAS PARA EXTENDER:
+     *  - Añadir animaciones de vertido (CSS/JS)
+     *  - Guardar progreso en localStorage
+     *  - Añadir efectos de partículas cuando se completa
+     *  - Implementar verificación de solvencia de nivel (si está resoluble)
+     ***********************/
+  </script>
+</body>
+  </html>
