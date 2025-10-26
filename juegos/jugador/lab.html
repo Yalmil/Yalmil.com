@@ -41,6 +41,14 @@
       background: rgba(255,255,255,0.05);
       display: flex;
       flex-direction: column-reverse;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .frasco:hover {
+      transform: scale(1.05);
+    }
+    .frasco.seleccionado {
+      outline: 3px solid #00ffff;
     }
     .color {
       width: 100%;
@@ -50,7 +58,7 @@
 
     /* === TEXTURA DE LA POCIÓN AQUÍ === */
     /* Cambia el fondo del frasco por tu textura */
-    /* POCIÓN=https://tulink.png */
+    /* POCIÓN=<link> */
     .frasco {
       background-image: url('');
       background-size: cover;
@@ -70,6 +78,9 @@
   <script>
     let movimientos = 0;
     let estado = "En juego";
+    let nivelActual = null;
+    let frascosDOM = [];
+    let seleccionado = null;
 
     document.getElementById("movs").textContent = movimientos;
     document.getElementById("estado").textContent = estado;
@@ -104,28 +115,81 @@
     }
 
     function mostrarNivel(nivel) {
+      nivelActual = nivel;
       const contenedor = document.getElementById("contenedor");
       contenedor.innerHTML = "";
+      frascosDOM = [];
 
       for (let i = 0; i < nivel.amount; i++) {
         const frasco = document.createElement("div");
         frasco.classList.add("frasco");
-        const colores = nivel.potions[i] || [];
-
-        colores.forEach(color => {
-          const divColor = document.createElement("div");
-          divColor.classList.add("color");
-          divColor.style.background = color;
-          frasco.appendChild(divColor);
-        });
-
+        frasco.dataset.index = i;
+        actualizarFrasco(frasco, nivel.potions[i] || []);
+        frasco.addEventListener("click", () => seleccionarFrasco(i));
+        frascosDOM.push(frasco);
         contenedor.appendChild(frasco);
       }
 
       document.getElementById("estado").textContent = "En juego";
     }
 
-    // Cargar el nivel 1
+    function actualizarFrasco(frasco, colores) {
+      frasco.innerHTML = "";
+      colores.forEach(color => {
+        const divColor = document.createElement("div");
+        divColor.classList.add("color");
+        divColor.style.background = color;
+        frasco.appendChild(divColor);
+      });
+    }
+
+    function seleccionarFrasco(i) {
+      if (estado !== "En juego") return;
+      const frasco = frascosDOM[i];
+      if (seleccionado === null) {
+        seleccionado = i;
+        frasco.classList.add("seleccionado");
+      } else if (seleccionado === i) {
+        frasco.classList.remove("seleccionado");
+        seleccionado = null;
+      } else {
+        intentarVerter(seleccionado, i);
+        frascosDOM[seleccionado].classList.remove("seleccionado");
+        seleccionado = null;
+      }
+    }
+
+    function intentarVerter(origen, destino) {
+      const frascoOrigen = nivelActual.potions[origen];
+      const frascoDestino = nivelActual.potions[destino];
+      if (frascoOrigen.length === 0) return;
+
+      const color = frascoOrigen[frascoOrigen.length - 1];
+      if (frascoDestino.length >= 4) return;
+
+      // Si el destino está vacío o el color coincide con el superior, se puede verter
+      if (frascoDestino.length === 0 || frascoDestino[frascoDestino.length - 1] === color) {
+        frascoDestino.push(color);
+        frascoOrigen.pop();
+        movimientos++;
+        document.getElementById("movs").textContent = movimientos;
+        actualizarFrasco(frascosDOM[origen], frascoOrigen);
+        actualizarFrasco(frascosDOM[destino], frascoDestino);
+        verificarVictoria();
+      }
+    }
+
+    function verificarVictoria() {
+      const completo = nivelActual.potions.every(p =>
+        p.length === 0 || p.every(c => c === p[0])
+      );
+      if (completo) {
+        estado = "Completado";
+        document.getElementById("estado").textContent = estado;
+        alert("Nivel completado!");
+      }
+    }
+
     cargarNivel(1).then(nivel => {
       mostrarNivel(nivel);
     });
