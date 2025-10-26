@@ -1,5 +1,5 @@
-<colors=red, orange, purple, green>
+<colors="red","orange","purple","green">
 <amount=4>
-<potion=red: orange, purple, red>
-<potion=green: purple, red, red>
+<potion="red","orange","purple","red">
+<potion="green","purple","red","red">
 <time=0>
