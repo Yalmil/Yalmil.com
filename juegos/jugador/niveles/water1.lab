@@ -1,14 +1,7 @@
 <colors=red, orange, purple, green>
-<amount=2>
+<amount=4>
 <potion=red:
 orange, purple, red>
 <potion=green:
 purple, red, red>
 <time=0>
-
-/ Explicación /
-/ "<color=>" es los colores que están en el juego disponibles (o nivel) /
-/ "<amount=>" es la cantidad de pociones que hay /
-/ "<potion=>" es la primer poción, ejemplo: <color=red:
-orange, purple, red> significa que la primera es rojo, después naranja, morado y otra vez rojo /
-/ "<time=>" define el tiempo para niveles especiales (si el número es 0, el tiempo es infinito) /
