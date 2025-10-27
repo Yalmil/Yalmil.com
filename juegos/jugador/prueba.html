@@ -11,272 +11,203 @@
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #333;
-      overflow-x: hidden;
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #1a001f);
+    color: #e5ccff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    animation: fadeIn 1s ease-out;
+    text-align: center;
+    overflow-x: hidden;
+  }
 
-    h1 {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-      font-size: 2.5em;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    .level-selector {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      margin-bottom: 30px;
-    }
+  h1 {
+    margin: 1rem 0 0.5rem;
+    font-size: 2.5rem;
+    color: #c084fc;
+    text-shadow: 0 0 10px #c084fc;
+  }
 
-    .level-selector h2 {
-      color: #667eea;
-      margin-bottom: 20px;
-    }
+  p, h2, h3, h4 {
+    color: #e5ccff;
+    text-shadow: 0 0 6px #c084fc88;
+  }
 
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-    }
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+    text-align: center;
+  }
 
-    .level-btn {
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
+  .level-selector, .game-container, .stats {
+    background: rgba(40, 0, 60, 0.25);
+    border: 2px solid #c084fc;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px #c084fc44;
+    padding: 2rem;
+    margin-top: 2rem;
+    transition: transform 0.2s;
+  }
 
-    .level-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    }
+  .level-selector:hover, .game-container:hover {
+    transform: translateY(-3px);
+  }
 
-    .game-container {
-      display: none;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
+  .level-btn, .back-btn, .message button {
+    background: linear-gradient(135deg, #7b2cbf, #9d4edd);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px #c084fc66;
+    transition: transform 0.2s, box-shadow 0.3s;
+  }
 
-    .game-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+  .level-btn:hover, .back-btn:hover, .message button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #c084fcaa;
+  }
 
-    .power-display {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px 40px;
-      border-radius: 10px;
-      font-size: 2em;
-      font-weight: bold;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
+  .power-display {
+    background: rgba(192, 132, 252, 0.15);
+    border: 2px solid #c084fc;
+    border-radius: 1rem;
+    padding: 1rem 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    box-shadow: 0 0 20px #c084fc66;
+    margin-bottom: 1rem;
+  }
 
-    .back-btn {
-      padding: 15px 30px;
-      background: #f44336;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
+  .towers-game {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
 
-    .back-btn:hover {
-      background: #d32f2f;
-      transform: scale(1.05);
-    }
+  .tower {
+    min-width: 120px;
+    text-align: center;
+    transition: all 0.3s;
+  }
 
-    .towers-game {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin-top: 30px;
-    }
+  .tower.active {
+    box-shadow: 0 0 25px #c084fcaa;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+  }
 
-    .tower {
-      min-width: 120px;
-      text-align: center;
-      transition: all 0.3s;
-    }
+  .tower.inactive {
+    opacity: 0.4;
+    pointer-events: none;
+  }
 
-    .tower.inactive {
-      opacity: 0.4;
-      pointer-events: none;
-    }
+  .tower-title {
+    font-weight: bold;
+    color: #c084fc;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+  }
 
-    .tower.active {
-      box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-      border-radius: 15px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.1);
-    }
+  .tower-blocks {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
 
-    .tower-title {
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 15px;
-      font-size: 1.2em;
-    }
+  .block {
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.2em;
+    transition: all 0.3s;
+    cursor: pointer;
+    color: #fff;
+    text-shadow: 0 0 10px #000;
+    box-shadow: 0 0 10px #c084fc55;
+  }
 
-    .tower-blocks {
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 8px;
-    }
+  .block.enemy { background: linear-gradient(135deg, #ff3c3c, #ff006e); }
+  .block.subtract { background: linear-gradient(135deg, #ffd43b, #f08c00); }
+  .block.multiply { background: linear-gradient(135deg, #51cf66, #2b8a3e); }
+  .block.divide { background: linear-gradient(135deg, #4dabf7, #1864ab); }
 
-    .block {
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1.3em;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-      position: relative;
-      background-size: cover;
-      background-position: center;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    }
+  .block:hover:not(.defeated) {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #c084fcaa;
+  }
 
-    .block:hover:not(.defeated) {
-      transform: scale(1.1);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-      cursor: pointer;
-    }
+  .block.defeated {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+  }
 
-    .block.defeated {
-      opacity: 0.3;
-      cursor: not-allowed;
-      filter: grayscale(100%);
-    }
+  .message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(40, 0, 60, 0.9);
+    border: 2px solid #c084fc;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 0 40px #c084fcaa;
+    z-index: 1000;
+    text-align: center;
+    transition: transform 0.3s;
+  }
 
-    .block.enemy {
-      background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
-    }
+  .message.show { transform: translate(-50%, -50%) scale(1); }
 
-    .block.subtract {
-      background: linear-gradient(135deg, #ffd43b 0%, #f08c00 100%);
-    }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 0, 20, 0.8);
+    z-index: 999;
+    display: none;
+  }
 
-    .block.multiply {
-      background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%);
-    }
+  .overlay.show { display: block; }
 
-    .block.divide {
-      background: linear-gradient(135deg, #4dabf7 0%, #1864ab 100%);
-    }
+  .loading {
+    color: #e5ccff;
+    font-size: 1.3em;
+    padding: 2rem;
+  }
 
-    .message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      z-index: 1000;
-      text-align: center;
-      transition: transform 0.3s;
-    }
-
-    .message.show {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .message h2 {
-      color: #667eea;
-      margin-bottom: 20px;
-      font-size: 2em;
-    }
-
-    .message button {
-      padding: 15px 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.2em;
-      cursor: pointer;
-      margin: 5px;
-      transition: all 0.3s;
-    }
-
-    .message button:hover {
-      transform: scale(1.05);
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      z-index: 999;
-      display: none;
-    }
-
-    .overlay.show {
-      display: block;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: white;
-      font-size: 1.5em;
-    }
-
-    .stats {
-      background: #f5f5f5;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
-    }
-
-    .stats-item {
-      display: inline-block;
-      margin: 5px 15px;
-      font-weight: bold;
-      color: #555;
-    }
-  </style>
+  .stats-item {
+    display: inline-block;
+    margin: 0.5rem 1rem;
+    color: #e5ccffcc;
+    font-weight: 600;
+  }
+</style>
 </head>
 <body>
   <div class="container">
