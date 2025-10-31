@@ -20,7 +20,9 @@
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #990808;
+      background: linear-gradient(135deg, #1a0000, #3a0000, #990808);
+      background-size: 300% 300%;
+      animation: gradientMove 8s ease infinite, fadeIn 1s ease-out;
       color: #E62C2C;
       display: flex;
       flex-direction: column;
@@ -30,7 +32,12 @@
       text-align: center;
       overflow: hidden;
       transition: background 1s, color 1s;
-      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     @keyframes fadeIn {
@@ -40,20 +47,21 @@
 
     h1 {
       font-size: 2.5rem;
-      color: #4C0202;
-      text-shadow: 0 0 10px #6E0707;
+      color: #ff5555;
+      text-shadow: 0 0 10px #ff2222, 0 0 25px #6E0707;
     }
 
     #countdown {
       font-size: 2.3rem;
       margin-top: 1rem;
-      color: #6E0707;
+      color: #ff9999;
       text-shadow: 0 0 12px #4C0202;
       letter-spacing: 2px;
     }
 
     .finished {
-      background: #5a0000;
+      background: linear-gradient(135deg, #400000, #700000, #b30000);
+      animation: none;
       color: #ffaaaa;
     }
 
