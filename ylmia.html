@@ -332,11 +332,6 @@
                 return obtenerFecha();
             }
 
-            // Chiste
-            if (preguntaNorm.match(/chiste|cuéntame.*chiste|dame.*chiste/i)) {
-                return await obtenerChiste();
-            }
-
             // Consejo
             if (preguntaNorm.match(/consejo|dame.*consejo|recomienda/i)) {
                 return await obtenerConsejo();
