@@ -879,7 +879,7 @@
 
     function fileToBase64(file, maxSizeKB = 5120) {
       return new Promise((resolve, reject) => {
-        if (file.size > maxSizeKB * 1024) {
+        if (file.size > maxSizeKB * 51200) {
           reject(new Error(`El archivo es demasiado grande. Máximo ${maxSizeKB}KB`));
           return;
         }
