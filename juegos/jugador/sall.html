@@ -1,667 +1,349 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sobrevive a las Letras</title>
-
-  <!-- Favor de mantener estas líneas (tal como las pides en tu perfil) -->
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Un juego HTML donde sobrevives a las letras. Guarda puntos y compite en la leaderboard." />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
-
-  <!-- Estilo general (usé un diseño oscuro y Poppins) -->
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f);
-      color: #e5ccff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      animation: fadeIn 1s ease-out;
-      text-align: center;
-      overflow-x: hidden;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 {
-      margin: 1rem 0 0.5rem;
-      font-size: 2.2rem;
-      color: #c084fc;
-      text-shadow: 0 0 10px #c084fc;
-    }
-
-    p {
-      font-size: 1rem;
-      color: #e5ccff;
-      text-shadow: 0 0 6px #c084fc88;
-    }
-
-    /* Layout del juego */
-    #topbar {
-      width: 100%;
-      max-width: 1200px;
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-    }
-
-    .panel {
-      background: rgba(40,0,60,0.25);
-      border: 1px solid #c084fc33;
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-    }
-
-    #menu, #gameOver {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 20;
-      text-align: center;
-      transition: opacity 0.5s;
-    }
-
-    #menu.hidden, #gameOver.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    button {
-      background: #c084fc;
-      border: none;
-      color: white;
-      padding: 10px 18px;
-      margin: 6px;
-      font-size: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.2s, background 0.3s;
-    }
-
-    button:hover { transform: scale(1.03); }
-
-    #ui {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 1.05em;
-      color: #c084fc;
-      z-index: 10;
-      box-shadow: 0 0 10px #c084fc;
-      display: none;
-    }
-
-    #leaderboard {
-      width: 320px;
-      max-width: calc(100% - 40px);
-      text-align: left;
-      margin-left: 12px;
-    }
-
-    #leaderboard h3 { margin: 0 0 8px 0; color: #fff; font-size: 1rem; }
-    .leader-list { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow:auto; }
-    .leader-item { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04); display:flex; justify-content:space-between; align-items:center; }
-    .small { font-size: 0.85rem; color: #ddddff; }
-
-    canvas { display:block; border-radius: 12px; width:100%; height: calc(100vh - 180px); max-width: 1200px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
-
-    .auth {
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-
-    .status {
-      font-size: 0.9rem;
-      color: #dfe7ff;
-    }
-
-    @media (max-width: 720px) {
-      #topbar { flex-direction: column; gap: 8px; align-items:center; }
-      canvas { height: calc(100vh - 240px); }
-    }
-  </style>
-</head>
-
-<body>
-  <h1>🅰 Sobrevive a las Letras</h1>
-
-  <div id="topbar" class="panel">
-    <div>
-      <div class="auth">
-        <div id="authArea" class="panel" style="display:flex;gap:8px;align-items:center;">
-          <span id="userInfo" class="status">No logueado</span>
-          <button id="googleLoginBtn">Entrar con Google</button>
-          <button id="anonLoginBtn">Entrar anónimo</button>
-          <button id="logoutBtn" style="display:none">Salir</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="ui" class="panel">
-      🕒 Tiempo: <span id="time">0</span>s |
-      💯 Puntos: <span id="score">0</span> |
-      🏆 Récord local: <span id="record">0</span>s
-    </div>
-
-    <div id="leaderboard" class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3>Leaderboard</h3>
-        <div>
-          <button id="tabPoints" style="padding:6px 8px;">Puntos</button>
-          <button id="tabTime" style="padding:6px 8px;">Tiempo</button>
-        </div>
-      </div>
-      <ul id="leaderList" class="leader-list"></ul>
-      <div style="margin-top:8px; display:flex; gap:8px; justify-content:space-between;">
-        <button id="refreshLb">Actualizar</button>
-        <button id="saveScoreBtn">Guardar ahora</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="menu">
-    <p style="color:#ddd;max-width:700px;padding:0 12px;">Para moverte: en pc mueve el mouse, en teléfono pulsa a donde quieres ir.
-    los power ups pueden darte resistencia por 3s, matar enemigos, o velocidad.</p>
-    <button id="startBtn">Jugar</button>
-    <button id="controlsBtn">Ayuda</button>
-    <p id="controlsText" style="display:none; color:#ccc; max-width:720px;">Los power ups tienen icono de dado: shield (invulnerable), speed (velocidad), wave (limpia), magnet (atrae).</p>
-  </div>
-
-  <div id="gameOver" class="hidden panel" style="max-width:420px;">
-    <h2 id="gameOverText">💀 Has perdido</h2>
-    <div style="display:flex;gap:8px;justify-content:center">
-      <button id="retryBtn">Reintentar</button>
-      <button id="menuBtn">Menú</button>
-    </div>
-  </div>
-
-  <canvas id="game"></canvas>
-
-  <!-- Firebase SDK (modular) -->
-  <script type="module">
-    // Import Firebase SDK (modular) desde CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getDatabase, ref, push, set, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-    // --- CONFIGURA TU FIREBASE (ya lo tenías, lo dejo aquí) ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
-      authDomain: "databaseloginweb.firebaseapp.com",
-      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
-      projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.firebasestorage.app",
-      messagingSenderId: "121538864529",
-      appId: "1:121538864529:web:e92aaeaa4ba52618162630",
-      measurementId: "G-M5CBRMJ9BN"
-    };
-
-    // Inicializa Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    // --- Referencias UI ---
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const ui = document.getElementById("ui");
-    const menu = document.getElementById("menu");
-    const gameOverScreen = document.getElementById("gameOver");
-    const recordDisplay = document.getElementById("record");
-    const startBtn = document.getElementById("startBtn");
-    const controlsBtn = document.getElementById("controlsBtn");
-    const controlsText = document.getElementById("controlsText");
-    const gameOverText = document.getElementById("gameOverText");
-    const retryBtn = document.getElementById("retryBtn");
-    const menuBtn = document.getElementById("menuBtn");
-
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const anonLoginBtn = document.getElementById("anonLoginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userInfo = document.getElementById("userInfo");
-    const saveScoreBtn = document.getElementById("saveScoreBtn");
-    const leaderList = document.getElementById("leaderList");
-    const refreshLb = document.getElementById("refreshLb");
-    const tabPoints = document.getElementById("tabPoints");
-    const tabTime = document.getElementById("tabTime");
-
-    // Canvas sizing
-    function resizeCanvas() {
-      canvas.width = innerWidth;
-      canvas.height = innerHeight - 180;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    // Game state
-    let player, enemies, powerUps, mouse, timeSurvived, score, record, invulnerable, lastEnemySpawn, lastPowerUp, bgHue, gameLoopId, timerInterval;
-    const letters = "ÑXYZWKLMNOPQRSTUVABCDE".split("");
-    const enemyColors = ["#ff0044", "#ffcc00", "#00ffff", "#00ff66", "#cc00ff", "#ffaa00"];
-    const bgColors = ["#0f0c29", "#302b63", "#24243e", "#1a1a1a"];
-
-    const powerUpImg = new Image();
-    powerUpImg.crossOrigin = "anonymous";
-    powerUpImg.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA_VOY-eH13RIjxNerDPrQkv_Cd9ev3ADeHWpGPJQiYg&s=10";
-
-    record = parseInt(localStorage.getItem("record")) || 0;
-    recordDisplay.textContent = record;
-
-    // Auth state
-    let currentUser = null;
-    onAuthStateChanged(auth, user => {
-      currentUser = user;
-      if (user) {
-        // muestra info
-        userInfo.textContent = user.isAnonymous ? "Anónimo" : (user.displayName || user.email || "Usuario");
-        logoutBtn.style.display = "inline-block";
-        googleLoginBtn.style.display = "none";
-        anonLoginBtn.style.display = "none";
-      } else {
-        userInfo.textContent = "No logueado";
-        logoutBtn.style.display = "none";
-        googleLoginBtn.style.display = "inline-block";
-        anonLoginBtn.style.display = "inline-block";
-      }
-    });
-
-    googleLoginBtn.addEventListener("click", async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e) {
-        alert("Error de login: " + e.message);
-      }
-    });
-
-    anonLoginBtn.addEventListener("click", async () => {
-      try {
-        await signInAnonymously(auth);
-      } catch (e) {
-        alert("Error de login anónimo: " + e.message);
-      }
-    });
-
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
-    // --- Leaderboard (Realtime DB) ---
-    let lbMode = "points"; // 'points' o 'time'
-
-    async function fetchLeaderboard(mode = "points") {
-      leaderList.innerHTML = "<li class='small'>Cargando...</li>";
-      // Guardamos en dos ramas: leaderboardPoints y leaderboardTime
-      const branch = mode === "points" ? "leaderboardPoints" : "leaderboardTime";
-      const q = query(ref(db, branch), orderByChild(mode === "points" ? "score" : "time"), limitToLast(12));
-      try {
-        const snap = await get(q);
-        const items = [];
-        if (snap.exists()) {
-          snap.forEach(child => {
-            items.push({ key: child.key, ...child.val() });
-          });
-          // vienen en ascendente por orderBy + limitToLast -> invertir
-          items.reverse();
-        }
-        renderLeaderboard(items, mode);
-      } catch (e) {
-        leaderList.innerHTML = `<li class="small">Error cargando leaderboard: ${e.message}</li>`;
-      }
-    }
-
-    function renderLeaderboard(items, mode) {
-      leaderList.innerHTML = "";
-      if (items.length === 0) {
-        leaderList.innerHTML = "<li class='small'>Sin resultados</li>";
-        return;
-      }
-      items.forEach((it, idx) => {
-        const li = document.createElement("li");
-        li.className = "leader-item";
-        const name = it.name || (it.uid ? it.uid.slice(0,6) : "Anon");
-        const left = document.createElement("div");
-        left.innerHTML = `<strong>#${idx+1} ${escapeHtml(name)}</strong><div class="small">${new Date(it.timestamp || Date.now()).toLocaleString()}</div>`;
-        const right = document.createElement("div");
-        if (mode === "points") {
-          right.innerHTML = `<div style="text-align:right"><div>${it.score || 0} pts</div><div class="small">${(it.time||0)}s</div></div>`;
-        } else {
-          right.innerHTML = `<div style="text-align:right"><div>${(it.time||0)}s</div><div class="small">${(it.score||0)} pts</div></div>`;
-        }
-        li.appendChild(left);
-        li.appendChild(right);
-        leaderList.appendChild(li);
-      });
-    }
-
-    function escapeHtml(s) {
-      if (!s) return "";
-      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
-    }
-
-    refreshLb.addEventListener("click", () => fetchLeaderboard(lbMode));
-    tabPoints.addEventListener("click", () => { lbMode = "points"; fetchLeaderboard("points"); });
-    tabTime.addEventListener("click", () => { lbMode = "time"; fetchLeaderboard("time"); });
-
-    // Guardar score: guardamos en 2 ramas para consultas más sencillas
-    async function saveScoreToDB({ uid, name, score, time }) {
-      try {
-        const timestamp = Date.now();
-        const data = { uid: uid || null, name: name || (uid?uid.slice(0,6):"Anon"), score, time, timestamp };
-        // Push a leaderboardPoints with child score (para orderByChild('score'))
-        const refPoints = push(ref(db, "leaderboardPoints"));
-        await set(refPoints, data);
-        const refTime = push(ref(db, "leaderboardTime"));
-        await set(refTime, data);
-        return true;
-      } catch (e) {
-        console.error("Error guardando score:", e);
-        return false;
-      }
-    }
-
-    // --- Juego (basado en tu código, con pequeños ajustes) ---
-    function startGame() {
-      menu.classList.add("hidden");
-      ui.style.display = "block";
-      gameOverScreen.classList.add("hidden");
-      init();
-    }
-
-    function init() {
-      player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 0.2 };
-      enemies = [];
-      powerUps = [];
-      mouse = { x: player.x, y: player.y };
-      timeSurvived = 0;
-      score = 0;
-      invulnerable = false;
-      lastEnemySpawn = 0;
-      lastPowerUp = 0;
-      bgHue = 0;
-
-      clearInterval(timerInterval);
-      cancelAnimationFrame(gameLoopId);
-
-      document.getElementById("score").textContent = score;
-      document.getElementById("time").textContent = timeSurvived;
-
-      timerInterval = setInterval(() => {
-        timeSurvived++;
-        document.getElementById("time").textContent = timeSurvived;
-        if (timeSurvived % 10 === 0) changeBackground();
-      }, 1000);
-
-      gameLoop(performance.now());
-    }
-
-    function spawnEnemy() {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.max(canvas.width, canvas.height) * 0.8;
-      const x = player.x + radius * Math.cos(angle);
-      const y = player.y + radius * Math.sin(angle);
-      const letter = letters[Math.floor(Math.random() * letters.length)];
-      const color = enemyColors[Math.floor(Math.random() * enemyColors.length)];
-      const speed = 1.4 + Math.random() * 1.2 + timeSurvived * 0.02;
-      const type = Math.random() < 0.2 ? "zigzag" : "normal";
-      enemies.push({ x, y, size: 30, speed, letter, color, type, angle: 0 });
-    }
-
-    function spawnPowerUp() {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      const type = ["shield", "speed", "wave", "magnet"][Math.floor(Math.random() * 4)];
-      powerUps.push({ x, y, size: 25, type });
-    }
-
-    function drawPlayer() {
-      const gradient = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 30);
-      gradient.addColorStop(0, "#F5A927");
-      gradient.addColorStop(1, "#F5A928");
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (invulnerable) {
-        ctx.strokeStyle = "#00ffff";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-      }
-    }
-
-    function drawEnemies() {
-      ctx.font = "bold 30px 'Courier New'";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      enemies.forEach(e => {
-        ctx.fillStyle = e.color;
-        ctx.shadowColor = e.color;
-        ctx.shadowBlur = 15;
-        ctx.fillText(e.letter, e.x, e.y);
-        ctx.shadowBlur = 0;
-      });
-    }
-
-    function updateEnemies() {
-      enemies.forEach(e => {
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.hypot(dx, dy) || 1;
-        if (e.type === "zigzag") e.angle += 0.2;
-        e.x += (dx / dist) * e.speed + (e.type === "zigzag" ? Math.sin(e.angle) * 2 : 0);
-        e.y += (dy / dist) * e.speed;
-      });
-    }
-
-    function drawPowerUps() {
-      powerUps.forEach(p => {
-        const size = p.size * 2;
-        if (powerUpImg.complete) {
-          ctx.drawImage(powerUpImg, p.x - size/2, p.y - size/2, size, size);
-        } else {
-          ctx.fillStyle = "#c084fc";
-          ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
-        }
-      });
-    }
-
-    function updatePlayer() {
-      player.x += (mouse.x - player.x) * player.speed;
-      player.y += (mouse.y - player.y) * player.speed;
-    }
-
-    function checkCollisions() {
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        const dist = Math.hypot(player.x - e.x, player.y - e.y);
-        if (dist < player.size + e.size / 2 && !invulnerable) {
-          gameOver();
-          return;
-        } else if (dist < player.size + e.size / 2) {
-          // si invulnerable, chocas y eliminas enemigo
-          enemies.splice(i, 1);
-          score += 5;
-          document.getElementById("score").textContent = score;
-        }
-      }
-
-      for (let i = powerUps.length - 1; i >= 0; i--) {
-        const p = powerUps[i];
-        const dist = Math.hypot(player.x - p.x, player.y - p.y);
-        if (dist < player.size + p.size) {
-          activatePowerUp(p.type);
-          powerUps.splice(i, 1);
-          score += 10;
-          document.getElementById("score").textContent = score;
-        }
-      }
-    }
-
-    function activatePowerUp(type) {
-      if (type === "shield") {
-        invulnerable = true;
-        setTimeout(() => invulnerable = false, 5000);
-      } else if (type === "speed") {
-        player.speed = 0.45;
-        setTimeout(() => player.speed = 0.2, 5000);
-      } else if (type === "wave") {
-        enemies.splice(0, enemies.length);
-      } else if (type === "magnet") {
-        powerUps.forEach(p => {
-          p.x = player.x;
-          p.y = player.y;
-        });
-      }
-    }
-
-    function changeBackground() {
-      bgHue = (bgHue + 1) % bgColors.length;
-      document.body.style.background = bgColors[bgHue];
-    }
-
-    async function gameOver() {
-      cancelAnimationFrame(gameLoopId);
-      clearInterval(timerInterval);
-      ui.style.display = "none";
-      gameOverScreen.classList.remove("hidden");
-
-      if (timeSurvived > record) {
-        localStorage.setItem("record", timeSurvived);
-        gameOverText.textContent = `🎉 ¡Nuevo récord! Sobreviviste ${timeSurvived}s`;
-        record = timeSurvived;
-        recordDisplay.textContent = record;
-      } else {
-        gameOverText.textContent = `💀 Has perdido. Sobreviviste ${timeSurvived}s`;
-      }
-
-      // Intentar guardar automáticamente si hay un usuario
-      if (currentUser) {
-        const name = currentUser.isAnonymous ? "Anónimo" : (currentUser.displayName || currentUser.email || "Usuario");
-        const ok = await saveScoreToDB({ uid: currentUser.uid, name, score, time: timeSurvived });
-        if (ok) {
-          // avisar que se guardó
-          const prev = gameOverText.textContent;
-          gameOverText.textContent = prev + " — Puntuación guardada";
-          fetchLeaderboard(lbMode);
-        } else {
-          gameOverText.textContent = gameOverText.textContent + " — Error guardando score";
-        }
-      } else {
-        // si no está logueado, sugiere guardar
-        gameOverText.textContent = gameOverText.textContent + " — Inicia sesión para guardar tu puntuación";
-      }
-    }
-
-    function restartGame() {
-      gameOverScreen.classList.add("hidden");
-      startGame();
-    }
-
-    function showMenu() {
-      gameOverScreen.classList.add("hidden");
-      menu.classList.remove("hidden");
-    }
-
-    function gameLoop(timestamp) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      updatePlayer();
-      drawPlayer();
-
-      drawEnemies();
-      updateEnemies();
-
-      drawPowerUps();
-      checkCollisions();
-
-      if (timestamp - lastEnemySpawn > 2000) {
-        spawnEnemy();
-        lastEnemySpawn = timestamp;
-      }
-
-      if (timestamp - lastPowerUp > 8000) {
-        spawnPowerUp();
-        lastPowerUp = timestamp;
-      }
-
-      gameLoopId = requestAnimationFrame(gameLoop);
-    }
-
-    // Input
-    window.addEventListener("mousemove", e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
-
-    window.addEventListener("touchmove", e => {
-      const t = e.touches[0];
-      mouse.x = t.clientX;
-      mouse.y = t.clientY;
-    });
-
-    // Controls
-    controlsBtn.addEventListener("click", () => {
-      controlsText.style.display = controlsText.style.display === "none" ? "block" : "none";
-    });
-
-    startBtn.addEventListener("click", startGame);
-    retryBtn.addEventListener("click", restartGame);
-    menuBtn.addEventListener("click", () => { showMenu(); });
-
-    // Botón para guardar manualmente
-    saveScoreBtn.addEventListener("click", async () => {
-      if (!currentUser) {
-        alert("Primero inicia sesión para guardar tu puntuación.");
-        return;
-      }
-      const name = currentUser.isAnonymous ? "Anónimo" : (currentUser.displayName || currentUser.email || "Usuario");
-      const ok = await saveScoreToDB({ uid: currentUser.uid, name, score, time: timeSurvived });
-      if (ok) {
-        alert("Puntuación guardada en la leaderboard.");
-        fetchLeaderboard(lbMode);
-      } else {
-        alert("Error guardando puntuación.");
-      }
-    });
-
-    // Primera carga de leaderboard
-    fetchLeaderboard(lbMode);
-
-    // Si quieres, puedes mostrar la leaderboard en tiempo real usando onValue en lugar de get
-    // pero para evitar lecturas continuas ahora la dejamos en petición manual (botón Actualizar).
-  </script>
-</body>
-</html>
+  
+<!DOCTYPE html>  
+<html lang="es">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>Sobrevive a las Letras</title>  
+  <style>  
+    html, body {  
+      margin: 0;  
+      padding: 0;  
+      overflow: hidden;  
+      font-family: 'Segoe UI', sans-serif;  
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);  
+      color: white;  
+      transition: background 2s;  
+    }  
+  
+    #menu, #gameOver {  
+      position: absolute;  
+      inset: 0;  
+      display: flex;  
+      flex-direction: column;  
+      justify-content: center;  
+      align-items: center;  
+      background: rgba(0, 0, 0, 0.85);  
+      z-index: 20;  
+      text-align: center;  
+      transition: opacity 0.5s;  
+    }  
+  
+    #menu.hidden, #gameOver.hidden {  
+      opacity: 0;  
+      pointer-events: none;  
+    }  
+  
+    button {  
+      background: #c084fc;  
+      border: none;  
+      color: white;  
+      padding: 12px 25px;  
+      margin: 10px;  
+      font-size: 1.2em;  
+      border-radius: 10px;  
+      cursor: pointer;  
+      transition: transform 0.2s, background 0.3s;  
+    }  
+  
+    button:hover {  
+      background: #a855f7;  
+      transform: scale(1.05);  
+    }  
+  
+    #ui {  
+      position: absolute;  
+      top: 15px;  
+      left: 50%;  
+      transform: translateX(-50%);  
+      background: rgba(0, 0, 0, 0.5);  
+      padding: 10px 20px;  
+      border-radius: 10px;  
+      font-size: 1.1em;  
+      color: #c084fc;  
+      z-index: 10;  
+      box-shadow: 0 0 10px #c084fc;  
+      display: none;  
+    }  
+  
+    #game {  
+      display: block;  
+    }  
+  
+    @keyframes fadeIn {  
+      from {opacity: 0;}  
+      to {opacity: 1;}  
+    }  
+  </style>  
+</head>  
+<body>  
+  <div id="menu">  
+    <h1>🅰 Sobrevive a las Letras</h1>  
+    <button id="startBtn">Jugar</button>  
+    <button id="controlsBtn">Ayuda</button>  
+    <p id="controlsText" style="display:none; color:#ccc;">Para moverte: en pc mueve el mouse, en teléfono pulsa a donde quieres ir.  
+    los power ups tienen icono de dado porque el efecto que te puede dar es random, estos te pueden dar lo siguiente: resistencia por 3 segundos, matar a todos los enemigos en la pantalla, aumentar tu velocidad</p>  
+  </div>  
+  
+  <div id="ui">  
+    🕒 Tiempo: <span id="time">0</span>s |  
+    💯 Puntos: <span id="score">0</span> |  
+    🏆 Récord: <span id="record">0</span>s  
+  </div>  
+  
+  <div id="gameOver" class="hidden">  
+    <h2 id="gameOverText">💀 Has perdido</h2>  
+    <button onclick="restartGame()">Reintentar</button>  
+    <button onclick="showMenu()">Menú</button>  
+  </div>  
+  
+  <canvas id="game"></canvas>  
+  
+  <script>  
+    const canvas = document.getElementById("game");  
+    const ctx = canvas.getContext("2d");  
+    canvas.width = innerWidth;  
+    canvas.height = innerHeight;  
+  
+    const ui = document.getElementById("ui");  
+    const menu = document.getElementById("menu");  
+    const gameOverScreen = document.getElementById("gameOver");  
+    const recordDisplay = document.getElementById("record");  
+    const startBtn = document.getElementById("startBtn");  
+    const controlsBtn = document.getElementById("controlsBtn");  
+  
+    let player, enemies, powerUps, mouse, timeSurvived, score, record, invulnerable, lastEnemySpawn, lastPowerUp, bgHue, gameLoopId, timerInterval;  
+  
+    const letters = "ÑXYZWKLMNOPQRSTUVABCDE".split("");  
+    const enemyColors = ["#ff0044", "#ffcc00", "#00ffff", "#00ff66", "#cc00ff", "#ffaa00"];  
+    const bgColors = ["#0f0c29", "#302b63", "#24243e", "#1a1a1a"];  
+  
+    // Imagen de power-up  
+    const powerUpImg = new Image();  
+    powerUpImg.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA_VOY-eH13RIjxNerDPrQkv_Cd9ev3ADeHWpGPJQiYg&s=10";  
+  
+    record = parseInt(localStorage.getItem("record")) || 0;  
+    recordDisplay.textContent = record;  
+  
+    function startGame() {  
+      menu.classList.add("hidden");  
+      ui.style.display = "block";  
+      gameOverScreen.classList.add("hidden");  
+      init();  
+    }  
+  
+    function init() {  
+      player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 0.2 };  
+      enemies = [];  
+      powerUps = [];  
+      mouse = { x: player.x, y: player.y };  
+      timeSurvived = 0;  
+      score = 0;  
+      invulnerable = false;  
+      lastEnemySpawn = 0;  
+      lastPowerUp = 0;  
+      bgHue = 0;  
+  
+      clearInterval(timerInterval);  
+      cancelAnimationFrame(gameLoopId);  
+  
+      timerInterval = setInterval(() => {  
+        timeSurvived++;  
+        document.getElementById("time").textContent = timeSurvived;  
+        if (timeSurvived % 10 === 0) changeBackground();  
+      }, 1000);  
+  
+      gameLoop(performance.now());  
+    }  
+  
+    function spawnEnemy() {  
+      const angle = Math.random() * Math.PI * 2;  
+      const radius = Math.max(canvas.width, canvas.height);  
+      const x = player.x + radius * Math.cos(angle);  
+      const y = player.y + radius * Math.sin(angle);  
+      const letter = letters[Math.floor(Math.random() * letters.length)];  
+      const color = enemyColors[Math.floor(Math.random() * enemyColors.length)];  
+      const speed = 1.4 + Math.random() * 1.2 + timeSurvived * 0.02;  
+      const type = Math.random() < 0.2 ? "zigzag" : "normal";  
+      enemies.push({ x, y, size: 30, speed, letter, color, type, angle: 0 });  
+    }  
+  
+    function spawnPowerUp() {  
+      const x = Math.random() * canvas.width;  
+      const y = Math.random() * canvas.height;  
+      const type = ["shield", "speed", "wave", "magnet"][Math.floor(Math.random() * 4)];  
+      powerUps.push({ x, y, size: 25, type });  
+    }  
+  
+    function drawPlayer() {  
+      const gradient = ctx.createRadialGradient(player.x, player.y, 5, player.x, player.y, 30);  
+      gradient.addColorStop(0, "#F5A927");  
+      gradient.addColorStop(1, "#F5A928");  
+      ctx.fillStyle = gradient;  
+      ctx.beginPath();  
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);  
+      ctx.fill();  
+  
+      if (invulnerable) {  
+        ctx.strokeStyle = "#00ffff";  
+        ctx.lineWidth = 4;  
+        ctx.stroke();  
+      }  
+    }  
+  
+    function drawEnemies() {  
+      ctx.font = "bold 30px 'Courier New'";  
+      ctx.textAlign = "center";  
+      ctx.textBaseline = "middle";  
+      enemies.forEach(e => {  
+        ctx.fillStyle = e.color;  
+        ctx.shadowColor = e.color;  
+        ctx.shadowBlur = 15;  
+        ctx.fillText(e.letter, e.x, e.y);  
+        ctx.shadowBlur = 0;  
+      });  
+    }  
+  
+    function updateEnemies() {  
+      enemies.forEach(e => {  
+        const dx = player.x - e.x;  
+        const dy = player.y - e.y;  
+        const dist = Math.hypot(dx, dy);  
+        if (e.type === "zigzag") e.angle += 0.2;  
+        e.x += (dx / dist) * e.speed + (e.type === "zigzag" ? Math.sin(e.angle) * 2 : 0);  
+        e.y += (dy / dist) * e.speed;  
+      });  
+    }  
+  
+    // 🎨 Dibuja power-ups usando la imagen  
+    function drawPowerUps() {  
+      powerUps.forEach(p => {  
+        const size = p.size * 2;  
+        ctx.drawImage(powerUpImg, p.x - size/2, p.y - size/2, size, size);  
+      });  
+    }  
+  
+    function updatePlayer() {  
+      player.x += (mouse.x - player.x) * player.speed;  
+      player.y += (mouse.y - player.y) * player.speed;  
+    }  
+  
+    function checkCollisions() {  
+      for (let i = enemies.length - 1; i >= 0; i--) {  
+        const e = enemies[i];  
+        const dist = Math.hypot(player.x - e.x, player.y - e.y);  
+        if (dist < player.size + e.size / 2 && !invulnerable) {  
+          gameOver();  
+          return;  
+        }  
+      }  
+  
+      for (let i = powerUps.length - 1; i >= 0; i--) {  
+        const p = powerUps[i];  
+        const dist = Math.hypot(player.x - p.x, player.y - p.y);  
+        if (dist < player.size + p.size) {  
+          activatePowerUp(p.type);  
+          powerUps.splice(i, 1);  
+          score += 10;  
+          document.getElementById("score").textContent = score;  
+        }  
+      }  
+    }  
+  
+    function activatePowerUp(type) {  
+      if (type === "shield") {  
+        invulnerable = true;  
+        setTimeout(() => invulnerable = false, 5000);  
+      } else if (type === "speed") {  
+        player.speed = 0.4;  
+        setTimeout(() => player.speed = 0.2, 5000);  
+      } else if (type === "wave") {  
+        enemies.splice(0, enemies.length);  
+      } else if (type === "magnet") {  
+        powerUps.forEach(p => {  
+          p.x = player.x;  
+          p.y = player.y;  
+        });  
+      }  
+    }  
+  
+    function changeBackground() {  
+      bgHue = (bgHue + 1) % bgColors.length;  
+      document.body.style.background = bgColors[bgHue];  
+    }  
+  
+    function gameOver() {  
+      cancelAnimationFrame(gameLoopId);  
+      clearInterval(timerInterval);  
+      ui.style.display = "none";  
+      gameOverScreen.classList.remove("hidden");  
+  
+      const text = document.getElementById("gameOverText");  
+      if (timeSurvived > record) {  
+        localStorage.setItem("record", timeSurvived);  
+        text.textContent = `🎉 ¡Nuevo récord! Sobreviviste ${timeSurvived}s`;  
+      } else {  
+        text.textContent = `💀 Has perdido. Sobreviviste ${timeSurvived}s`;  
+      }  
+    }  
+  
+    function restartGame() {  
+      gameOverScreen.classList.add("hidden");  
+      startGame();  
+    }  
+  
+    function showMenu() {  
+      gameOverScreen.classList.add("hidden");  
+      menu.classList.remove("hidden");  
+    }  
+  
+    function gameLoop(timestamp) {  
+      ctx.clearRect(0, 0, canvas.width, canvas.height);  
+  
+      updatePlayer();  
+      drawPlayer();  
+  
+      drawEnemies();  
+      updateEnemies();  
+  
+      drawPowerUps();  
+      checkCollisions();  
+  
+      if (timestamp - lastEnemySpawn > 2000) {  
+        spawnEnemy();  
+        lastEnemySpawn = timestamp;  
+      }  
+  
+      if (timestamp - lastPowerUp > 8000) {  
+        spawnPowerUp();  
+        lastPowerUp = timestamp;  
+      }  
+  
+      gameLoopId = requestAnimationFrame(gameLoop);  
+    }  
+  
+    window.addEventListener("mousemove", e => {  
+      mouse.x = e.clientX;  
+      mouse.y = e.clientY;  
+    });  
+  
+    window.addEventListener("touchmove", e => {  
+      const t = e.touches[0];  
+      mouse.x = t.clientX;  
+      mouse.y = t.clientY;  
+    });  
+  
+    window.addEventListener("resize", () => {  
+      canvas.width = innerWidth;  
+      canvas.height = innerHeight;  
+    });  
+  
+    controlsBtn.addEventListener("click", () => {  
+      const c = document.getElementById("controlsText");  
+      c.style.display = c.style.display === "none" ? "block" : "none";  
+    });  
+  
+    startBtn.addEventListener("click", startGame);  
+  </script>  
+</body>  
+</html>  
