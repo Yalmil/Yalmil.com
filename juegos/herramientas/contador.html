@@ -12,67 +12,75 @@
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+ <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    * { box-sizing: border-box; }
+  * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f);
-      color: #e5ccff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      overflow: hidden;
-      transition: background 1s, color 1s;
-      animation: fadeIn 1s ease-out;
-    }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0a0a0a, #1a001f, #3b0066, #0a0a0a);
+    background-size: 400% 400%;
+    color: #e5ccff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+    transition: background 1s, color 1s;
+    animation: gradientShift 10s ease infinite, fadeIn 1s ease-out;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 
-    h1 {
-      font-size: 2.5rem;
-      color: #c084fc;
-      text-shadow: 0 0 10px #c084fc;
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    #countdown {
-      font-size: 2rem;
-      margin-top: 1rem;
-      color: #e5ccff;
-      text-shadow: 0 0 8px #c084fcaa;
-    }
+  h1 {
+    font-size: 2.5rem;
+    color: #c084fc;
+    text-shadow: 0 0 10px #c084fc;
+  }
 
-    .finished {
-      background: #B37B24;
-      color: #633D01;
-    }
+  #countdown {
+    font-size: 2rem;
+    margin-top: 1rem;
+    color: #e5ccff;
+    text-shadow: 0 0 8px #c084fcaa;
+  }
 
-    .finished h1 {
-      color: #FFBA52;
-      text-shadow: 0 0 15px #694C21;
-      font-size: 3rem;
-    }
+  .finished {
+    background: linear-gradient(135deg, #B37B24, #8B5E17);
+    color: #633D01;
+    animation: none;
+  }
 
-    .finished #countdown {
-      display: none;
-    }
-  </style>
+  .finished h1 {
+    color: #FFBA52;
+    text-shadow: 0 0 15px #694C21;
+    font-size: 3rem;
+  }
+
+  .finished #countdown {
+    display: none;
+  }
+</style>
 </head>
 <body>
   <h1>Cuenta regresiva para año nuevo</h1>
   <div id="countdown">Cargando...</div>
 
   <script>
-    // Fecha objetivo: 31 de octubre a las 6:00 PM (hora Ciudad de México)
+    // Fecha objetivo
     const targetDate = new Date("2025-01-01T18:00:00-06:00").getTime();
 
     const countdownEl = document.getElementById("countdown");
