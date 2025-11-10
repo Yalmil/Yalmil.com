@@ -20,7 +20,7 @@
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #000;
+      background: linear-gradient(135deg, #0a0a0a, #1a001f);
       color: #e5ccff;
       display: flex;
       flex-direction: column;
@@ -45,11 +45,10 @@
     }
 
     #countdown {
-      font-size: 2.3rem;
+      font-size: 2rem;
       margin-top: 1rem;
       color: #e5ccff;
-      text-shadow: 0 0 12px #c084fc99;
-      letter-spacing: 2px;
+      text-shadow: 0 0 8px #c084fcaa;
     }
 
     .finished {
@@ -61,16 +60,10 @@
       color: #ff5555;
       text-shadow: 0 0 15px #ff0000;
       font-size: 3rem;
-      animation: pulse 1s infinite alternate;
     }
 
     .finished #countdown {
       display: none;
-    }
-
-    @keyframes pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.05); }
     }
   </style>
 </head>
@@ -79,8 +72,8 @@
   <div id="countdown">Cargando...</div>
 
   <script>
-    // Fecha objetivo
-    const targetDate = new Date("2026-1-1T18:00:00-06:00").getTime();
+    // Fecha objetivo: 31 de octubre a las 6:00 PM (hora Ciudad de México)
+    const targetDate = new Date("2025-01-01T18:00:00-06:00").getTime();
 
     const countdownEl = document.getElementById("countdown");
     const titleEl = document.querySelector("h1");
@@ -92,7 +85,7 @@
       if (distance <= 0) {
         clearInterval(interval);
         document.body.classList.add("finished");
-        titleEl.textContent = "LA GUEST UPDATE SALIÓ!";
+        titleEl.textContent = "Año nuevo :D";
         return;
       }
 
