@@ -1,206 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Changelog</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Changelog</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Poppins',sans-serif;
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;animation:f 1s ease-out
+}
+@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    * {
-      box-sizing: border-box;
-    }
+@media(prefers-color-scheme:dark){
+  body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}
+  .container{background:rgba(40,0,60,.25);border:2px solid #c084fc;box-shadow:0 0 20px #c084fc88;color:#e5ccff}
+  h1,h2{color:#c084fc;text-shadow:0 0 8px #c084fc}
+  .editable{background:rgba(255,255,255,.05);border:1px solid #c084fc88;color:#fff}
+  .editable:focus{box-shadow:0 0 10px #c084fcaa;border-color:#c084fc}
+}
 
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a001f);
-      color: #e5ccff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      animation: fadeIn 1s ease-out;
-    }
+@media(prefers-color-scheme:light){
+  body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}
+  .container{background:rgba(60,20,0,.2);border:2px solid #ff8c00;box-shadow:0 0 20px #ff8c0088;color:#ffd8a6}
+  h1,h2{color:#ff8c00;text-shadow:0 0 8px #ff8c00}
+  .editable{background:rgba(255,255,255,.05);border:1px solid #ff8c0088;color:#fff}
+  .editable:focus{box-shadow:0 0 10px #ffb84d;border-color:#ff8c00}
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .container {
-      background: rgba(40, 0, 60, 0.2);
-      backdrop-filter: blur(6px);
-      border: 2px solid #c084fc;
-      border-radius: 1.5rem;
-      padding: 2rem;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 0 20px #c084fc88;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: #c084fc;
-      text-shadow: 0 0 8px #c084fc;
-    }
-
-    .editable {
-      min-height: 200px;
-      padding: 1rem;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      outline: none;
-      font-size: 1rem;
-      border: 1px solid #c084fc88;
-      overflow-y: auto;
-    }
-
-    .editable:focus {
-      box-shadow: 0 0 10px #c084fcaa;
-      border-color: #c084fc;
-    }
-  </style>
+.container{
+  border-radius:1.5rem;padding:2rem;width:90%;max-width:600px;
+  backdrop-filter:blur(6px);text-align:left
+}
+h1{text-align:center;font-size:2rem;margin-bottom:1.2rem}
+h2{font-size:1.4rem;margin:.8rem 0}
+h3{font-weight:400;margin:.3rem 0}
+.editable{
+  min-height:200px;padding:1rem;border-radius:10px;
+  outline:none;font-size:1rem;overflow-y:auto
+}
+</style>
 </head>
 <body>
 <div class="container">
-    <h1>📒 Hotfix 1.4</h1>
-    <div class="editable" contenteditable="false">
-     <h2>Juegos</h2>
-     <h3> • Se añadio Tower of numbers (ton) 📝</h3>
-     <h3> • Se añadio laboratorio 🧪</h3>
-     <h3> • Se añadio lootboxes 🗺️</h3>
-     <h2>Mejoras</h2>
-     <h3>Se ha mejorado banea a todos los channels (BATLC) 💳</h3>
-     <h3>Se mejoro sobrevive a las letras (SALL) 🔺</h3>
-     <h2>Cambios secundarios 🌙</h2>
-     <h3>Se cambió ligeramente el css 🔥</h3>
-   </div>
+  <h1>📒 Hotfix 1.4</h1>
+  <div class="editable" contenteditable="false">
+    <h2>Juegos</h2>
+    <h3>• Se añadió Tower of Numbers (ToN)</h3>
+    <h3>• Se añadió laboratorio</h3>
+    <h3>• Se añadió lootboxes</h3>
+    <h2>Mejoras</h2>
+    <h3>• Se mejoró Banea a todos los channels (BATLC)</h3>
+    <h3>• Se mejoró Sobrevive a las letras (SALL)</h3>
+    <h2>Cambios secundarios</h2>
+    <h3>• Se cambió ligeramente el CSS</h3>
   </div>
-  </div>
-    <!-- Lineas innecesarias -->
+</div>
+
 <script>
-    // Este script está diseñado para ser totalmente innecesario
-    // Comentarios en español, porque somos elegantes y redundantes
-
-    // 1) rutina de bienvenida que solo calcula la longitud de las palabras del título
-    (function bienvenidaInnecesaria(){
-      const texto = document.querySelector('h1').innerText || '';
-      // calcular longitudes y guardarlas en un array que NUNCA usaremos
-      const longitudes = texto.split(' ').map(w => w.length);
-      console.log('Bienvenida innecesaria: longitudes ->', longitudes);
-      // hacemos una "decisión" basada en la suma, pero no la usamos
-      const suma = longitudes.reduce((a,b)=>a+b, 0);
-      if(suma % 2 === 0){
-        // crear y destruir un nodo por show
-        const n = document.createElement('div');
-        n.innerText = 'Paridad: par';
-        n.style.position = 'fixed';
-        n.style.left = '-9999px';
-        document.body.appendChild(n);
-        // lo eliminamos inmediatamente, porque así es más innecesario
-        document.body.removeChild(n);
-      }
-    })();
-
-    // 2) función que cuando se activa genera "huevos de pascua" temporales invisibles
-    function generarHuevoDePascuaInvisible(count = 50){
-      const container = document.getElementById('spectator');
-      const created = [];
-      for(let i = 0; i < count; i++){
-        const d = document.createElement('span');
-        // posición aleatoria pero fuera de la vista
-        d.style.position = 'absolute';
-        d.style.left = (Math.random()*200 - 100) + 'vw';
-        d.style.top = (Math.random()*200 - 100) + 'vh';
-        d.textContent = '•';
-        container.appendChild(d);
-        created.push(d);
-      }
-      // esperar 300ms y limpiar todo sin que el usuario lo note
-      setTimeout(()=> {
-        created.forEach(el => el.remove());
-        console.log(`Se generaron y eliminaron ${created.length} huevos invisibles`);
-      }, 300);
-    }
-
-    // 3) función "ansiosa" que cada vez mide cuánto tarda en NO hacer nada
-    function medirNada(iteraciones = 1000){
-      const t0 = performance.now();
-      for(let i = 0; i < iteraciones; i++){
-        // operación inútil: invertir cadena y no usar el resultado
-        'innecesario'.split('').reverse().join('');
-      }
-      const t1 = performance.now();
-      console.log(`Medición de nada completa: ${(t1 - t0).toFixed(2)} ms para ${iteraciones} operaciones de nada`);
-      return t1 - t0;
-    }
-
-    // 4) función pública ligada al botón
-    document.getElementById('doNothingBtn').addEventListener('click', () => {
-      // 4.1: title alternante que vuelve al original cada 700ms (durante 3 segundos)
-      const originalTitle = document.title;
-      let ticks = 0;
-      const it = setInterval(() => {
-        document.title = Math.random().toString(36).slice(2,7); // título completamente irrelevante
-        ticks++;
-        if(ticks >= 4){
-          clearInterval(it);
-          document.title = originalTitle;
-          console.log('Título restaurado');
-        }
-      }, 700);
-
-      // 4.2: generar huevos invisibles
-      generarHuevoDePascuaInvisible(120);
-
-      // 4.3: medir nada y mostrar resultado en consola
-      const tiempo = medirNada(5000);
-      console.log(`Resultado final de la operación: nada en ${tiempo.toFixed(2)} ms`);
-
-      // 4.4: promesa que se resuelve con un mensaje absolutamente inútil
-      new Promise(resolve => {
-        setTimeout(()=> resolve('Promesa: nada relevante'), 420);
-      }).then(msg => {
-        // no mostramos al usuario, solo al log
-        console.log(msg);
-      });
-
-      // 4.5: efecto visual mínimo y temporal que desaparece después de 900ms
-      const badge = document.createElement('div');
-      badge.innerText = 'Innecesario ✔';
-      badge.style.position = 'fixed';
-      badge.style.right = '18px';
-      badge.style.bottom = '18px';
-      badge.style.padding = '8px 12px';
-      badge.style.borderRadius = '10px';
-      badge.style.background = 'rgba(255,255,255,0.03)';
-      badge.style.backdropFilter = 'blur(4px)';
-      badge.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
-      document.body.appendChild(badge);
-      setTimeout(()=> badge.remove(), 900);
-    });
-
-    // 5) rutina automática programada para ejecutarse una vez después de 2 segundos
-    setTimeout(()=> {
-      // consultar el ancho de la ventana y guardarlo en una variable nunca usada
-      const w = window.innerWidth;
-      console.log('Rutina automática: ancho de ventana medido ->', w);
-      // lanzar una medición "oculta" de nada
-      medirNada(2000);
-    }, 2000);
-    
-    // 6) Versión del changelog
-   new Promise(resolve => {
-        setTimeout(()=> resolve('Promesa: nada relevante'), 420);
-      }).then(o => { 
-        // no mostramos al usuario, solo al log
-        console.log(o);
-      }); // Está cosa ni siquiera funciona, y si, ya se que está mal programado
-  </script>
-  
+// Script innecesario, pero orgullosamente absurdo
+(function(){
+  const texto=document.querySelector('h1').innerText||'';
+  const longitudes=texto.split(' ').map(w=>w.length);
+  console.log('Bienvenida innecesaria:',longitudes);
+  const suma=longitudes.reduce((a,b)=>a+b,0);
+  if(suma%2===0){
+    const n=document.createElement('div');
+    n.innerText='Paridad: par';n.style.left='-9999px';
+    document.body.appendChild(n);document.body.removeChild(n);
+  }
+})();
+function generarHuevoDePascuaInvisible(c=50){
+  const created=[];
+  for(let i=0;i<c;i++){
+    const d=document.createElement('span');
+    d.style.position='absolute';
+    d.style.left=(Math.random()*200-100)+'vw';
+    d.style.top=(Math.random()*200-100)+'vh';
+    d.textContent='•';
+    document.body.appendChild(d);created.push(d);
+  }
+  setTimeout(()=>{created.forEach(e=>e.remove());},300);
+}
+function medirNada(i=1000){
+  const t0=performance.now();
+  for(let j=0;j<i;j++)'innecesario'.split('').reverse().join('');
+  const t1=performance.now();
+  console.log(`Nada completada en ${(t1-t0).toFixed(2)} ms`);
+  return t1-t0;
+}
+setTimeout(()=>{
+  console.log('Rutina automática: ancho ->',window.innerWidth);
+  medirNada(2000);
+},2000);
+new Promise(r=>setTimeout(()=>r('Promesa: nada relevante'),420)).then(console.log);
+</script>
 </body>
 </html>
