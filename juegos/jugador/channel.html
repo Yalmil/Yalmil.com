@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Juego: Banear Channels</title>
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<meta property="og:title" content="Yalmil.com" />
+<meta property="og:description" content="Juego de clicker: Banea Channels y captura calculadoras raras" />
+<meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+<meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+<meta property="og:type" content="website" />
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -19,6 +25,7 @@ body {
   flex-direction: column;
   min-height: 100vh;
   animation: fadeIn 0.8s ease-out;
+  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -30,29 +37,24 @@ header {
   background-color: #4d1a00;
   padding: 1rem 2rem;
   border-bottom: 2px solid #ff8c00;
-  text-align: center;
   box-shadow: 0 0 12px #ff8c0055;
 }
 
-header h1 {
+h1 {
   margin: 0;
-  font-size: 2rem;
   color: #ff8c00;
   text-shadow: 0 0 10px #ff8c00aa;
 }
 
-main {
-  flex: 1;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.stats {
+  margin-top: 15px;
+  font-size: 18px;
 }
 
-.stats {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #ffd8a6;
+#contador-calculadora {
+  margin-top: 10px;
+  font-size: 20px;
+  color: #ffa94d;
   text-shadow: 0 0 6px #ff8c0066;
 }
 
@@ -69,40 +71,22 @@ main {
 }
 
 #baneo-btn:hover {
-  background: linear-gradient(90deg, #ff751a, #ffaa33);
   transform: scale(1.05);
   box-shadow: 0 0 25px #ff8c00aa;
 }
 
-.mejoras {
-  margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
 .mejora {
   background: rgba(60, 20, 0, 0.3);
-  backdrop-filter: blur(8px);
   border: 2px solid #ff8c00;
   border-radius: 15px;
-  width: 300px;
   padding: 15px;
-  text-align: center;
-  box-shadow: 0 0 10px #ff8c0044;
-  transition: 0.2s;
-}
-
-.mejora:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 0 20px #ff8c00;
+  margin: 10px;
+  width: 300px;
+  display: inline-block;
 }
 
 .mejora h3 {
   color: #ff8c00;
-  margin-bottom: 5px;
-  text-shadow: 0 0 5px #ff8c0088;
 }
 
 .mejora button {
@@ -115,7 +99,6 @@ main {
   cursor: pointer;
   font-weight: 600;
   box-shadow: 0 0 8px #ff8c0055;
-  transition: 0.2s;
 }
 
 .mejora button:hover {
@@ -124,25 +107,69 @@ main {
 }
 
 footer {
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.8rem;
-  color: #ffb366;
   background-color: #330800;
-  border-top: 1px solid #662200;
+  padding: 1rem;
+  color: #ffb366;
 }
+
+/* === ESTILOS DE LA CALCULADORA ALEATORIA === */
+#calculadora-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeInOverlay 0.5s ease forwards;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#calculadora-popup {
+  background: #222;
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 25px #fff4;
+  transform: scale(0.8);
+  animation: popupIn 0.5s ease forwards;
+}
+
+@keyframes popupIn {
+  to { transform: scale(1); opacity: 1; }
+}
+
+.rarity-verde { background: linear-gradient(135deg, #004d00, #00cc00); box-shadow: 0 0 20px #00ff00aa; }
+.rarity-azul { background: linear-gradient(135deg, #00224d, #0066ff); box-shadow: 0 0 20px #0099ffcc; }
+.rarity-morado { background: linear-gradient(135deg, #33004d, #aa33ff); box-shadow: 0 0 20px #cc66ffaa; }
+.rarity-naranja { background: linear-gradient(135deg, #4d1a00, #ff6600); box-shadow: 0 0 20px #ff9900aa; }
+
+#calculadora-popup button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+#btn-si { background: #00ff88; color: #000; }
+#btn-no { background: #ff5555; color: #fff; }
 </style>
 </head>
 
 <body>
-
-<header>
-  <h1>Banea a todos los Channels!</h1>
-</header>
+<header><h1>Banea a todos los Channels!</h1></header>
 
 <main>
   <button id="baneo-btn">Banear a Channel</button>
-
   <div class="stats">
     <p><strong>Baneos:</strong> <span id="baneos">0</span></p>
     <p><strong>Baneos por click:</strong> <span id="bpc">1</span></p>
@@ -150,7 +177,9 @@ footer {
     <p><strong>Velocidad AutoClick:</strong> <span id="velocidad">2.5s</span></p>
   </div>
 
-  <div class="mejoras">
+  <div id="contador-calculadora">Siguiente calculadora en: 5:00</div>
+
+  <div id="mejoras">
     <div class="mejora">
       <h3>Generar Odio</h3>
       <p>Aumenta los baneos por click en +0.5</p>
@@ -174,76 +203,81 @@ footer {
   </div>
 </main>
 
-<footer>
-  <p>Hecho con odio para Channel</p>
-</footer>
+<footer><p>Hecho con odio para Channel</p></footer>
+
+<!-- Overlay de calculadora -->
+<div id="calculadora-overlay">
+  <div id="calculadora-popup">
+    <h2 id="calc-titulo">¡Ha aparecido una Calculadora!</h2>
+    <p id="calc-rarity"></p>
+    <p>¿Capturar?</p>
+    <button id="btn-si">Sí</button>
+    <button id="btn-no">No</button>
+  </div>
+</div>
 
 <script>
 // ===== FUNCIONES DE COOKIES =====
-function setCookie(name, value, days = 365) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days*24*60*60*1000));
-  const expires = "expires="+ d.toUTCString();
-  document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
+function setCookie(nombre, valor, dias = 365) {
+  const fecha = new Date();
+  fecha.setTime(fecha.getTime() + (dias*24*60*60*1000));
+  document.cookie = `${nombre}=${encodeURIComponent(valor)}; expires=${fecha.toUTCString()}; path=/`;
 }
 
-function getCookie(name) {
-  const cname = name + "=";
-  const decoded = decodeURIComponent(document.cookie);
-  const ca = decoded.split(';');
-  for(let c of ca) {
-    while (c.charAt(0) == ' ') c = c.substring(1);
-    if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
+function getCookie(nombre) {
+  const partes = document.cookie.split('; ');
+  for (let parte of partes) {
+    const [clave, valor] = parte.split('=');
+    if (clave === nombre) return decodeURIComponent(valor);
   }
-  return "";
+  return null;
+}
+
+function guardarDatos() {
+  const datos = { baneos, bpc, empleados, velocidad, costoOdio, costoEmpleado, costoYalgui };
+  setCookie("datosJuego", JSON.stringify(datos));
+}
+
+function cargarDatos() {
+  const datosGuardados = getCookie("datosJuego");
+  if (datosGuardados) {
+    try {
+      const d = JSON.parse(datosGuardados);
+      baneos = d.baneos ?? 0;
+      bpc = d.bpc ?? 1;
+      empleados = d.empleados ?? 0;
+      velocidad = d.velocidad ?? 2500;
+      costoOdio = d.costoOdio ?? 10;
+      costoEmpleado = d.costoEmpleado ?? 50;
+      costoYalgui = d.costoYalgui ?? 200;
+    } catch(e) { console.warn("Error al cargar cookies"); }
+  }
 }
 
 // ===== VARIABLES =====
-let baneos = parseFloat(getCookie("baneos")) || 0;
-let bpc = parseFloat(getCookie("bpc")) || 1;
-let empleados = parseInt(getCookie("empleados")) || 0;
-let velocidad = parseInt(getCookie("velocidad")) || 2500;
-let costoOdio = parseInt(getCookie("costoOdio")) || 10;
-let costoEmpleado = parseInt(getCookie("costoEmpleado")) || 50;
-let costoYalgui = parseInt(getCookie("costoYalgui")) || 200;
+let baneos = 0, bpc = 1, empleados = 0, velocidad = 2500;
+let costoOdio = 10, costoEmpleado = 50, costoYalgui = 200;
 let autoClickInterval = null;
 
-// ===== ELEMENTOS =====
-const baneoDisplay = document.getElementById("baneos");
-const bpcDisplay = document.getElementById("bpc");
-const empleadosDisplay = document.getElementById("empleados");
-const velocidadDisplay = document.getElementById("velocidad");
-const costoOdioDisplay = document.getElementById("costo-odio");
-const costoEmpleadoDisplay = document.getElementById("costo-empleado");
-const costoYalguiDisplay = document.getElementById("costo-yalgui");
-
 // ===== FUNCIONES =====
-function guardarDatos() {
-  setCookie("baneos", baneos);
-  setCookie("bpc", bpc);
-  setCookie("empleados", empleados);
-  setCookie("velocidad", velocidad);
-  setCookie("costoOdio", costoOdio);
-  setCookie("costoEmpleado", costoEmpleado);
-  setCookie("costoYalgui", costoYalgui);
-}
-
 function actualizarPantalla() {
-  baneoDisplay.textContent = baneos.toFixed(1);
-  bpcDisplay.textContent = bpc.toFixed(1);
-  empleadosDisplay.textContent = empleados;
-  velocidadDisplay.textContent = (velocidad / 1000).toFixed(2) + "s";
-  costoOdioDisplay.textContent = costoOdio;
-  costoEmpleadoDisplay.textContent = costoEmpleado;
-  costoYalguiDisplay.textContent = costoYalgui;
+  document.getElementById("baneos").textContent = baneos.toFixed(1);
+  document.getElementById("bpc").textContent = bpc.toFixed(1);
+  document.getElementById("empleados").textContent = empleados;
+  document.getElementById("velocidad").textContent = (velocidad/1000).toFixed(2) + "s";
+  document.getElementById("costo-odio").textContent = costoOdio;
+  document.getElementById("costo-empleado").textContent = costoEmpleado;
+  document.getElementById("costo-yalgui").textContent = costoYalgui;
   guardarDatos();
 }
 
+// ===== CLICK PRINCIPAL =====
 document.getElementById("baneo-btn").addEventListener("click", () => {
   baneos += bpc;
   actualizarPantalla();
 });
 
+// ===== MEJORAS =====
 function comprarOdio() {
   if (baneos >= costoOdio) {
     baneos -= costoOdio;
@@ -258,8 +292,8 @@ function comprarEmpleado() {
     baneos -= costoEmpleado;
     empleados++;
     costoEmpleado = Math.floor(costoEmpleado * 1.7);
-    actualizarPantalla();
     iniciarAutoClick();
+    actualizarPantalla();
   }
 }
 
@@ -268,8 +302,8 @@ function comprarYalgui() {
     baneos -= costoYalgui;
     velocidad -= 250;
     costoYalgui = Math.floor(costoYalgui * 2);
-    actualizarPantalla();
     iniciarAutoClick();
+    actualizarPantalla();
   }
 }
 
@@ -281,10 +315,68 @@ function iniciarAutoClick() {
   }, velocidad);
 }
 
-// ===== INICIO =====
-actualizarPantalla();
-if (empleados > 0) iniciarAutoClick();
-</script>
+// ===== CALCULADORA (CADA 5 MINUTOS) =====
+const overlay = document.getElementById("calculadora-overlay");
+const popup = document.getElementById("calculadora-popup");
+const rarityText = document.getElementById("calc-rarity");
+const contador = document.getElementById("contador-calculadora");
+const btnSi = document.getElementById("btn-si");
+const btnNo = document.getElementById("btn-no");
 
+let tiempoRestante = 60; // 1 minutos
+
+function formatoTiempo(seg) {
+  const m = Math.floor(seg / 60);
+  const s = seg % 60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function actualizarContador() {
+  contador.textContent = `Siguiente calculadora en: ${formatoTiempo(tiempoRestante)}`;
+}
+
+function mostrarCalculadora() {
+  const rarezas = [
+    {nombre: "Común", clase: "rarity-verde", premio: 50},
+    {nombre: "Rara", clase: "rarity-azul", premio: 150},
+    {nombre: "Épica", clase: "rarity-morado", premio: 500},
+    {nombre: "Mítica", clase: "rarity-naranja", premio: 1500}
+  ];
+  const seleccion = rarezas[Math.floor(Math.random() * rarezas.length)];
+
+  popup.className = seleccion.clase;
+  rarityText.textContent = seleccion.nombre;
+  overlay.style.display = "flex";
+
+  btnSi.onclick = () => {
+    baneos += seleccion.premio;
+    overlay.style.display = "none";
+    tiempoRestante = 300;
+    actualizarPantalla();
+  };
+
+  btnNo.onclick = () => {
+    overlay.style.display = "none";
+    tiempoRestante = 300;
+    actualizarPantalla();
+  };
+}
+
+setInterval(() => {
+  if (overlay.style.display === "none" || overlay.style.display === "") {
+    tiempoRestante--;
+    if (tiempoRestante <= 0) {
+      mostrarCalculadora();
+    }
+    actualizarContador();
+  }
+}, 1000);
+
+// ===== INICIO =====
+cargarDatos();
+actualizarPantalla();
+actualizarContador();
+iniciarAutoClick();
+</script>
 </body>
-</html>
+                                            </html>
