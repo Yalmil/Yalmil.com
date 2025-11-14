@@ -732,7 +732,7 @@
       </div>
     </div>
 
-    <button class="btn" onclick="gainCoins()">🎲 Ganar Monedas (+10)</button>
+    <button class="btn" onclick="gainCoins()">🎲 Ganar Monedas (+25)</button>
 
     <div class="chest-container">
       <div class="chest" onclick="openChest('basic')" id="basicChest">
@@ -1212,7 +1212,7 @@
 
     // MPC (Money per click)
     window.gainCoins = function() {
-      gameState.coins += 10;
+      gameState.coins += 25;
       saveGame();
       updateUI();
     };
