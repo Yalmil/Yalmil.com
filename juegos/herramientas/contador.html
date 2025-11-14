@@ -1,110 +1,151 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cuenta Regresiva</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuenta Regresiva</title>
 
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Cuenta regresiva: año nuevo" />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<meta property="og:title" content="Yalmil.com" />
+<meta property="og:description" content="Cuenta regresiva personalizada" />
+<meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+<meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+<meta property="og:type" content="website" />
 
- <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #0a0a0a, #1a001f, #3b0066, #0a0a0a);
-    background-size: 400% 400%;
-    color: #e5ccff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
-    overflow: hidden;
-    transition: background 1s, color 1s;
-    animation: gradientShift 10s ease infinite, fadeIn 1s ease-out;
-  }
-
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    color: #c084fc;
-    text-shadow: 0 0 10px #c084fc;
-  }
-
-  #countdown {
-    font-size: 2rem;
-    margin-top: 1rem;
-    color: #e5ccff;
-    text-shadow: 0 0 8px #c084fcaa;
-  }
-
-  .finished {
-    background: linear-gradient(135deg, #B37B24, #8B5E17);
-    color: #633D01;
-    animation: none;
-  }
-
-  .finished h1 {
-    color: #FFBA52;
-    text-shadow: 0 0 15px #694C21;
-    font-size: 3rem;
-  }
-
-  .finished #countdown {
-    display: none;
-  }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');*{box-sizing:border-box;margin:0}body{font-family:'Poppins',sans-serif;display:flex;flex-direction:column;min-height:100vh;transition:.4s;justify-content:center;align-items:center;text-align:center;padding:20px}
+@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-color-scheme:dark){
+body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}
+.subpage{background:rgba(40,0,60,.25);border:2px solid #c084fc;color:#e5ccff}
+h1{color:#c084fc}
+}
+@media(prefers-color-scheme:light){
+body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}
+.subpage{background:rgba(60,20,0,.2);border:2px solid #ff8c00;color:#ffd8a6}
+h1{color:#ff8c00}
+}
+h1{font-size:2.3rem;margin-bottom:10px;animation:f .6s}
+#countdown{font-size:1.8rem;margin-top:10px;animation:f .8s}
+button{margin-top:20px;padding:10px 20px;font-size:1rem;border-radius:10px;border:none;cursor:pointer}
+.subpage{padding:20px;margin-top:20px;border-radius:15px;display:none}
+input{padding:8px;width:100%;margin:6px 0;border-radius:6px;border:none}
 </style>
+
 </head>
 <body>
-  <h1>Cuenta regresiva para año nuevo</h1>
-  <div id="countdown">Cargando...</div>
 
-  <script>
-    // Fecha objetivo
-    const targetDate = new Date("2026-01-01T18:00:00-06:00").getTime();
+<h1 id="title">Cuenta regresiva</h1>
+<div id="countdown">Cargando...</div>
+<h3>Contraseña: forsaken</h3>
+<button id="adminBtn">Opciones</button>
 
-    const countdownEl = document.getElementById("countdown");
-    const titleEl = document.querySelector("h1");
+<div class="subpage" id="configBox">
+  <h2>Configurar fecha</h2>
+  <input id="nameInput" type="text" placeholder="Nombre del evento">
+  <input id="dateInput" type="datetime-local"> 
+  <button id="saveBtn">Guardar</button>
+</div>
 
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
+<script>
+// ---------------------------
+// MANEJO DE COOKIES
+// ---------------------------
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days*24*60*60*1000));
+  document.cookie = name + "=" + value + ";expires=" + d.toUTCString() + ";path=/";
+}
 
-      if (distance <= 0) {
-        clearInterval(interval);
-        document.body.classList.add("finished");
-        titleEl.textContent = "Año nuevo :D";
-        return;
-      }
+function getCookie(name) {
+  const decoded = decodeURIComponent(document.cookie).split(";");
+  for (let c of decoded) {
+    c = c.trim();
+    if (c.indexOf(name + "=") === 0) return c.substring(name.length + 1);
+  }
+  return "";
+}
 
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+// ---------------------------
+// DATOS GUARDADOS
+// ---------------------------
+let savedName = getCookie("eventName");
+let savedDate = getCookie("eventDate");
 
-      countdownEl.innerHTML = 
-        `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }, 1000);
-  </script>
+if (!savedName) savedName = "Año nuevo";
+if (!savedDate) savedDate = "2026-01-01T18:00";
+
+// ---------------------------
+// ELEMENTOS
+// ---------------------------
+const titleEl = document.getElementById("title");
+const countdownEl = document.getElementById("countdown");
+const adminBtn = document.getElementById("adminBtn");
+const configBox = document.getElementById("configBox");
+const nameInput = document.getElementById("nameInput");
+const dateInput = document.getElementById("dateInput");
+
+// Inicializar campos
+nameInput.value = savedName;
+dateInput.value = savedDate;
+
+// ---------------------------
+// BOTÓN SECRETO (contraseña simple)
+// ---------------------------
+adminBtn.onclick = () => {
+  const pass = prompt("Contraseña");
+  if (pass === "forsaken") {
+    configBox.style.display = "block";
+  }
+};
+
+// ---------------------------
+// GUARDAR EVENTO
+// ---------------------------
+document.getElementById("saveBtn").onclick = () => {
+  const n = nameInput.value.trim();
+  const d = dateInput.value;
+
+  if (!n || !d) return alert("Completa todos los campos");
+
+  setCookie("eventName", n, 999);
+  setCookie("eventDate", d, 999);
+
+  savedName = n;
+  savedDate = d;
+
+  titleEl.textContent = "Cuenta regresiva para " + savedName;
+
+  alert("Guardado");
+  location.reload();
+};
+
+// ---------------------------
+// COUNTDOWN
+// ---------------------------
+titleEl.textContent = "Cuenta regresiva para " + savedName;
+
+function updateCountdown() {
+  const target = new Date(savedDate).getTime();
+  const now = Date.now();
+  const dist = target - now;
+
+  if (dist <= 0) {
+    countdownEl.textContent = "Comenzó!";
+    return;
+  }
+
+  const d = Math.floor(dist / (1000*60*60*24));
+  const h = Math.floor((dist % (1000*60*60*24)) / (1000*60*60));
+  const m = Math.floor((dist % (1000*60*60)) / (1000*60));
+  const s = Math.floor((dist % (1000*60)) / 1000);
+
+  countdownEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+
 </body>
 </html>
