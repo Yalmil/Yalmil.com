@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yalmil.com</title>
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<meta property="og:title" content="Yalmil.com" />
+<meta property="og:description" content="Mods de YDT" />
+<meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+<meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+<meta property="og:type" content="website" />
+
+  <style>
+  /* -------------------------------------- */
+/* Fuente, reset y comportamiento global */
+/* -------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: #9127F5;
+  position: relative;
+}
+
+/* Colores base */
+:root {
+  --c1: #8400FF;
+  --c2: rgb(15, 0, 30);
+  --c3: rgb(12, 0, 20);
+  --glow: 0 0 25px var(--c1);
+  --glow-big: 0 0 45px var(--c1);
+  --border: 2px solid var(--c1);
+}
+
+/* -------------------------------------- */
+/* Fondo animado */
+/* -------------------------------------- */
+.forest-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to bottom, #9127F5 10%, #B368F7 30%, #5F3685 60%, #450580 100%);
+  z-index: -2;
+}
+
+/* Niebla */
+.forest-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgb(19, 0, 50), transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgb(0, 40, 0), transparent 60%),
+    radial-gradient(ellipse at 50% 80%, rgb(15, 0, 50), transparent 60%);
+  opacity: 0.55;
+  animation: fogMove 22s ease-in-out infinite;
+}
+
+@keyframes fogMove {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(25px, -18px); }
+}
+
+/* Árboles */
+.forest-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60%;
+  background:
+    linear-gradient(to bottom, transparent 0%, rgb(0, 15, 0) 20%, rgb(15, 0, 20) 100%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 60px,
+      rgb(18, 0, 30) 60px 65px,
+      transparent 65px 90px,
+      rgb(22, 0, 35) 90px 97px,
+      transparent 97px 140px,
+      rgb(11, 0, 25) 140px 145px
+    );
+}
+
+.forest-layer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.tree {
+  position: absolute;
+  bottom: 0;
+}
+
+.tree::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 15px;
+  height: 100%;
+  background: linear-gradient(to right, rgb(13, 0, 20), rgb(16, 0, 30), rgb(13, 0, 20));
+  border-radius: 3px;
+  transform: translateX(-50%);
+}
+
+.tree::after {
+  content: '';
+  position: absolute;
+  bottom: 60%;
+  left: 50%;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 80px solid rgb(23, 0, 50);
+  filter: blur(2px);
+  transform: translateX(-50%);
+}
+
+/* -------------------------------------- */
+/* Partículas */
+/* -------------------------------------- */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.particle {
+  position: absolute;
+  background: var(--c1);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--c1);
+  animation: float 6s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); opacity: 0.3; }
+  50% { transform: translateY(-30px) translateX(10px); opacity: 0.8; }
+}
+
+/* -------------------------------------- */
+/* Header */
+/* -------------------------------------- */
+header {
+  background: var(--c3);
+  padding: 20px;
+  border-bottom: var(--border);
+  box-shadow: var(--glow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--c1);
+  text-shadow: var(--glow);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 60px;
+  filter: drop-shadow(var(--glow));
+}
+
+nav {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: var(--c1);
+  text-decoration: none;
+  text-shadow: 0 0 5px var(--c1);
+  transition: 0.3s;
+}
+
+nav a:hover {
+  transform: scale(1.1);
+  text-shadow: var(--glow-big);
+}
+
+/* -------------------------------------- */
+/* Main */
+/* -------------------------------------- */
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 60px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  margin-bottom: 80px;
+  padding: 40px 0;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  color: var(--c1);
+  text-shadow: var(--glow-big);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { text-shadow: var(--glow-big); }
+  50% { text-shadow: 0 0 65px var(--c1); }
+}
+
+.hero h3 {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-top: 20px;
+}
+
+/* -------------------------------------- */
+/* Tarjeta de IP */
+/* -------------------------------------- */
+.server-ip {
+  background: var(--c2);
+  border: var(--border);
+  border-radius: 12px;
+  padding: 25px;
+  margin: 30px auto;
+  max-width: 600px;
+  box-shadow: var(--glow);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.server-ip:hover {
+  transform: scale(1.05);
+  box-shadow: var(--glow-big);
+}
+
+.ip-text {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--c1);
+  text-shadow: var(--glow);
+  letter-spacing: 2px;
+}
+
+/* -------------------------------------- */
+/* Card base reutilizable */
+/* -------------------------------------- */
+.card {
+  background: var(--c2);
+  border: var(--border);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: var(--glow);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow-big);
+}
+
+/* Secciones reutilizando clase .card */
+.announcement-card,
+.guide-card,
+.faq-item,
+.discord-embed,
+.sponsor-card {
+  composes: card;
+}
+
+/* Títulos dentro de tarjetas */
+.card h3 {
+  color: var(--c1);
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+}
+
+/* -------------------------------------- */
+/* Botones */
+/* -------------------------------------- */
+.discord-button,
+.sponsor-link {
+  background: rgb(19, 0, 50);
+  border: var(--border);
+  color: var(--c1);
+  padding: 15px 35px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s;
+  box-shadow: var(--glow);
+  margin-top: 20px;
+}
+
+.discord-button:hover,
+.sponsor-link:hover {
+  background: rgb(25, 0, 70);
+  transform: scale(1.05);
+  box-shadow: var(--glow-big);
+}
+
+/* -------------------------------------- */
+/* Grid responsive */
+/* -------------------------------------- */
+.guide-grid,
+.sponsors-grid {
+  display: grid;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.guide-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.sponsors-grid {
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+/* -------------------------------------- */
+/* Footer */
+/* -------------------------------------- */
+footer {
+  background: var(--c2);
+  border-top: var(--border);
+  padding: 30px 20px;
+  text-align: center;
+  margin-top: 60px;
+  box-shadow: var(--glow);
+}
+
+footer p {
+  opacity: 0.8;
+}
+
+/* -------------------------------------- */
+/* Responsivo */
+/* -------------------------------------- */
+@media (max-width: 768px) {
+
+  .logo img { height: 50px; }
+
+  nav {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .hero h1 { font-size: 2rem; }
+  .hero h3 { font-size: 1.2rem; }
+  .ip-text { font-size: 1.3rem; }
+
+  .guide-grid,
+  .sponsors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+  <!-- CÓMO ##### FUNCIONA ESTA COSA SIN BUGS -->
+  <div class="forest-bg"></div>
+  <div class="forest-layer" id="forest"></div>
+  <div class="particles" id="particles"></div>
+  <!-- ADVERTENCIA: Si vas a modificar este código te deseo MUCHA suerte -->
+  <!-- Hay 80 bugs, me he leido el código y no encuentro como arreglarlo, si lo arreglas es porque usaste IA -->
+  <!-- No te recomiendo modificar este código, no siquiera yo lo entiendo mejor ve a ver códigos más "FACILES" -->
+  <!-- Como podrian ser https://yalmil.pages.dev -->
+  <header>
+    <div class="header-content">
+      <div class="logo">
+        <img src="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" alt="YLM">
+  <header>
+  <main>
+    <!-- Me voy a tirar de u puente -->
+    <section id="inicio" class="hero">
+      <h1>Yalmil Mods</h1>
+      <h3>By YDT</h3>
+      
+      <div class="server-ip" onclick="copyIP()">
+        <h3>Packs disponibles</h3>
+        <div class="ip-text">Ninguno</div>
+      </div>
+      
+      <h2>Estoy desarrollando un mod. Próximamente público. - Yalmil</h2>
+    </section>
+    
+    <!-- DISCORD -->
+    <section id="discord" class="content-section">
+      <h2>💬 Únete a Discord</h2>
+      <div class="discord-embed">
+        <p>Conéctate con la comunidad.</p>
+        <a href="https://discord.gg/bt9UDPZKgn" class="discord-button" target="_blank">Unirse al Discord</a>
+      </div>
+    </section>
+    
+    <!-- MODS -->
+    <section id="mods" class="content-section">
+      <h2>📦 Nuestros mods</h2>
+      
+      <div class="sponsors-grid">
+        <!-- RNDM Mod (Me explotan) -->
+        <div class="sponsor-card">
+          <h3>🕳️ RNDM Mod</h3>
+          <p>Un mod de Minecraft que añade la mayoría de cosas principales del lore de los Randoms.</p>
+          <h4>Estado: en desarrollo</h4>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <footer>
+    <p>&copy; 2025 YDT. Todos los derechos reservados.</p>
+    <p>No está afiliado con Mojang AB o Microsoft.</p>
+  </footer>
+  </header>
+</div>
+</div>
+</header>
+</body>
+</html>
