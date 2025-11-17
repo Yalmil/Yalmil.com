@@ -1,646 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yalmil Chat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NES Web Emulator</title>
+
+  <!-- Metadata del usuario -->
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
   <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Aplicación de mensajería con amigos y mundos virtuales" />
+  <meta property="og:description" content="Emulador NES en tu navegador" />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
   <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
   <meta property="og:type" content="website" />
-  
+
+  <!-- Estilos del usuario adaptados -->
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      transition: .4s;
-    }
-    
-    @keyframes f {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @media(prefers-color-scheme:dark) {
-      body { background: linear-gradient(135deg, #0a0a0a, #1a001f); color: #e5ccff; }
-      header, footer { background: #15001f; color: #c084fc; }
-      header { border-bottom: 2px solid #c084fc; text-align: center; }
-      header h1 { color: #c084fc; }
-      main h2 { color: #c084fc; }
-      .subpage { background: rgba(40, 0, 60, .25); border: 2px solid #c084fc; color: #e5ccff; }
-      .btn { background: #c084fc; color: #0a0a0a; }
-      .btn:hover { background: #a855f7; }
-      input, textarea { background: rgba(40, 0, 60, .5); border: 1px solid #c084fc; color: #e5ccff; }
-      .chat-item:hover { background: rgba(192, 132, 252, .1); }
-      .message-mine { background: #c084fc; color: #0a0a0a; }
-      .message-theirs { background: rgba(40, 0, 60, .5); color: #e5ccff; }
-    }
-    
-    @media(prefers-color-scheme:light) {
-      body { background: linear-gradient(135deg, #330a00, #662000); color: #ffd8a6; }
-      header, footer { background: #4d1a00; color: #ff8c00; }
-      header { border-bottom: 2px solid #ff8c00; text-align: center; }
-      header h1 { color: #ff8c00; }
-      main h2 { color: #ff8c00; }
-      .subpage { background: rgba(60, 20, 0, .2); border: 2px solid #ff8c00; color: #ffd8a6; }
-      .btn { background: #ff8c00; color: #1a0500; }
-      .btn:hover { background: #cc7000; }
-      input, textarea { background: rgba(60, 20, 0, .3); border: 1px solid #ff8c00; color: #ffd8a6; }
-      .chat-item:hover { background: rgba(255, 140, 0, .1); }
-      .message-mine { background: #ff8c00; color: #1a0500; }
-      .message-theirs { background: rgba(60, 20, 0, .3); color: #ffd8a6; }
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      animation: f 0.5s ease-out;
-    }
-    
-    header {
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.3);
-    }
-    
-    header h1 {
-      font-size: 2em;
-      font-weight: 600;
-    }
-    
-    .auth-container {
-      max-width: 400px;
-      margin: 100px auto;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,.4);
-    }
-    
-    input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 14px;
-    }
-    
-    input:focus, textarea:focus {
-      outline: none;
-      box-shadow: 0 0 10px rgba(192, 132, 252, .3);
-    }
-    
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      transition: .3s;
-      width: 100%;
-      margin-top: 10px;
-    }
-    
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,.3);
-    }
-    
-    .app-layout {
-      display: flex;
-      height: calc(100vh - 80px);
-      gap: 0;
-    }
-    
-    .sidebar {
-      width: 300px;
-      padding: 20px;
-      overflow-y: auto;
-      border-right: 2px solid;
-    }
-    
-    .chat-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-    
-    .chat-list {
-      margin-top: 20px;
-    }
-    
-    .chat-item {
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: .2s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .chat-item.active {
-      opacity: .7;
-    }
-    
-    .messages-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .message {
-      max-width: 70%;
-      padding: 12px 16px;
-      border-radius: 12px;
-      word-wrap: break-word;
-    }
-    
-    .message-mine {
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    
-    .message-theirs {
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    
-    .message-sender {
-      font-size: 11px;
-      opacity: .7;
-      margin-bottom: 4px;
-    }
-    
-    .message-input {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    
-    .message-input input {
-      flex: 1;
-      margin: 0;
-    }
-    
-    .message-input button {
-      width: auto;
-      margin: 0;
-    }
-    
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .tab {
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: .2s;
-      opacity: .5;
-    }
-    
-    .tab.active {
-      opacity: 1;
-    }
-    
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .modal.active {
-      display: flex;
-    }
-    
-    .modal-content {
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 8px 16px rgba(0,0,0,.4);
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 15px;
-      border-bottom: 2px solid;
-      margin-bottom: 20px;
-    }
-    
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-    }
-    
-    @media(max-width: 768px) {
-      .app-layout {
-        flex-direction: column;
-      }
-      .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 2px solid;
-        height: auto;
-      }
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Poppins',sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px;}
+  h1{margin-bottom:15px}
+  canvas{border:3px solid #00ff66;border-radius:8px}
+  #romInput{margin-top:20px;padding:10px;border:2px solid #00ff66;background:#000;color:#00ff66;border-radius:6px;cursor:pointer}
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>💬 Yalmil Chat</h1>
-  </header>
+  <h1>Emulador NES Web</h1>
 
-  <!-- Pantalla de Inicio de Sesión -->
-  <div id="authScreen" class="container">
-    <div class="auth-container subpage">
-      <h2 style="text-align: center; margin-bottom: 20px;">Iniciar Sesión</h2>
-      <input type="email" id="loginEmail" placeholder="Correo electrónico">
-      <input type="password" id="loginPassword" placeholder="Contraseña">
-      <button class="btn" onclick="login()">Iniciar Sesión</button>
-      <button class="btn" onclick="showRegister()" style="margin-top: 20px;">Crear Cuenta</button>
-      <p id="authError" style="color: #ff4444; text-align: center; margin-top: 15px;"></p>
-    </div>
-  </div>
+  <canvas id="screen" width="256" height="240"></canvas>
 
-  <!-- Pantalla de Registro -->
-  <div id="registerScreen" class="container hidden">
-    <div class="auth-container subpage">
-      <h2 style="text-align: center; margin-bottom: 20px;">Crear Cuenta</h2>
-      <input type="text" id="registerUsername" placeholder="Nombre de usuario">
-      <input type="email" id="registerEmail" placeholder="Correo electrónico">
-      <input type="password" id="registerPassword" placeholder="Contraseña">
-      <button class="btn" onclick="register()">Registrarse</button>
-      <button class="btn" onclick="showLogin()" style="margin-top: 20px;">Volver al Inicio</button>
-      <p id="registerError" style="color: #ff4444; text-align: center; margin-top: 15px;"></p>
-    </div>
-  </div>
+  <input type="file" id="romInput" accept=".nes" />
 
-  <!-- Aplicación Principal -->
-  <div id="appScreen" class="hidden">
-    <div class="app-layout">
-      <div class="sidebar">
-        <div class="user-info">
-          <div class="avatar" id="userAvatar"></div>
-          <div>
-            <div id="userName" style="font-weight: 600;"></div>
-            <button class="btn" onclick="logout()" style="width: auto; padding: 6px 12px; font-size: 12px; margin-top: 5px;">Cerrar Sesión</button>
-          </div>
-        </div>
-        
-        <div class="tabs">
-          <div class="tab active" onclick="switchTab('friends')">👥 Amigos</div>
-          <div class="tab" onclick="switchTab('worlds')">🌍 Mundos</div>
-        </div>
-        
-        <button class="btn" onclick="showAddFriendModal()">➕ Agregar Amigo</button>
-        <button class="btn" onclick="showCreateWorldModal()">🌍 Crear Mundo</button>
-        
-        <div id="friendsList" class="chat-list"></div>
-        <div id="worldsList" class="chat-list hidden"></div>
-      </div>
-      
-      <div class="chat-main">
-        <div id="chatHeader" style="padding: 15px; border-bottom: 2px solid; margin-bottom: 20px;">
-          <h2 id="chatTitle">Selecciona un chat</h2>
-        </div>
-        <div id="messagesContainer" class="messages-container"></div>
-        <div class="message-input">
-          <input type="text" id="messageInput" placeholder="Escribe un mensaje..." onkeypress="handleEnter(event)">
-          <button class="btn" onclick="sendMessage()">Enviar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- JSNES -->
+  <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
 
-  <!-- Modal Agregar Amigo -->
-  <div id="addFriendModal" class="modal">
-    <div class="modal-content subpage">
-      <h2 style="margin-bottom: 20px;">Agregar Amigo</h2>
-      <input type="text" id="friendUsername" placeholder="Nombre de usuario">
-      <button class="btn" onclick="addFriend()">Agregar</button>
-      <button class="btn" onclick="closeModal('addFriendModal')">Cancelar</button>
-    </div>
-  </div>
+  <script>
+    const canvas = document.getElementById("screen");
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx.getImageData(0, 0, 256, 240);
 
-  <!-- Modal Crear Mundo -->
-  <div id="createWorldModal" class="modal">
-    <div class="modal-content subpage">
-      <h2 style="margin-bottom: 20px;">Crear Mundo</h2>
-      <input type="text" id="worldName" placeholder="Nombre del mundo">
-      <textarea id="worldDesc" placeholder="Descripción" rows="3"></textarea>
-      <button class="btn" onclick="createWorld()">Crear</button>
-      <button class="btn" onclick="closeModal('createWorldModal')">Cancelar</button>
-    </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getDatabase, ref, set, push, onValue, get, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
-      authDomain: "databaseloginweb.firebaseapp.com",
-      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
-      projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.firebasestorage.app",
-      messagingSenderId: "121538864529",
-      appId: "1:121538864529:web:e92aaeaa4ba52618162630",
-      measurementId: "G-M5CBRMJ9BN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    window.currentUser = null;
-    window.currentChat = null;
-    window.currentChatType = null;
-
-    // Funciones de Autenticación
-    window.register = async () => {
-      const username = document.getElementById('registerUsername').value;
-      const email = document.getElementById('registerEmail').value;
-      const password = document.getElementById('registerPassword').value;
-      
-      if (!username || !email || !password) {
-        document.getElementById('registerError').textContent = 'Completa todos los campos';
-        return;
-      }
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await set(ref(db, 'users/' + userCredential.user.uid), {
-          username: username,
-          email: email,
-          createdAt: Date.now()
-        });
-        document.getElementById('registerError').textContent = '';
-      } catch (error) {
-        document.getElementById('registerError').textContent = error.message;
-      }
-    };
-
-    window.login = async () => {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        document.getElementById('authError').textContent = '';
-      } catch (error) {
-        document.getElementById('authError').textContent = 'Credenciales incorrectas';
-      }
-    };
-
-    window.logout = async () => {
-      await signOut(auth);
-    };
-
-    window.showRegister = () => {
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('registerScreen').classList.remove('hidden');
-    };
-
-    window.showLogin = () => {
-      document.getElementById('registerScreen').classList.add('hidden');
-      document.getElementById('authScreen').classList.remove('hidden');
-    };
-
-    // Agregar Amigo
-    window.addFriend = async () => {
-      const friendUsername = document.getElementById('friendUsername').value;
-      if (!friendUsername) return;
-
-      const usersRef = ref(db, 'users');
-      const snapshot = await get(usersRef);
-      let friendId = null;
-
-      snapshot.forEach(child => {
-        if (child.val().username === friendUsername) {
-          friendId = child.key;
+    // Emulador
+    const nes = new jsnes.NES({
+      onFrame: function(frameBuffer) {
+        for (let i = 0; i < frameBuffer.length; i++) {
+          imageData.data[i] = frameBuffer[i];
         }
-      });
-
-      if (friendId && friendId !== currentUser.uid) {
-        await update(ref(db, `users/${currentUser.uid}/friends/${friendId}`), { added: Date.now() });
-        await update(ref(db, `users/${friendId}/friends/${currentUser.uid}`), { added: Date.now() });
-        closeModal('addFriendModal');
-        document.getElementById('friendUsername').value = '';
-      } else {
-        alert('Usuario no encontrado');
+        ctx.putImageData(imageData, 0, 0);
+      },
+      onAudioSample: function() {
+        // sonido si quieres implementarlo luego
       }
-    };
+    });
 
-    // Crear Mundo
-    window.createWorld = async () => {
-      const name = document.getElementById('worldName').value;
-      const desc = document.getElementById('worldDesc').value;
-      if (!name) return;
+    // Cargar ROM
+    document.getElementById("romInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-      const worldRef = push(ref(db, 'worlds'));
-      await set(worldRef, {
-        name: name,
-        description: desc,
-        creator: currentUser.uid,
-        members: { [currentUser.uid]: true },
-        createdAt: Date.now()
-      });
+      const arrayBuffer = await file.arrayBuffer();
+      nes.loadROM(new Uint8Array(arrayBuffer));
+      nes.frame();
+      startLoop();
+    });
 
-      closeModal('createWorldModal');
-      document.getElementById('worldName').value = '';
-      document.getElementById('worldDesc').value = '';
-    };
-
-    // Enviar Mensaje
-    window.sendMessage = async () => {
-      const input = document.getElementById('messageInput');
-      const message = input.value.trim();
-      if (!message || !currentChat) return;
-
-      const messagesRef = currentChatType === 'friend' 
-        ? ref(db, `messages/${getChatId(currentUser.uid, currentChat)}`)
-        : ref(db, `worldMessages/${currentChat}`);
-
-      await push(messagesRef, {
-        text: message,
-        sender: currentUser.uid,
-        timestamp: Date.now()
-      });
-
-      input.value = '';
-    };
-
-    window.handleEnter = (e) => {
-      if (e.key === 'Enter') sendMessage();
-    };
-
-    // Cambiar Tab
-    window.switchTab = (tab) => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
-      
-      if (tab === 'friends') {
-        document.getElementById('friendsList').classList.remove('hidden');
-        document.getElementById('worldsList').classList.add('hidden');
-      } else {
-        document.getElementById('friendsList').classList.add('hidden');
-        document.getElementById('worldsList').classList.remove('hidden');
+    // Loop del emulador
+    function startLoop() {
+      function loop() {
+        nes.frame();
+        requestAnimationFrame(loop);
       }
-    };
-
-    // Modales
-    window.showAddFriendModal = () => {
-      document.getElementById('addFriendModal').classList.add('active');
-    };
-
-    window.showCreateWorldModal = () => {
-      document.getElementById('createWorldModal').classList.add('active');
-    };
-
-    window.closeModal = (modalId) => {
-      document.getElementById(modalId).classList.remove('active');
-    };
-
-    // Abrir Chat
-    window.openChat = (id, type, name) => {
-      currentChat = id;
-      currentChatType = type;
-      document.getElementById('chatTitle').textContent = name;
-      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-      event.target.closest('.chat-item').classList.add('active');
-
-      const messagesRef = type === 'friend' 
-        ? ref(db, `messages/${getChatId(currentUser.uid, id)}`)
-        : ref(db, `worldMessages/${id}`);
-
-      onValue(messagesRef, async (snapshot) => {
-        const container = document.getElementById('messagesContainer');
-        container.innerHTML = '';
-
-        const messages = [];
-        snapshot.forEach(child => {
-          messages.push({ id: child.key, ...child.val() });
-        });
-
-        messages.sort((a, b) => a.timestamp - b.timestamp);
-
-        for (const msg of messages) {
-          const div = document.createElement('div');
-          const isMine = msg.sender === currentUser.uid;
-          div.className = `message ${isMine ? 'message-mine' : 'message-theirs'}`;
-          
-          if (!isMine) {
-            const senderData = await get(ref(db, `users/${msg.sender}`));
-            const senderName = senderData.val()?.username || 'Usuario';
-            div.innerHTML = `<div class="message-sender">${senderName}</div>${msg.text}`;
-          } else {
-            div.textContent = msg.text;
-          }
-          
-          container.appendChild(div);
-        }
-
-        container.scrollTop = container.scrollHeight;
-      });
-    };
-
-    function getChatId(uid1, uid2) {
-      return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+      loop();
     }
 
-    // Auth State
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
+    // Controles
+    const keyMap = {
+      38: jsnes.Controller.BUTTON_UP,
+      40: jsnes.Controller.BUTTON_DOWN,
+      37: jsnes.Controller.BUTTON_LEFT,
+      39: jsnes.Controller.BUTTON_RIGHT,
+      90: jsnes.Controller.BUTTON_A,     // Z
+      88: jsnes.Controller.BUTTON_B,     // X
+      13: jsnes.Controller.BUTTON_START, // ENTER
+      16: jsnes.Controller.BUTTON_SELECT // SHIFT
+    };
 
-        const userData = await get(ref(db, `users/${user.uid}`));
-        const username = userData.val()?.username || 'Usuario';
-        document.getElementById('userName').textContent = username;
-        document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+    window.addEventListener("keydown", (e) => {
+      const btn = keyMap[e.keyCode];
+      if (btn !== undefined) nes.buttonDown(1, btn);
+    });
 
-        // Cargar Amigos
-        onValue(ref(db, `users/${user.uid}/friends`), async (snapshot) => {
-          const list = document.getElementById('friendsList');
-          list.innerHTML = '';
-          
-          for (const [friendId, data] of Object.entries(snapshot.val() || {})) {
-            const friendData = await get(ref(db, `users/${friendId}`));
-            const friendName = friendData.val()?.username || 'Usuario';
-            
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `<div class="avatar">${friendName.charAt(0).toUpperCase()}</div><div>${friendName}</div>`;
-            div.onclick = () => openChat(friendId, 'friend', friendName);
-            list.appendChild(div);
-          }
-        });
-
-        // Cargar Mundos
-        onValue(ref(db, 'worlds'), (snapshot) => {
-          const list = document.getElementById('worldsList');
-          list.innerHTML = '';
-          
-          snapshot.forEach(child => {
-            const world = child.val();
-            if (world.members && world.members[user.uid]) {
-              const div = document.createElement('div');
-              div.className = 'chat-item';
-              div.innerHTML = `<div>🌍</div><div>${world.name}</div>`;
-              div.onclick = () => openChat(child.key, 'world', world.name);
-              list.appendChild(div);
-            }
-          });
-        });
-
-      } else {
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('appScreen').classList.add('hidden');
-      }
+    window.addEventListener("keyup", (e) => {
+      const btn = keyMap[e.keyCode];
+      if (btn !== undefined) nes.buttonUp(1, btn);
     });
   </script>
 </body>
