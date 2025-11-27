@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   <url><loc>https://yalmil.pages.dev/</loc></url>
-  <url><loc>https://yalmil.pages.dev/login</loc></url>
   <url><loc>https://yalmil.pages.dev/inicio</loc></url>
+  <url><loc>https://yalmil.pages.dev/login</loc></url>
+  <url><loc>https://yalmil.pages.dev/changelog</loc></url>
+  <url><loc>https://yalmil.pages.dev/errors</loc></url>
+  <url><loc>https://yalmil.pages.dev/perfil</loc></url>
+  <url><loc>https://yalmil.pages.dev/node</loc></url>
+  <url><loc>https://yalmil.pages.dev/sobre-mi</loc></url>
+  <url><loc>https://yalmil.pages.dev/terminos</loc></url>
+  <url><loc>https://yalmil.pages.dev/ylmia</loc></url>
+
+  <!-- JUEGOS -->
+  <url><loc>https://yalmil.pages.dev/juegos</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/herramientas</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/multijugador</loc></url>
+
+  <!-- JUEGOS/JUGADOR -->
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/acertijo</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/channel</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/clicker</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/diamante</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/friendle</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/lab</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/lootboxes</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/platformer</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/prueba</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/sall</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/jugador/tower-game</loc></url>
+
+  <!-- JUEGOS/MULTIJUGADOR -->
+  <url><loc>https://yalmil.pages.dev/juegos/multijugador/alp</loc></url>
+  <url><loc>https://yalmil.pages.dev/juegos/multijugador/chat</loc></url>
+
+  <!-- SECRETOS/YOUTUBE -->
+  <url><loc>https://yalmil.pages.dev/secretos/Youtube/canales</loc></url>
+  <url><loc>https://yalmil.pages.dev/secretos/Youtube/la</loc></url>
+  <url><loc>https://yalmil.pages.dev/secretos/Youtube/le</loc></url>
+
+  <!-- ARCHIVOS QUE DEBEN QUEDARSE TAL CUAL -->
+  <url><loc>https://yalmil.pages.dev/googleae8a7ef4810e2696.html</loc></url>
+
 </urlset>
