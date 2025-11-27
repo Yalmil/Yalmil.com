@@ -1,0 +1,13 @@
+import @state-yc
+function set -blogstexts @set em
+[function = BLOGS]
+
+BLOGS:
+
+{Título; Actualización: 1.4.1
+descripciónvisual; Novedades de la 1.4.1
+descripción; Lista de las cosas actualizadas en la 1.4.1:
+- Se mejoro el Changelog 
+- Se mejoro el SEO
+- Se arreglaron varios Bugs 
+- Se modifico el código de SALL}
