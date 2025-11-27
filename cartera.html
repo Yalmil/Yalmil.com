@@ -1,1 +1,140 @@
-<!-- En programación -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cartera | Lunas</title>
+
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Cartera de Lunas del usuario" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    *{ box-sizing:border-box; margin:0 }
+
+    body{
+      font-family:'Poppins',sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      animation:fade 0.6s ease-out;
+    }
+
+    @keyframes fade {
+      from{opacity:0; transform:translateY(10px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    @media(prefers-color-scheme:dark){
+      body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}
+      .card{background:rgba(40,0,60,.25);border:2px solid #c084fc}
+      h2{color:#c084fc}
+    }
+
+    @media(prefers-color-scheme:light){
+      body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}
+      .card{background:rgba(60,20,0,.2);border:2px solid #ff8c00}
+      h2{color:#ff8c00}
+    }
+
+    .card{
+      padding:2rem;
+      max-width:380px;
+      width:90%;
+      border-radius:20px;
+      text-align:center;
+      backdrop-filter:blur(8px);
+    }
+
+    .lunas{
+      font-size:2.6rem;
+      font-weight:700;
+      margin-top:1rem;
+      text-shadow:0 0 10px currentColor;
+    }
+
+    button{
+      margin-top:1.5rem;
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>Tu cartera</h2>
+    <p>Lunas actuales</p>
+    <div class="lunas" id="lunas">...</div>
+
+    <button id="logoutBtn">Cerrar sesión</button>
+  </div>
+
+<script type="module">
+  // Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { 
+    getDatabase, 
+    ref, 
+    onValue 
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+    authDomain: "databaseloginweb.firebaseapp.com",
+    databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+    projectId: "databaseloginweb",
+    storageBucket: "databaseloginweb.firebasestorage.app",
+    messagingSenderId: "121538864529",
+    appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  const lunasBox = document.getElementById("lunas");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  // Verificar sesión
+  onAuthStateChanged(auth, (user)=>{
+    if(!user){
+      window.location.href = "login.html";
+      return;
+    }
+
+    const uid = user.uid;
+
+    const lunaRef = ref(db, "users/" + uid + "/lunas");
+
+    onValue(lunaRef, (snap)=>{
+      if(snap.exists()){
+        lunasBox.textContent = snap.val();
+      }else{
+        lunasBox.textContent = "0";
+      }
+    });
+  });
+
+  logoutBtn.addEventListener("click", async ()=>{
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+</script>
+
+</body>
+</html>
