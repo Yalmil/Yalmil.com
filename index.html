@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Yalmil | website</title>
+
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
   <meta property="og:title" content="Yalmil.com" />
   <meta property="og:description" content="Yalmil.com - Una página para divertirse" />
@@ -11,12 +12,11 @@
   <meta property="og:url" content="https://yalmil.pages.dev/" />
   <meta property="og:type" content="website" />
   <meta name="description" content="Yalmil.com - Página oficial de Yalmil con juegos, herramientas y proyectos únicos."/>
-  <meta name="description" content="Yalmil.com - Pagina para perder el tiempo">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-*{box-sizing:border-box;}
+*{box-sizing:border-box;margin:0;}
 
 body{
   margin:0;
@@ -24,8 +24,12 @@ body{
   display:flex;
   flex-direction:column;
   min-height:100vh;
-  animation:fadeIn .8s ease-out;
   transition:.4s;
+}
+
+/* Animación solo si es la primera visita */
+body.first-visit{
+  animation:fadeIn .8s ease-out;
 }
 
 @keyframes fadeIn {
@@ -92,14 +96,28 @@ body{
   </footer>
 
 <script>
+// ===== CARGA MÁS RÁPIDA CON COOKIES =====
+
+// Marcar si es primera visita (para evitar animaciones la próxima vez)
+if(!document.cookie.includes("visited=true")){
+  document.body.classList.add("first-visit");
+  document.cookie = "visited=true; max-age=2592000; path=/"; // 30 días
+}
+
+// Restaurar si ya abrió la descripción antes
+if(document.cookie.includes("desc=open")){
+  document.getElementById("desc").style.display = "block";
+}
+
 function toggleDesc(){
   const d = document.getElementById('desc');
-  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+  const isOpen = d.style.display === 'block';
+  d.style.display = isOpen ? 'none' : 'block';
+  
+  // Guardar en cookie
+  document.cookie = `desc=${isOpen ? "closed" : "open"}; max-age=2592000; path=/`;
 }
 </script>
 
 </body>
 </html>
-
-
-
