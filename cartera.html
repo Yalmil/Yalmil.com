@@ -128,10 +128,9 @@
 
 
 <script type="module">
-  // Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -153,9 +152,8 @@
   let userUID = null;
   let lunasActuales = 0;
 
-  // Verificar sesión
-  onAuthStateChanged(auth, (user)=>{
-    if(!user){
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
       window.location.href = "login.html";
       return;
     }
@@ -163,39 +161,45 @@
     userUID = user.uid;
     const lunaRef = ref(db, "users/" + userUID + "/lunas");
 
-    onValue(lunaRef, (snap)=>{
-      lunasActuales = snap.exists() ? snap.val() : 0;
+    // 1. Revisa si existe el nodo (NO lo sobreescribe si ya existe)
+    const snap = await get(lunaRef);
+
+    if (!snap.exists()) {
+      // Primera vez -> crear nodo
+      await set(lunaRef, 0);
+      lunasActuales = 0;
+      lunasBox.textContent = 0;
+    }
+
+    // 2. Sincronizar siempre
+    onValue(lunaRef, (s) => {
+      lunasActuales = s.val();
       lunasBox.textContent = lunasActuales;
     });
   });
 
-  // Botón salir
-  logoutBtn.addEventListener("click", async ()=>{
+  logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "login.html";
   });
 
-
-  // Comprar productos
+  // Comprar
   const botones = document.querySelectorAll(".buy-btn");
 
-  botones.forEach(btn=>{
-    btn.addEventListener("click", ()=>{
+  botones.forEach(btn => {
+    btn.addEventListener("click", () => {
       const item = btn.parentElement;
       const precio = parseInt(item.dataset.price);
 
-      if(lunasActuales >= precio){
-        // restar lunas
+      if (lunasActuales >= precio) {
         const nuevaCantidad = lunasActuales - precio;
         set(ref(db, "users/" + userUID + "/lunas"), nuevaCantidad);
-
         window.location.href = "https://discord.com/users/1282532222305308682";
       } else {
         alert("No tienes suficientes lunas!");
       }
     });
   });
-
 </script>
 
 </body>
