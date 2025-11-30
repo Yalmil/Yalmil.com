@@ -36,3 +36,15 @@ Puedes ver tu cartera en **yalmil.pages.dev/cartera**
 # ¿Cómo reclamo recompensas?
 
 Actualmente estamos trabajando en la reclamación de recompensas con Lunas, **está función estará disponible pronto**.}
+
+{Título; Actualización 1.4.2
+descripciónvisual;Novedades de la 1.4.2
+descripción; ola! tengo una nueva lista de cambios :D
+
+# Lunas
+Se arreglo el bug que ocurría **cuando cierras sesión**
+**Se añadio la tienda**, hay un bug muy pequeño que ocurre al momento de canjear una recompensa, si no te da la recompensa  **manda MD mediante la pestaña que se abrió**
+
+# General
+
+Se mejoro el texto en los changelogs con nuevas herramientas (cursivas, negritas, entre otras)}
