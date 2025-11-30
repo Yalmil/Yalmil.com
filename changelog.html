@@ -17,7 +17,6 @@
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');*{box-sizing:border-box;margin:0}body{font-family:'Poppins',sans-serif;display:flex;flex-direction:column;min-height:100vh;transition:.4s}@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(prefers-color-scheme:dark){body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}header,footer{background:#15001f;color:#c084fc}header{border-bottom:2px solid #c084fc;text-align:center}header h1{color:#c084fc}main h2{color:#c084fc}.subpage{background:rgba(40,0,60,.25);border:2px solid #c084fc;color:#e5ccff}}@media(prefers-color-scheme:light){body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}header,footer{background:#4d1a00;color:#ff8c00}header{border-bottom:2px solid #ff8c00;text-align:center}header h1{color:#ff8c00}main h2{color:#ff8c00}.subpage{background:rgba(60,20,0,.2);border:2px solid #ff8c00;color:#ffd8a6}}
 
-  /* Estilos específicos del blog */
   .wrap{width:100%;max-width:1100px;margin:1.5rem auto;padding:1rem;animation:f .35s ease both}
   .card{background:rgba(255,255,255,0.04);border-radius:12px;padding:1rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.08)}
   .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
@@ -39,13 +38,11 @@
     <p>Cargados correctamente.</p>
   </section>
 
-  <div id="cards" class="grid-cards">
-    <!-- Aquí van los artículos auto-generados -->
-  </div>
+  <div id="cards" class="grid-cards"></div>
 
   <section id="viewer" class="card">
     <h2 id="v-title"></h2>
-    <p id="v-desc" style="margin-top:.5rem"></p>
+    <div id="v-desc" style="margin-top:.5rem"></div>
   </section>
 
 </main>
@@ -55,18 +52,36 @@
 </footer>
 
 <script>
+// ✔ Conversión de formato estilo Markdown custom
+function formatText(t){
+  if(!t) return "";
+
+  // H2, H3, H4, etc — detecta cantidad de #
+  t = t.replace(/^(\#{1,6})\s*(.+)$/gm, (m, hashes, content)=>{
+    const level = hashes.length + 1; // h2 para "#", h3 para "##"
+    return `<h${level}>${content}</h${level}>`;
+  });
+
+  // Negritas **texto**
+  t = t.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+  // Cursivas *texto*
+  t = t.replace(/\*(.*?)\*/g, "<i>$1</i>");
+
+  // Saltos de línea
+  t = t.replace(/\n/g, "<br>");
+
+  return t;
+}
+
 async function loadYS(){
   const raw = await fetch("blogs.ys").then(r=>r.text());
-
-  // Extraer bloques {...}
   const blocks = [...raw.matchAll(/\{([\s\S]*?)\}/g)].map(m=>m[1]);
 
   let parsed = [];
 
   for(let b of blocks){
     let obj = {};
-
-    // Dividir por líneas
     const lines = b.split("\n");
 
     let currentKey = null;
@@ -76,9 +91,7 @@ async function loadYS(){
       line = line.trim();
       if (!line) continue;
 
-      // Si tiene "clave; valor"
       if (line.includes(";")){
-        // Si ya había una clave previa, guardarla
         if (currentKey){
           obj[currentKey] = currentValue.join("\n").trim();
         }
@@ -87,12 +100,10 @@ async function loadYS(){
         currentKey = key.trim();
         currentValue = [rest.join(";").trim()];
       } else {
-        // Es continuación del valor (líneas extra)
         currentValue.push(line);
       }
     }
 
-    // Guardar el último valor
     if (currentKey){
       obj[currentKey] = currentValue.join("\n").trim();
     }
@@ -121,7 +132,9 @@ function createCard(a, index){
 function showArticle(a){
   document.getElementById("viewer").style.display = "block";
   document.getElementById("v-title").innerText = a.title;
-  document.getElementById("v-desc").innerText = a.full;
+
+  // ✔ Procesar formato Markdown antes de mostrar
+  document.getElementById("v-desc").innerHTML = formatText(a.full);
 }
 
 (async()=>{
@@ -131,14 +144,12 @@ function showArticle(a){
   cards.innerHTML = "";
 
   articles.forEach((a,i)=>{
-    const card = createCard(a,i);
-    cards.appendChild(card);
+    cards.appendChild(createCard(a,i));
   });
 
   cards.addEventListener("click", e=>{
     if(e.target.tagName==="BUTTON"){
-      const i = e.target.dataset.i;
-      showArticle(articles[i]);
+      showArticle(articles[e.target.dataset.i]);
     }
   });
 
