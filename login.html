@@ -167,7 +167,7 @@
     import {
       getDatabase,
       ref,
-      set,
+      update,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
@@ -223,7 +223,7 @@
         profileArea.style.display = 'block';
 
         try {
-          await set(ref(db, 'users/' + uid), {
+          await update(ref(db, 'users/' + uid), {
             name: userData.name,
             email: userData.email,
             photoURL: userData.photoURL,
