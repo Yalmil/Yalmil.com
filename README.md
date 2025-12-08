@@ -1,2 +1,2 @@
 # Yalmil.com
-## *Yalmil.com es un sitio web para nsc*
+## ⚠️ ATENCIÓN: NO TOCAR ESTE REPO. FUNCIONA Y NO SÉ POR QUÉ ⚠️
