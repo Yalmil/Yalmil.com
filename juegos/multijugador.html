@@ -3,105 +3,177 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>Yalmil.com – Juegos</title>
+
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+
+  <meta property="og:title" content="Yalmil.com – Juegos" />
+  <meta property="og:description" content="Explora juegos solitarios, multijugador y herramientas" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0a0f1a, #000000);
-      color: #b55eff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    header {
-      background-color: #140022;
-      padding: 1rem 2rem;
-      border-bottom: 2px solid #c084fc;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 0 15px #c084fc33;
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #b55eff;
-      text-shadow: 0 0 10px #b55eff;
-    }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #330a00, #662000);
+  color: #ffd8a6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  animation: fadeIn .6s ease-out;
+}
 
-    main {
-      flex: 1;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-    h2 {
-      color: #b55eff;
-      text-shadow: 0 0 6px #b55eff;
-    }
+/* HEADER */
+header {
+  background: #4d1a00;
+  padding: 1rem;
+  border-bottom: 2px solid #ff8c00;
+  text-align: center;
+  box-shadow: 0 0 12px #ff8c0055;
+}
 
-    .game-list {
-      width: 100%;
-      max-width: 800px;
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #ff8c00;
+  text-shadow: 0 0 10px #ff8c00aa;
+}
 
-    .game {
-      background-color: #121212;
-      border: 2px solid #b55eff;
-      border-radius: 1rem;
-      padding: 1.5rem;
-      text-align: center;
-      text-decoration: none;
-      color: #f5e8ff;
-      box-shadow: 0 0 12px #b55eff44;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+/* BOTONES SUPERIORES */
+.top-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(60,20,0,.25);
+  border-bottom: 2px solid #ff8c00;
+  backdrop-filter: blur(4px);
+}
 
-    .game:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 0 24px #b55eff;
-    }
+.btn {
+  padding: .8rem 1.2rem;
+  border-radius: 10px;
+  border: 2px solid #ff8c00;
+  text-decoration: none;
+  color: #ffd8a6;
+  background: rgba(60, 20, 0, 0.3);
+  font-weight: 600;
+  transition: .2s;
+  box-shadow: 0 0 8px #ff8c0055;
+  font-size: 1rem;
+}
 
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.8rem;
-      color: #888;
-    }
+.btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 18px #ff8c00;
+}
 
-    .back-link {
-      margin-bottom: 2rem;
-      color: #b55eff;
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: color 0.2s;
-    }
+/* MAIN */
+main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 900px;
+  width: 100%;
+  margin: auto;
+}
 
-    .back-link:hover {
-      color: #d1aaff;
-    }
+h2 {
+  color: #ff8c00;
+  text-shadow: 0 0 6px #ff8c0088;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* GRID DE JUEGOS */
+.game-list {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.game {
+  background-color: #121212;
+  border: 2px solid #b55eff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  color: #f5e8ff;
+  box-shadow: 0 0 12px #b55eff44;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: .95rem;
+}
+
+.game:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 24px #b55eff;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: .8rem;
+  background: #330800;
+  border-top: 1px solid #662200;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .game {
+    padding: 1.2rem;
+  }
+}
   </style>
 </head>
+
 <body>
+
   <header>
     <h1>Juegos</h1>
   </header>
+
+  <div class="top-buttons">
+    <a class="btn" href="juegos">Solitarios 🎮</a>
+    <a class="btn" href="juegos/multijugador">Multijugador 💻</a>
+    <a class="btn" href="juegos/herramientas">Herramientas 🔨</a>
+  </div>
+
   <main>
-    <a class="back-link" href="https://yalmil.pages.dev/juegos">← Volver atrás</a>
-    <h2 id="welcome">¿Qué vas a jugar hoy, usuario?</h2>
+    <h2 id="welcome">Que vas a jugar hoy, usuario?</h2>
+
     <div class="game-list">
-    <a class="game" href="multijugador/alp">Adivina la palabra 📜 [BETA]</a>
+      <a class="game" href="multijugador/alp">Adivina la palabra 📜 [BETA]</a>
     </div>
   </main>
-  <footer>
-    &copy; 2025 Yalmil.tv – Juegos
-  </footer>
+
+  <footer>&copy; 2025 Yalmil.tv – Juegos</footer>
+
 </body>
 </html>
