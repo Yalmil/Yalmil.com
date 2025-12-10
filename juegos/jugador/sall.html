@@ -32,6 +32,23 @@
       opacity: 0;
       pointer-events: none;
     }
+    
+    #menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 20;
+  text-align: center;
+  transition: opacity 0.5s;
+}
+
+#menu:not(.hidden) {
+  z-index: 30;
+}
 
     button {
       background: #c084fc;
@@ -312,10 +329,11 @@
       startGame();
     }
 
-    function showMenu() {
-      gameOverScreen.classList.add("hidden");
-      menu.classList.remove("hidden");
-    }
+function showMenu() {
+  gameOverScreen.classList.add("hidden");
+  menu.classList.remove("hidden");
+  ui.style.display = "none";
+}
 
     function gameLoop(timestamp) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
