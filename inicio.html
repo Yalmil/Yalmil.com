@@ -1,140 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta property="og:title" content="Registrarse en Yalmil.com" />
-  <meta property="og:description" content="Te unes o mañana duermes para siempre..." />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <title>Yalmil.com</title>
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+
+<!-- Facebook / Discord -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="twitter:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
+  <!-- CSS solicitado por el usuario (incluir siempre) -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     *{box-sizing:border-box;margin:0}
-    body{
-      font-family:'Poppins',sans-serif;display:flex;flex-direction:column;min-height:100vh;
-      animation:f .8s ease-out
-    }
+    body{font-family:'Poppins',sans-serif;display:flex;flex-direction:column;min-height:100vh;transition:.4s;align-items:center;justify-content:center;background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6;padding:24px}
     @keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-    /* ==== COLOR MODE DARK ==== */
+    header,footer{background:#4d1a00;color:#ff8c00;padding:12px;border-radius:10px}
+    header{border-bottom:2px solid #ff8c00;text-align:center;margin-bottom:18px}
+    header h1{color:#ff8c00;font-size:20px}
+    main{animation:f .35s ease-out}
+    .card{background:rgba(60,20,0,.2);border:2px solid #ff8c00;color:#ffd8a6;padding:18px;border-radius:12px;max-width:560px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+    a.button{display:inline-block;margin-top:12px;padding:10px 16px;border-radius:10px;border:2px solid #ffd8a6;text-decoration:none;font-weight:600}
+    small{display:block;margin-top:10px;opacity:.9}
     @media(prefers-color-scheme:dark){
       body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}
       header,footer{background:#15001f;color:#c084fc}
-      header{border-bottom:2px solid #c084fc;text-align:center;box-shadow:0 0 12px #c084fc55}
-      
-      
-      header h1 img{filter:drop-shadow(0 0 10px #c084fcaa)}
-      header h3{color:#e5ccff}
-      #profilePic{border:2px solid #c084fc;box-shadow:0 0 10px #c084fcaa}
-      #profilePic:hover{box-shadow:0 0 15px #d8b4fe}
-      main h2{color:#c084fc;text-shadow:0 0 6px #c084fc88}
-      .subpage{background:rgba(40,0,60,.25);border:2px solid #c084fc;color:#e5ccff;box-shadow:0 0 10px #c084fc55}
-      .subpage:hover{transform:translateY(-6px);box-shadow:0 0 20px #c084fc}
-      footer{border-top:1px solid #2e0040}
+      header{border-bottom:2px solid #c084fc}
+      header h1{color:#c084fc}
+      main h2{color:#c084fc}
+      .card{background:rgba(40,0,60,.25);border:2px solid #c084fc;color:#e5ccff}
+      a.button{border-color:#e5ccff}
     }
-
-    /* ==== COLOR MODE LIGHT ==== */
-    @media(prefers-color-scheme:light){
-      body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}
-      header,footer{background:#4d1a00;color:#ff8c00}
-      header{border-bottom:2px solid #ff8c00;text-align:center;box-shadow:0 0 12px #ff8c0055}
-      header h1 img{filter:drop-shadow(0 0 10px #ff8c00aa)}
-      header h3{color:#ffd8a6}
-      #profilePic{border:2px solid #ff8c00;box-shadow:0 0 10px #ff8c00aa}
-      #profilePic:hover{box-shadow:0 0 15px #ffb84d}
-      main h2{color:#ff8c00;text-shadow:0 0 6px #ff8c0088}
-      .subpage{background:rgba(60,20,0,.2);border:2px solid #ff8c00;color:#ffd8a6;box-shadow:0 0 10px #ff8c0055}
-      .subpage:hover{transform:translateY(-6px);box-shadow:0 0 20px #ff8c00}
-      footer{border-top:1px solid #662200}
-    }
-
-    header{position:relative;padding:1rem 2rem}
-    
-    header h1 img{
-      height:185px;
-      object-fit:contain;
-      margin-top:.3rem;
-    }
-    header h3{margin:.5rem 0;font-weight:400}
-
-    #profilePic{
-      position:absolute;top:10px;right:10px;width:50px;height:50px;border-radius:50%;
-      cursor:pointer;object-fit:cover;transition:.2s
-    }
-
-    main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
-    .subpage-list{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));width:100%;max-width:800px;text-align:center}
-    .subpage{padding:1.5rem;border-radius:1rem;text-decoration:none;font-weight:500;transition:.2s}
-    footer{text-align:center;padding:1rem;font-size:.8rem}
   </style>
-</head>
 
+  <!-- Fallback meta refresh -->
+  <meta http-equiv="refresh" content="1;url=https://yalmil.pages.dev">
+  <script>
+    // Redirección inmediata con JavaScript (mejor compatibilidad)
+    (function(){
+      const url = "https://yalmil.pages.dev";
+      // Intentar reemplazar la historia para que el usuario no pueda volver a esta página con el back
+      window.location.replace(url);
+    })();
+  </script>
+</head>
 <body>
   <header>
-    <h1>
-      <img src="https://yalmil.pages.dev/texturas/Hi (1).png" alt="Logo">
-    </h1>
-    <h3 id="bienvenida">Ola</h3>
-    <img id="profilePic" src="https://i.pravatar.cc/100?u=default" alt="Foto de perfil">
+    <h1>Cargando componentes</h1>
   </header>
 
-  <main>
-    <h2>Subpáginas</h2>
-    <div class="subpage-list">
-      <a class="subpage" href="juegos">Herramientas/juegos</a>
-      <a class="subpage" href="changelog">Changelog</a>
-      <a class="subpage" href="cartera">Lunas - Mira tu cartera</a>
-      <a class="subpage" href="login">Iniciar sesión</a>
-    </div>
+  <main class="card" role="main">
+    <p>Los componentes tardan maximo 3 segundos en cargar</p>
+    <a class="button" href="https://yalmil.pages.dev">¿No han cargado? Haz click aquí!</a>
   </main>
 
-  <footer>
-    &copy; 2025 Yalmil.com – Todos los derechos reservados.
+  <footer style="margin-top:18px;">
+    <small>Haz click arriba para recargar Los componentes</small>
   </footer>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
-      authDomain: "databaseloginweb.firebaseapp.com",
-      projectId: "databaseloginweb",
-      storageBucket: "databaseloginweb.appspot.com",
-      messagingSenderId: "121538864529",
-      appId: "1:121538864529:web:e92aaeaa4ba52618162630"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const profilePic = document.getElementById("profilePic");
-    const bienvenida = document.getElementById("bienvenida");
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          const photoURL = data.photoURL || user.photoURL || `https://i.pravatar.cc/100?u=${user.uid}`;
-          profilePic.src = photoURL;
-          bienvenida.textContent = `Bienvenido de nuevo, ${data.name || user.displayName || 'usuario'}!`;
-        } else {
-          profilePic.src = user.photoURL || `https://i.pravatar.cc/100?u=${user.uid}`;
-        }
-      } else {
-        profilePic.src = "https://i.pravatar.cc/100?u=default";
-        bienvenida.textContent = "Inicia sesión para acceder a todo el contenido.";
-      }
-    });
-
-    profilePic.addEventListener("click",()=>window.location.href="perfil.html");
-  </script>
 </body>
 </html>
