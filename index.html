@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+
+<!-- Open Graph (Facebook / Discord) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="twitter:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+*{box-sizing:border-box;margin:0;}
+
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  transition:.4s;
+}
+
+/* Animación solo si es la primera visita */
+body.first-visit{
+  animation:fadeIn .8s ease-out;
+}
+
+@keyframes fadeIn {
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ======== MODO OSCURO ======== */
+@media (prefers-color-scheme: dark) {
+  body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff;}
+  header{background:rgba(50,0,80,.3);padding:1rem 2rem;border-bottom:2px solid #c084fc;text-align:center;box-shadow:0 0 12px #c084fc55;}
+  header h1{margin:0;font-size:2.2rem;color:#c084fc;text-shadow:0 0 10px #c084fcaa;}
+  header h3{margin:.5rem 0;font-weight:400;color:#e5ccff;}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+  main h2{font-size:1.6rem;margin-bottom:1.5rem;color:#c084fc;text-shadow:0 0 6px #c084fc88;cursor:pointer;}
+  .subpage-list{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));width:100%;max-width:800px;}
+  .subpage{background:rgba(40,0,60,.25);backdrop-filter:blur(6px);padding:1.5rem;border:2px solid #c084fc;border-radius:1rem;text-align:center;text-decoration:none;color:#e5ccff;font-weight:500;box-shadow:0 0 10px #c084fc44;transition:.2s;}
+  .subpage:hover{transform:translateY(-6px);box-shadow:0 0 20px #c084fc;}
+  footer{text-align:center;padding:1rem;font-size:.8rem;color:#c084fcaa;background:rgba(30,0,50,.5);border-top:1px solid #c084fc33;}
+  #desc{color:#e5ccff;text-align:center;max-width:700px;margin-top:1rem;display:none;}
+}
+
+/* ======== MODO CLARO ======== */
+@media (prefers-color-scheme: light) {
+  body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6;}
+  header{background:#4d1a00;padding:1rem 2rem;border-bottom:2px solid #ff8c00;text-align:center;box-shadow:0 0 12px #ff8c0055;}
+  header h1{margin:0;font-size:2.2rem;color:#ff8c00;text-shadow:0 0 10px #ff8c00aa;}
+  header h3{margin:.5rem 0;font-weight:400;color:#ffd8a6;}
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+  main h2{font-size:1.6rem;margin-bottom:1.5rem;color:#ff8c00;text-shadow:0 0 6px #ff8c0088;cursor:pointer;}
+  .subpage-list{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));width:100%;max-width:800px;}
+  .subpage{background:rgba(60,20,0,.2);backdrop-filter:blur(6px);padding:1.5rem;border:2px solid #ff8c00;border-radius:1rem;text-align:center;text-decoration:none;color:#ffd8a6;font-weight:500;box-shadow:0 0 10px #ff8c0055;transition:.2s;}
+  .subpage:hover{transform:translateY(-6px);box-shadow:0 0 20px #ff8c00;}
+  footer{text-align:center;padding:1rem;font-size:.8rem;color:#ffb366;background:#330800;border-top:1px solid #662200;}
+  #desc{color:#ffd8a6;text-align:center;max-width:700px;margin-top:1rem;display:none;}
+}
+</style>
+</head>
+
+<body>
+  <header>
+    <h1>Yalmil.com</h1>
+    <h3>Inicia sesión para continuar</h3>
+  </header>
+
+  <main>
+    <h3 onclick="toggleDesc()">Quien es Yalmil?</h3>
+
+    <p id="desc">
+      Yalmil es un programador creativo que diseña páginas, sistemas y herramientas divertidas.  
+      Le gusta experimentar y crear proyectos únicos para compartir con todos.
+    </p>
+
+    <h2>Iniciar sesión</h2>
+
+    <div class="subpage-list">
+      <a class="subpage" href="login">Iniciar sesión</a>
+      <a class="subpage" href="inicio">Entrar como invitado</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Yalmil.tv – Todos los derechos reservados.
+  </footer>
+
+<script>
+// ===== CARGA MÁS RÁPIDA CON COOKIES =====
+
+// Marcar si es primera visita (para evitar animaciones la próxima vez)
+if(!document.cookie.includes("visited=true")){
+  document.body.classList.add("first-visit");
+  document.cookie = "visited=true; max-age=2592000; path=/"; // 30 días
+}
+
+// Restaurar si ya abrió la descripción antes
+if(document.cookie.includes("desc=open")){
+  document.getElementById("desc").style.display = "block";
+}
+
+function toggleDesc(){
+  const d = document.getElementById('desc');
+  const isOpen = d.style.display === 'block';
+  d.style.display = isOpen ? 'none' : 'block';
+  
+  // Guardar en cookie
+  document.cookie = `desc=${isOpen ? "closed" : "open"}; max-age=2592000; path=/`;
+}
+</script>
+
+</body>
+</html>
