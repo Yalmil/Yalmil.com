@@ -1,37 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- LÍNEAS REQUERIDAS -->
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="aqui pon un texto relacionado al html" />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
+  <!-- SEO -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Yalmil.com - Sobre mí</title>
+
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <link rel="canonical" href="https://yalmil.github.io/Yalmil.com/">
+
+  <meta name="title" content="Yalmil.com - Sobre mí">
+  <meta name="description" content="Página personal donde comparto información sobre mí, mis proyectos, traducciones y programación.">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Yalmil.com - Sobre mí">
+  <meta property="og:description" content="Conoce más sobre mí, mis proyectos y mi trabajo en programación y traducciones.">
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png">
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Yalmil.com - Sobre mí">
+  <meta name="twitter:description" content="Información personal, proyectos y programación.">
+  <meta name="twitter:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png">
 
   <!-- CSS -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; margin: 0; }
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
       background: linear-gradient(135deg, #0a0a0a, #1a001f);
       color: #e5ccff;
-      display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      animation: fadeIn 1s ease-out;
+      padding: 20px;
+      animation: fadeIn 0.8s ease-out;
     }
 
     @keyframes fadeIn {
@@ -40,112 +51,132 @@
     }
 
     .container {
-      background: rgba(40, 0, 60, 0.2);
-      backdrop-filter: blur(6px);
+      background: rgba(40, 0, 60, .25);
       border: 2px solid #c084fc;
       border-radius: 1.5rem;
       padding: 2rem;
-      width: 90%;
       max-width: 600px;
+      width: 100%;
       box-shadow: 0 0 20px #c084fc88;
+      backdrop-filter: blur(6px);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: .3rem;
+      color: #c084fc;
+      text-shadow: 0 0 10px #c084fc;
     }
 
     h2 {
-      text-align: center;
-      font-size: 2rem;
+      font-size: 1.6rem;
       margin-bottom: 1.5rem;
       color: #c084fc;
-      text-shadow: 0 0 8px #c084fc;
     }
 
     .editable {
       min-height: 200px;
       padding: 1rem;
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.05);
       color: #fff;
-      outline: none;
-      font-size: 1rem;
       border: 1px solid #c084fc88;
+      margin-bottom: 1rem;
+      outline: none;
       overflow-y: auto;
     }
 
     .editable:focus {
-      box-shadow: 0 0 10px #c084fcaa;
       border-color: #c084fc;
+      box-shadow: 0 0 10px #c084fcaa;
     }
 
     .contact {
       display: inline-block;
-      margin-top: 1rem;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
+      padding: .7rem 1.4rem;
+      border-radius: 10px;
       background: #c084fc33;
-      border: 1px solid #c084fc99;
+      border: 1px solid #c084fc88;
       color: #fff;
-      font-weight: 600;
       text-decoration: none;
-      transition: all 0.2s ease;
+      font-weight: 600;
+      transition: .2s;
     }
 
     .contact:hover {
       background: #c084fc55;
-      box-shadow: 0 0 8px #c084fc;
+      box-shadow: 0 0 10px #c084fc;
     }
 
     footer {
-      text-align: center;
-      font-size: 0.85rem;
       margin-top: 1rem;
+      font-size: .85rem;
       color: #c084fcaa;
     }
+
+    /* Elementos necesarios para el script */
+    #spectator { position: relative; }
+    #doNothingBtn {
+      margin-top: 15px;
+      padding: .6rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #c084fc33;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .2s;
+    }
+    #doNothingBtn:hover {
+      background: #c084fc55;
+      box-shadow: 0 0 8px #c084fc;
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h2>Sobre mí</h2>
-    <div class="editable" contenteditable="true">
-      <p>Traduzco mods de Minecraft, me gusta programar (Sé HTML, CSS, JavaScript y BDScript).</p>
+
+  <div class="container" id="spectator">
+    <h1>Sobre mí</h1>
+
+    <h2>Información</h2>
+
+    <div class="editable" contenteditable="true"
+      <p>Hola! Soy Yalmil (También conocido como Yalimil). Me gusta programar en discord.js, html y BDScript 2. Me gusta traducir mods de Minecraft e hice una IA (https://yalmil.pages.dev/ia)</p>
       <p>Mi color favorito es morado, país Perú (México) y NSC. Si quieres preguntarme algo más, mándame un correo.</p>
       <p><strong>Correo:</strong> yalmil63@gmail.com</p>
     </div>
+
     <a class="contact" href="mailto:yalmil63@gmail.com">Enviar mensaje</a>
+
+    <button id="doNothingBtn">Hacer nada</button>
+
     <footer>&copy; 2025 Yalmil.com – Todos los derechos reservados.</footer>
   </div>
 
-  <!-- Lineas innecesarias -->
-<script>
-    // Este script está diseñado para ser totalmente innecesario
-    // Comentarios en español, porque somos elegantes y redundantes
-
-    // 1) rutina de bienvenida que solo calcula la longitud de las palabras del título
+  <!-- script innecesario-->
+  <script>
     (function bienvenidaInnecesaria(){
-      const texto = document.querySelector('h1').innerText || '';
-      // calcular longitudes y guardarlas en un array que NUNCA usaremos
+      const texto = document.querySelector('h1')?.innerText || '';
       const longitudes = texto.split(' ').map(w => w.length);
-      console.log('Bienvenida innecesaria: longitudes ->', longitudes);
-      // hacemos una "decisión" basada en la suma, pero no la usamos
       const suma = longitudes.reduce((a,b)=>a+b, 0);
       if(suma % 2 === 0){
-        // crear y destruir un nodo por show
         const n = document.createElement('div');
         n.innerText = 'Paridad: par';
         n.style.position = 'fixed';
         n.style.left = '-9999px';
         document.body.appendChild(n);
-        // lo eliminamos inmediatamente, porque así es más innecesario
-        document.body.removeChild(n);
+        n.remove();
       }
     })();
 
-    // 2) función que cuando se activa genera "huevos de pascua" temporales invisibles
     function generarHuevoDePascuaInvisible(count = 50){
       const container = document.getElementById('spectator');
       const created = [];
       for(let i = 0; i < count; i++){
         const d = document.createElement('span');
-        // posición aleatoria pero fuera de la vista
         d.style.position = 'absolute';
         d.style.left = (Math.random()*200 - 100) + 'vw';
         d.style.top = (Math.random()*200 - 100) + 'vh';
@@ -153,56 +184,35 @@
         container.appendChild(d);
         created.push(d);
       }
-      // esperar 300ms y limpiar todo sin que el usuario lo note
       setTimeout(()=> {
         created.forEach(el => el.remove());
-        console.log(`Se generaron y eliminaron ${created.length} huevos invisibles`);
       }, 300);
     }
 
-    // 3) función "ansiosa" que cada vez mide cuánto tarda en NO hacer nada
     function medirNada(iteraciones = 1000){
       const t0 = performance.now();
       for(let i = 0; i < iteraciones; i++){
-        // operación inútil: invertir cadena y no usar el resultado
         'innecesario'.split('').reverse().join('');
       }
       const t1 = performance.now();
-      console.log(`Medición de nada completa: ${(t1 - t0).toFixed(2)} ms para ${iteraciones} operaciones de nada`);
+      console.log(`Nada tomado: ${(t1 - t0).toFixed(2)} ms`);
       return t1 - t0;
     }
 
-    // 4) función pública ligada al botón
     document.getElementById('doNothingBtn').addEventListener('click', () => {
-      // 4.1: title alternante que vuelve al original cada 700ms (durante 3 segundos)
-      const originalTitle = document.title;
-      let ticks = 0;
+      const original = document.title;
+      let t = 0;
       const it = setInterval(() => {
-        document.title = Math.random().toString(36).slice(2,7); // título completamente irrelevante
-        ticks++;
-        if(ticks >= 4){
-          clearInterval(it);
-          document.title = originalTitle;
-          console.log('Título restaurado');
-        }
+        document.title = Math.random().toString(36).slice(2,7);
+        if(++t >= 4){ clearInterval(it); document.title = original; }
       }, 700);
 
-      // 4.2: generar huevos invisibles
       generarHuevoDePascuaInvisible(120);
+      medirNada(5000);
 
-      // 4.3: medir nada y mostrar resultado en consola
-      const tiempo = medirNada(5000);
-      console.log(`Resultado final de la operación: nada en ${tiempo.toFixed(2)} ms`);
+      new Promise(r => setTimeout(()=>r('Nada relevante'), 420))
+      .then(msg => console.log(msg));
 
-      // 4.4: promesa que se resuelve con un mensaje absolutamente inútil
-      new Promise(resolve => {
-        setTimeout(()=> resolve('Promesa: nada relevante'), 420);
-      }).then(msg => {
-        // no mostramos al usuario, solo al log
-        console.log(msg);
-      });
-
-      // 4.5: efecto visual mínimo y temporal que desaparece después de 900ms
       const badge = document.createElement('div');
       badge.innerText = 'Innecesario ✔';
       badge.style.position = 'fixed';
@@ -217,14 +227,7 @@
       setTimeout(()=> badge.remove(), 900);
     });
 
-    // 5) rutina automática programada para ejecutarse una vez después de 2 segundos
-    setTimeout(()=> {
-      // consultar el ancho de la ventana y guardarlo en una variable nunca usada
-      const w = window.innerWidth;
-      console.log('Rutina automática: ancho de ventana medido ->', w);
-      // lanzar una medición "oculta" de nada
-      medirNada(2000);
-    }, 2000);
+    setTimeout(()=> medirNada(2000), 2000);
   </script>
 </body>
 </html>
