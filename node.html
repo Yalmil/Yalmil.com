@@ -5,76 +5,64 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Salas - Yalmil.com</title>
-
+<title>Salas | Yalmil.com</title>
 <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-<link rel="canonical" href="https://yalmil.pages.dev">
-
-<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
-<meta name="description" content="Sistema de salas en tiempo real.">
-
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
-<meta property="og:description" content="Sistema de salas en tiempo real.">
-<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
-<meta property="og:url" content="https://yalmil.pages.dev">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 *{box-sizing:border-box;margin:0}
+
 body{
   font-family:'Poppins',sans-serif;
   min-height:100vh;
-  background:linear-gradient(135deg,#0a0a0a,#1a001f);
-  color:#e5ccff;
   display:flex;
   justify-content:center;
   align-items:center;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
 }
+
 .box{
   background:rgba(40,0,60,.25);
   border:2px solid #c084fc;
   padding:20px;
-  border-radius:16px;
+  border-radius:18px;
   width:320px;
   text-align:center;
 }
+
 button,input{
   width:100%;
-  padding:10px;
   margin-top:10px;
+  padding:10px;
   border-radius:10px;
   border:none;
   font-family:inherit;
 }
+
 button{
   background:#c084fc;
   color:#000;
   font-weight:600;
   cursor:pointer;
 }
-ul{
-  margin-top:10px;
-  list-style:none;
-}
+
+ul{list-style:none;margin-top:10px}
 </style>
 </head>
+
 <body>
 
-<div class="box" id="home">
+<div class="box" id="home" style="display:none">
   <h2>Salas</h2>
-  <button onclick="crearSala()">Crear sala</button>
-  <button onclick="mostrarJoin()">Unirse</button>
+  <button id="crearBtn">Crear sala</button>
+  <button id="unirseBtn">Unirse</button>
 </div>
 
 <div class="box" id="join" style="display:none">
-  <h2>Unirse</h2>
+  <h2>Unirse a sala</h2>
   <input id="roomInput" placeholder="ID de la sala">
-  <button onclick="unirseSala()">Entrar</button>
+  <button id="entrarBtn">Entrar</button>
 </div>
 
 <div class="box" id="room" style="display:none">
@@ -84,9 +72,9 @@ ul{
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
@@ -95,57 +83,70 @@ const firebaseConfig = {
   projectId: "databaseloginweb",
   storageBucket: "databaseloginweb.firebasestorage.app",
   messagingSenderId: "121538864529",
-  appId: "1:121538864529:web:e92aaeaa4ba52618162630",
-  measurementId: "G-M5CBRMJ9BN"
+  appId: "1:121538864529:web:e92aaeaa4ba52618162630"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
-let user;
-let currentRoom;
+let userUID = null;
 
-await signInWithPopup(auth, new GoogleAuthProvider());
-user = auth.currentUser;
+const home = document.getElementById("home");
+const join = document.getElementById("join");
+const room = document.getElementById("room");
 
-function randomID(){
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  userUID = user.uid;
+  home.style.display = "block";
+});
+
+function generarID(){
   return Math.random().toString(36).substring(2,8);
 }
 
-window.crearSala = async () => {
-  const roomId = randomID();
-  await set(ref(db, `rooms/${roomId}/users/${user.uid}`), true);
+document.getElementById("crearBtn").onclick = async () => {
+  const roomId = generarID();
+  await set(ref(db, `rooms/${roomId}/users/${userUID}`), true);
   entrarSala(roomId);
 };
 
-window.mostrarJoin = () => {
+document.getElementById("unirseBtn").onclick = () => {
   home.style.display="none";
   join.style.display="block";
 };
 
-window.unirseSala = () => {
-  const id = roomInput.value.trim();
+document.getElementById("entrarBtn").onclick = () => {
+  const id = document.getElementById("roomInput").value.trim();
   if(id) entrarSala(id);
 };
 
 async function entrarSala(roomId){
-  currentRoom = roomId;
-  await set(ref(db, `rooms/${roomId}/users/${user.uid}`), true);
+  await set(ref(db, `rooms/${roomId}/users/${userUID}`), true);
 
   home.style.display="none";
   join.style.display="none";
   room.style.display="block";
-  roomIdText.textContent = `ID: ${roomId}`;
+
+  document.getElementById("roomIdText").textContent = "ID: " + roomId;
 
   const usersRef = ref(db, `rooms/${roomId}/users`);
   onValue(usersRef, async snap => {
-    userList.innerHTML="";
-    for(const uid in snap.val()){
+    const ul = document.getElementById("userList");
+    ul.innerHTML = "";
+
+    if(!snap.exists()) return;
+
+    for(const uid of Object.keys(snap.val())){
       const nameSnap = await get(child(ref(db), `users/${uid}/name`));
       const li = document.createElement("li");
       li.textContent = nameSnap.exists() ? nameSnap.val() : "Usuario";
-      userList.appendChild(li);
+      ul.appendChild(li);
     }
   });
 }
