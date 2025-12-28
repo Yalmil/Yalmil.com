@@ -1,98 +1,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NES Web Emulator</title>
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Metadata del usuario -->
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
-  <meta property="og:title" content="Yalmil.com" />
-  <meta property="og:description" content="Emulador NES en tu navegador" />
-  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
-  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
-  <meta property="og:type" content="website" />
+<title>Salas - Yalmil.com</title>
 
-  <!-- Estilos del usuario adaptados -->
-  <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-  *{box-sizing:border-box;margin:0}
-  body{font-family:'Poppins',sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px;}
-  h1{margin-bottom:15px}
-  canvas{border:3px solid #00ff66;border-radius:8px}
-  #romInput{margin-top:20px;padding:10px;border:2px solid #00ff66;background:#000;color:#00ff66;border-radius:6px;cursor:pointer}
-  </style>
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Sistema de salas en tiempo real.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Sistema de salas en tiempo real.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Poppins',sans-serif;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.box{
+  background:rgba(40,0,60,.25);
+  border:2px solid #c084fc;
+  padding:20px;
+  border-radius:16px;
+  width:320px;
+  text-align:center;
+}
+button,input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  font-family:inherit;
+}
+button{
+  background:#c084fc;
+  color:#000;
+  font-weight:600;
+  cursor:pointer;
+}
+ul{
+  margin-top:10px;
+  list-style:none;
+}
+</style>
 </head>
-
 <body>
-  <h1>Emulador NES Web</h1>
 
-  <canvas id="screen" width="256" height="240"></canvas>
+<div class="box" id="home">
+  <h2>Salas</h2>
+  <button onclick="crearSala()">Crear sala</button>
+  <button onclick="mostrarJoin()">Unirse</button>
+</div>
 
-  <input type="file" id="romInput" accept=".nes" />
+<div class="box" id="join" style="display:none">
+  <h2>Unirse</h2>
+  <input id="roomInput" placeholder="ID de la sala">
+  <button onclick="unirseSala()">Entrar</button>
+</div>
 
-  <!-- JSNES -->
-  <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+<div class="box" id="room" style="display:none">
+  <h2>Sala</h2>
+  <p id="roomIdText"></p>
+  <ul id="userList"></ul>
+</div>
 
-  <script>
-    const canvas = document.getElementById("screen");
-    const ctx = canvas.getContext("2d");
-    const imageData = ctx.getImageData(0, 0, 256, 240);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // Emulador
-    const nes = new jsnes.NES({
-      onFrame: function(frameBuffer) {
-        for (let i = 0; i < frameBuffer.length; i++) {
-          imageData.data[i] = frameBuffer[i];
-        }
-        ctx.putImageData(imageData, 0, 0);
-      },
-      onAudioSample: function() {
-        // sonido si quieres implementarlo luego
-      }
-    });
+const firebaseConfig = {
+  apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+  authDomain: "databaseloginweb.firebaseapp.com",
+  databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+  projectId: "databaseloginweb",
+  storageBucket: "databaseloginweb.firebasestorage.app",
+  messagingSenderId: "121538864529",
+  appId: "1:121538864529:web:e92aaeaa4ba52618162630",
+  measurementId: "G-M5CBRMJ9BN"
+};
 
-    // Cargar ROM
-    document.getElementById("romInput").addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-      const arrayBuffer = await file.arrayBuffer();
-      nes.loadROM(new Uint8Array(arrayBuffer));
-      nes.frame();
-      startLoop();
-    });
+let user;
+let currentRoom;
 
-    // Loop del emulador
-    function startLoop() {
-      function loop() {
-        nes.frame();
-        requestAnimationFrame(loop);
-      }
-      loop();
+await signInWithPopup(auth, new GoogleAuthProvider());
+user = auth.currentUser;
+
+function randomID(){
+  return Math.random().toString(36).substring(2,8);
+}
+
+window.crearSala = async () => {
+  const roomId = randomID();
+  await set(ref(db, `rooms/${roomId}/users/${user.uid}`), true);
+  entrarSala(roomId);
+};
+
+window.mostrarJoin = () => {
+  home.style.display="none";
+  join.style.display="block";
+};
+
+window.unirseSala = () => {
+  const id = roomInput.value.trim();
+  if(id) entrarSala(id);
+};
+
+async function entrarSala(roomId){
+  currentRoom = roomId;
+  await set(ref(db, `rooms/${roomId}/users/${user.uid}`), true);
+
+  home.style.display="none";
+  join.style.display="none";
+  room.style.display="block";
+  roomIdText.textContent = `ID: ${roomId}`;
+
+  const usersRef = ref(db, `rooms/${roomId}/users`);
+  onValue(usersRef, async snap => {
+    userList.innerHTML="";
+    for(const uid in snap.val()){
+      const nameSnap = await get(child(ref(db), `users/${uid}/name`));
+      const li = document.createElement("li");
+      li.textContent = nameSnap.exists() ? nameSnap.val() : "Usuario";
+      userList.appendChild(li);
     }
+  });
+}
+</script>
 
-    // Controles
-    const keyMap = {
-      38: jsnes.Controller.BUTTON_UP,
-      40: jsnes.Controller.BUTTON_DOWN,
-      37: jsnes.Controller.BUTTON_LEFT,
-      39: jsnes.Controller.BUTTON_RIGHT,
-      90: jsnes.Controller.BUTTON_A,     // Z
-      88: jsnes.Controller.BUTTON_B,     // X
-      13: jsnes.Controller.BUTTON_START, // ENTER
-      16: jsnes.Controller.BUTTON_SELECT // SHIFT
-    };
-
-    window.addEventListener("keydown", (e) => {
-      const btn = keyMap[e.keyCode];
-      if (btn !== undefined) nes.buttonDown(1, btn);
-    });
-
-    window.addEventListener("keyup", (e) => {
-      const btn = keyMap[e.keyCode];
-      if (btn !== undefined) nes.buttonUp(1, btn);
-    });
-  </script>
 </body>
 </html>
