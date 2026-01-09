@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Juego tipo Mafia online">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
+  padding:20px
+}
+button,input{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  font-weight:600;
+  cursor:pointer
+}
+button{background:#c084fc;color:#000}
+.section{
+  background:rgba(40,0,60,.25);
+  border:2px solid #c084fc;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px
+}
+.hidden{display:none}
+ul{padding-left:20px}
+</style>
+</head>
+<body>
+
+<h1>Juego tipo Mafia</h1>
+
+<div id="login" class="section">
+  <button id="loginBtn">Iniciar sesión con Google</button>
+</div>
+
+<div id="lobby" class="section hidden">
+  <p>Jugador: <b id="username"></b></p>
+  <input id="roomId" placeholder="ID de sala">
+  <button onclick="createRoom()">Crear sala</button>
+  <button onclick="joinRoom()">Unirse</button>
+</div>
+
+<div id="room" class="section hidden">
+  <h2>Sala: <span id="roomName"></span></h2>
+  <ul id="players"></ul>
+  <button id="startBtn" class="hidden" onclick="startGame()">Iniciar partida</button>
+</div>
+
+<div id="game" class="section hidden">
+  <h2>Juego</h2>
+  <p id="roleText"></p>
+  <div id="actions"></div>
+  <p id="log"></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+  authDomain: "databaseloginweb.firebaseapp.com",
+  databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+  projectId: "databaseloginweb",
+  storageBucket: "databaseloginweb.firebasestorage.app",
+  messagingSenderId: "121538864529",
+  appId: "1:121538864529:web:e92aaeaa4ba52618162630"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getDatabase();
+
+let user, roomId, role;
+
+loginBtn.onclick = async ()=>{
+  await signInWithPopup(auth,new GoogleAuthProvider());
+};
+
+onAuthStateChanged(auth, async u=>{
+  if(!u) return;
+  user=u;
+  const snap = await get(ref(db,"users/"+u.uid));
+  if(!snap.exists()){
+    await set(ref(db,"users/"+u.uid),{name:u.displayName});
+  }
+  document.getElementById("username").textContent = snap.val()?.name || u.displayName;
+  login.classList.add("hidden");
+  lobby.classList.remove("hidden");
+});
+
+window.createRoom = async ()=>{
+  roomId = roomIdInput();
+  await set(ref(db,"rooms/"+roomId),{
+    owner:user.uid,
+    state:"waiting",
+    players:{[user.uid]:true}
+  });
+  enterRoom();
+};
+
+window.joinRoom = async ()=>{
+  roomId = roomIdInput();
+  await update(ref(db,"rooms/"+roomId+"/players"),{[user.uid]:true});
+  enterRoom();
+};
+
+function roomIdInput(){
+  return document.getElementById("roomId").value.trim();
+}
+
+function enterRoom(){
+  lobby.classList.add("hidden");
+  room.classList.remove("hidden");
+  roomName.textContent = roomId;
+
+  onValue(ref(db,"rooms/"+roomId), snap=>{
+    const data=snap.val();
+    if(!data) return;
+
+    players.innerHTML="";
+    Object.keys(data.players||{}).forEach(p=>{
+      players.innerHTML+="<li>"+p+"</li>";
+    });
+
+    if(data.owner===user.uid && Object.keys(data.players||{}).length>=4 && data.state==="waiting"){
+      startBtn.classList.remove("hidden");
+    }
+
+    if(data.state==="started"){
+      startGameUI(data);
+    }
+  });
+}
+
+window.startGame = async ()=>{
+  const snap = await get(ref(db,"rooms/"+roomId+"/players"));
+  const ids = Object.keys(snap.val());
+  ids.sort(()=>Math.random()-0.5);
+
+  await update(ref(db,"rooms/"+roomId),{
+    state:"started",
+    roles:{
+      assassin:ids[0],
+      doctor:ids[1],
+      sheriff:ids[2]
+    },
+    alive:ids,
+    round:1
+  });
+};
+
+function startGameUI(data){
+  room.classList.add("hidden");
+  game.classList.remove("hidden");
+
+  role="civil";
+  if(data.roles.assassin===user.uid) role="asesino";
+  if(data.roles.doctor===user.uid) role="medico";
+  if(data.roles.sheriff===user.uid) role="sheriff";
+
+  roleText.textContent="Tu rol: "+role;
+  actions.innerHTML="";
+
+  if(role!=="civil"){
+    data.alive.forEach(p=>{
+      if(role==="asesino" && p===user.uid) return;
+      actions.innerHTML+=`<button onclick="choose('${p}')">${p}</button> `;
+    });
+  }
+}
+
+window.choose = async (target)=>{
+  await update(ref(db,"rooms/"+roomId+"/choices/"+user.uid),target);
+  log.textContent="Elección enviada";
+};
+</script>
+</body>
+</html>
