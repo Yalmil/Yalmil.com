@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Juego simple donde controlas una bola y esquivas letras enemigas.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Juego simple donde controlas una bola y esquivas letras enemigas.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="twitter:description" content="Juego simple donde controlas una bola y esquivas letras enemigas.">
+<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Poppins',sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
+}
+canvas{
+  background:rgba(40,0,60,.25);
+  border:2px solid #c084fc;
+  border-radius:12px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = Math.min(innerWidth - 20, 600);
+canvas.height = Math.min(innerHeight - 20, 600);
+
+const player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  r: 12,
+  speed: 0.15
+};
+
+let target = { x: player.x, y: player.y };
+let enemies = [];
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function spawnEnemy(){
+  enemies.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    char: letters[Math.floor(Math.random() * letters.length)],
+    speed: 0.5 + Math.random()
+  });
+}
+
+for(let i=0;i<6;i++) spawnEnemy();
+
+canvas.addEventListener("mousemove", e=>{
+  const rect = canvas.getBoundingClientRect();
+  target.x = e.clientX - rect.left;
+  target.y = e.clientY - rect.top;
+});
+
+canvas.addEventListener("touchstart", e=>{
+  const rect = canvas.getBoundingClientRect();
+  target.x = e.touches[0].clientX - rect.left;
+  target.y = e.touches[0].clientY - rect.top;
+});
+
+canvas.addEventListener("touchmove", e=>{
+  const rect = canvas.getBoundingClientRect();
+  target.x = e.touches[0].clientX - rect.left;
+  target.y = e.touches[0].clientY - rect.top;
+});
+
+function update(){
+  player.x += (target.x - player.x) * player.speed;
+  player.y += (target.y - player.y) * player.speed;
+
+  enemies.forEach(e=>{
+    const dx = player.x - e.x;
+    const dy = player.y - e.y;
+    const d = Math.hypot(dx, dy);
+    e.x += (dx / d) * e.speed;
+    e.y += (dy / d) * e.speed;
+  });
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.r, 0, Math.PI*2);
+  ctx.fillStyle = "#c084fc";
+  ctx.fill();
+
+  ctx.font = "20px Poppins";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  enemies.forEach(e=>{
+    ctx.fillStyle = "#ff6b6b";
+    ctx.fillText(e.char, e.x, e.y);
+  });
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>
