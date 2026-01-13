@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sobrevive a las Letras</title>
+  
+  <!-- Estilos actualizados con el diseño morado -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #5b21b6;
+      --primary-light: #8b5cf6;
+      --secondary: #c4b5fd;
+      --background: #0f0a1a;
+      --surface: #1e1836;
+      --surface-light: #2d2749;
+      --text: #f5f3ff;
+      --text-secondary: #c4b5fd;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --border: #4c1d95;
+      --shadow: rgba(124, 58, 237, 0.2);
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Canvas del juego */
+    #game {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Menú de inicio - Estilo actualizado */
+    #menu, #gameOver {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(15, 10, 26, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      text-align: center;
+      transition: opacity 0.5s ease;
+      padding: 2rem;
+    }
+
+    #menu.hidden, #gameOver.hidden {
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    #menu:not(.hidden) {
+      z-index: 30;
+    }
+
+    /* Título del juego */
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+      letter-spacing: 1px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Botones actualizados */
+    button {
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      margin: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px var(--shadow);
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px var(--shadow);
+      background: linear-gradient(to right, var(--primary-light), var(--primary));
+    }
+
+    button:active {
+      transform: translateY(-2px);
+    }
+
+    /* UI del juego - Actualizada */
+    #ui {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 24, 54, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 15px 30px;
+      border-radius: 20px;
+      font-size: 1.2rem;
+      color: var(--text);
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      display: none;
+      min-width: 400px;
+      text-align: center;
+    }
+
+    #ui span {
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    /* Texto de controles */
+    #controlsText {
+      max-width: 500px;
+      background-color: var(--surface);
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Estilos para pantallas pequeñas */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      h2 {
+        font-size: 1.8rem;
+      }
+      
+      #ui {
+        min-width: 90%;
+        font-size: 1rem;
+        padding: 12px 20px;
+        top: 10px;
+      }
+      
+      button {
+        min-width: 180px;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      #ui {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+      }
+      
+      button {
+        min-width: 160px;
+        padding: 10px 15px;
+        font-size: 1rem;
+      }
+      
+      #controlsText {
+        font-size: 0.9rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menú principal -->
+  <div id="menu">
+    <h1>🅰 Sobrevive a las Letras</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem; max-width: 600px;">
+      Un juego de velocidad y reflejos. Escapa de las letras que te persiguen y recolecta power-ups para sobrevivir más tiempo.
+    </p>
+    <button id="startBtn">
+      <span>🎮</span> Jugar
+    </button>
+    <button id="controlsBtn">
+      <span>❓</span> Ayuda
+    </button>
+    <div id="controlsText" style="display:none;">
+      <h3 style="color: var(--primary-light); margin-bottom: 10px;">Controles:</h3>
+      <p><strong>PC:</strong> Mueve el mouse para controlar al jugador</p>
+      <p><strong>Móvil:</strong> Toca y desliza en la pantalla</p>
+      <h3 style="color: var(--primary-light); margin: 15px 0 10px 0;">Power-Ups:</h3>
+      <p><strong>Escudo:</strong> Te hace invulnerable por 5 segundos</p>
+      <p><strong>Velocidad:</strong> Aumenta tu movimiento por 5 segundos</p>
+      <p><strong>Onda expansiva:</strong> Elimina todos los enemigos</p>
+      <p><strong>Magneto:</strong> Atrae todos los power-ups hacia ti</p>
+    </div>
+  </div>
+
+  <!-- UI del juego -->
+  <div id="ui">
+    <span>🕒</span> Tiempo: <span id="time">0</span>s | 
+    <span>💯</span> Puntos: <span id="score">0</span> | 
+    <span>🏆</span> Récord: <span id="record">0</span>s
+  </div>
+
+  <!-- Pantalla de Game Over -->
+  <div id="gameOver" class="hidden">
+    <h2 id="gameOverText">💀 Has perdido</h2>
+    <button onclick="restartGame()">
+      <span>🔄</span> Reintentar
+    </button>
+    <button onclick="showMenu()">
+      <span>🏠</span> Menú
+    </button>
+  </div>
+
+  <!-- Canvas del juego -->
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    const ui = document.getElementById("ui");
+    const menu = document.getElementById("menu");
+    const gameOverScreen = document.getElementById("gameOver");
+    const recordDisplay = document.getElementById("record");
+    const startBtn = document.getElementById("startBtn");
+    const controlsBtn = document.getElementById("controlsBtn");
+
+    let player, enemies, powerUps, mouse, timeSurvived, score, record, invulnerable, lastEnemySpawn, lastPowerUp, bgHue, gameLoopId, timerInterval;
+
+    const letters = "ÑXYZWKLMNOPQRSTUVABCDE".split("");
+    const enemyColors = ["#ff0044", "#ffcc00", "#00ffff", "#00ff66", "#cc00ff", "#ffaa00", "#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4"];
+    const bgColors = ["#0f0a1a", "#1e1836", "#2d2749", "#1a1a2e", "#16213e"];
+
+    // Crear imagen para power-ups (usaremos un círculo con gradiente si no carga la imagen)
+    const powerUpImg = new Image();
+    powerUpImg.src = "https://cdn-icons-png.flaticon.com/512/869/869869.png";
+    powerUpImg.onerror = function() {
+      // Si falla la carga, usaremos dibujos en su lugar
+      console.log("No se pudo cargar la imagen de power-ups, usando dibujos alternativos");
+    };
+
+    record = parseInt(localStorage.getItem("record")) || 0;
+    recordDisplay.textContent = record;
+
+    function startGame() {
+      menu.classList.add("hidden");
+      ui.style.display = "block";
+      gameOverScreen.classList.add("hidden");
+      init();
+    }
+
+    function init() {
+      player = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        size: 25,
+        speed: 0.2,
+        color: "#F5A927"
+      };
+
+      enemies = [];
+      powerUps = [];
+      mouse = { x: player.x, y: player.y };
+      timeSurvived = 0;
+      score = 0;
+      invulnerable = false;
+      lastEnemySpawn = 0;
+      lastPowerUp = 0;
+      bgHue = 0;
+
+      clearInterval(timerInterval);
+      cancelAnimationFrame(gameLoopId);
+
+      timerInterval = setInterval(() => {
+        timeSurvived++;
+        document.getElementById("time").textContent = timeSurvived;
+        if (timeSurvived % 10 === 0) changeBackground();
+      }, 1000);
+
+      gameLoop(performance.now());
+    }
+
+    function spawnEnemy() {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.max(canvas.width, canvas.height) * 0.7;
+      const x = player.x + radius * Math.cos(angle);
+      const y = player.y + radius * Math.sin(angle);
+      const letter = letters[Math.floor(Math.random() * letters.length)];
+      const color = enemyColors[Math.floor(Math.random() * enemyColors.length)];
+      const speed = 1.4 + Math.random() * 1.2 + timeSurvived * 0.02;
+      const type = Math.random() < 0.15 ? "zigzag" : (Math.random() < 0.1 ? "spiral" : "normal");
+
+      enemies.push({
+        x, y, size: 35, speed, letter, color, type,
+        angle: 0,
+        spiralRadius: 50,
+        spiralSpeed: 0.05
+      });
+    }
+
+    function spawnPowerUp() {
+      const margin = 50;
+      const x = margin + Math.random() * (canvas.width - 2 * margin);
+      const y = margin + Math.random() * (canvas.height - 2 * margin);
+      const type = ["shield", "speed", "wave", "magnet"][Math.floor(Math.random() * 4)];
+
+      powerUps.push({
+        x, y, size: 30, type,
+        pulse: 0
+      });
+    }
+
+    function drawPlayer() {
+      // Dibujar halo de jugador
+      if (invulnerable) {
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.size + 10, 0, Math.PI * 2);
+        const shieldGradient = ctx.createRadialGradient(
+          player.x, player.y, player.size,
+          player.x, player.y, player.size + 10
+        );
+        shieldGradient.addColorStop(0, "rgba(0, 255, 255, 0.3)");
+        shieldGradient.addColorStop(1, "rgba(0, 255, 255, 0)");
+        ctx.fillStyle = shieldGradient;
+        ctx.fill();
+      }
+
+      // Dibujar jugador
+      const gradient = ctx.createRadialGradient(
+        player.x, player.y, 5,
+        player.x, player.y, player.size
+      );
+      gradient.addColorStop(0, "#F5A927");
+      gradient.addColorStop(0.7, "#FF8C00");
+      gradient.addColorStop(1, "#FF4500");
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Efecto de brillo
+      ctx.shadowColor = "#F5A927";
+      ctx.shadowBlur = 15;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Dibujar borde si es invulnerable
+      if (invulnerable) {
+        ctx.strokeStyle = "#00ffff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+
+    function drawEnemies() {
+      ctx.font = "bold 35px 'Courier New', monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      enemies.forEach(e => {
+        // Efecto de sombra para enemigos
+        ctx.shadowColor = e.color;
+        ctx.shadowBlur = 15;
+        
+        // Dibujar enemigo
+        ctx.fillStyle = e.color;
+        ctx.fillText(e.letter, e.x, e.y);
+        
+        // Dibujar borde alrededor de la letra
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 2;
+        ctx.strokeText(e.letter, e.x, e.y);
+        
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function updateEnemies() {
+      enemies.forEach(e => {
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (e.type === "zigzag") {
+          e.angle += 0.2;
+          e.x += (dx / dist) * e.speed + Math.sin(e.angle) * 2;
+          e.y += (dy / dist) * e.speed;
+        } else if (e.type === "spiral") {
+          e.angle += e.spiralSpeed;
+          const spiralX = Math.cos(e.angle) * e.spiralRadius;
+          const spiralY = Math.sin(e.angle) * e.spiralRadius;
+          e.x += (dx / dist) * e.speed * 0.5 + spiralX * 0.1;
+          e.y += (dy / dist) * e.speed * 0.5 + spiralY * 0.1;
+        } else {
+          e.x += (dx / dist) * e.speed;
+          e.y += (dy / dist) * e.speed;
+        }
+      });
+    }
+
+    function drawPowerUps() {
+      powerUps.forEach(p => {
+        // Efecto de pulso
+        p.pulse += 0.1;
+        const pulseSize = Math.sin(p.pulse) * 3;
+        
+        // Color según el tipo de power-up
+        let color;
+        switch(p.type) {
+          case "shield": color = "#00ffff"; break;
+          case "speed": color = "#00ff66"; break;
+          case "wave": color = "#ffcc00"; break;
+          case "magnet": color = "#cc00ff"; break;
+          default: color = "#ffffff";
+        }
+        
+        // Dibujar power-up (imagen o círculo)
+        if (powerUpImg.complete && powerUpImg.naturalWidth > 0) {
+          ctx.save();
+          ctx.globalAlpha = 0.9;
+          const size = p.size + pulseSize;
+          ctx.drawImage(powerUpImg, p.x - size/2, p.y - size/2, size, size);
+          ctx.restore();
+        } else {
+          // Dibujar círculo si no hay imagen
+          const gradient = ctx.createRadialGradient(p.x, p.y, 5, p.x, p.y, p.size);
+          gradient.addColorStop(0, color);
+          gradient.addColorStop(1, "rgba(255, 255, 255, 0.5)");
+          
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size + pulseSize, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Dibujar icono según tipo
+          ctx.fillStyle = "white";
+          ctx.font = "bold 20px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          
+          let icon = "?";
+          switch(p.type) {
+            case "shield": icon = "🛡️"; break;
+            case "speed": icon = "⚡"; break;
+            case "wave": icon = "💥"; break;
+            case "magnet": icon = "🧲"; break;
+          }
+          
+          ctx.fillText(icon, p.x, p.y);
+        }
+        
+        // Efecto de brillo
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function updatePlayer() {
+      player.x += (mouse.x - player.x) * player.speed;
+      player.y += (mouse.y - player.y) * player.speed;
+      
+      // Mantener al jugador dentro de los límites
+      player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+      player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+    }
+
+    function checkCollisions() {
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        const dist = Math.hypot(player.x - e.x, player.y - e.y);
+
+        if (dist < player.size + e.size / 2 && !invulnerable) {
+          gameOver();
+          return;
+        }
+      }
+
+      for (let i = powerUps.length - 1; i >= 0; i--) {
+        const p = powerUps[i];
+        const dist = Math.hypot(player.x - p.x, player.y - p.y);
+
+        if (dist < player.size + p.size) {
+          activatePowerUp(p.type);
+          powerUps.splice(i, 1);
+          score += 10;
+          document.getElementById("score").textContent = score;
+        }
+      }
+    }
+
+    function activatePowerUp(type) {
+      if (type === "shield") {
+        invulnerable = true;
+        setTimeout(() => invulnerable = false, 5000);
+
+      } else if (type === "speed") {
+        const originalSpeed = player.speed;
+        player.speed = 0.4;
+        setTimeout(() => player.speed = originalSpeed, 5000);
+
+      } else if (type === "wave") {
+        // Efecto visual de onda expansiva
+        drawWaveEffect();
+        enemies.splice(0, enemies.length);
+
+      } else if (type === "magnet") {
+        powerUps.forEach(p => {
+          const dx = player.x - p.x;
+          const dy = player.y - p.y;
+          const dist = Math.hypot(dx, dy);
+          const speed = 5;
+          
+          p.x += (dx / dist) * speed;
+          p.y += (dy / dist) * speed;
+        });
+      }
+    }
+
+    function drawWaveEffect() {
+      // Dibujar efecto visual de onda expansiva
+      const wave = {
+        x: player.x,
+        y: player.y,
+        radius: 0,
+        maxRadius: Math.max(canvas.width, canvas.height),
+        alpha: 0.7
+      };
+      
+      function animateWave() {
+        ctx.beginPath();
+        ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0, 255, 255, ${wave.alpha})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        wave.radius += 15;
+        wave.alpha -= 0.02;
+        
+        if (wave.radius < wave.maxRadius && wave.alpha > 0) {
+          requestAnimationFrame(animateWave);
+        }
+      }
+      
+      animateWave();
+    }
+
+    function changeBackground() {
+      bgHue = (bgHue + 1) % bgColors.length;
+      document.body.style.backgroundColor = bgColors[bgHue];
+      document.body.style.transition = "background-color 1.5s ease";
+    }
+
+    function gameOver() {
+      cancelAnimationFrame(gameLoopId);
+      clearInterval(timerInterval);
+      ui.style.display = "none";
+      gameOverScreen.classList.remove("hidden");
+
+      const text = document.getElementById("gameOverText");
+
+      if (timeSurvived > record) {
+        localStorage.setItem("record", timeSurvived);
+        record = timeSurvived;
+        text.innerHTML = `🎉 <span style="color: var(--primary-light)">Nuevo récord: ${timeSurvived}s</span>`;
+        recordDisplay.textContent = timeSurvived;
+      } else {
+        text.innerHTML = `💀 Has perdido. Sobreviviste <span style="color: var(--primary-light)">${timeSurvived}s</span>`;
+      }
+    }
+
+    function restartGame() {
+      gameOverScreen.classList.add("hidden");
+      startGame();
+    }
+
+    function showMenu() {
+      gameOverScreen.classList.add("hidden");
+      menu.classList.remove("hidden");
+      ui.style.display = "none";
+    }
+
+    function gameLoop(timestamp) {
+      // Fondo con efecto de partículas sutiles
+      ctx.fillStyle = `rgba(15, 10, 26, 0.1)`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Dibujar efectos de fondo
+      drawBackgroundEffects();
+
+      updatePlayer();
+      drawPlayer();
+
+      drawEnemies();
+      updateEnemies();
+
+      drawPowerUps();
+      checkCollisions();
+
+      if (timestamp - lastEnemySpawn > 2000 - Math.min(timeSurvived * 10, 1500)) {
+        spawnEnemy();
+        lastEnemySpawn = timestamp;
+      }
+
+      if (timestamp - lastPowerUp > 8000) {
+        spawnPowerUp();
+        lastPowerUp = timestamp;
+      }
+
+      gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function drawBackgroundEffects() {
+      // Dibujar partículas de fondo sutiles
+      if (Math.random() < 0.03) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 2 + 1;
+        const alpha = Math.random() * 0.3 + 0.1;
+        
+        ctx.fillStyle = `rgba(124, 58, 237, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Event listeners
+    window.addEventListener("mousemove", e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      mouse.x = t.clientX;
+      mouse.y = t.clientY;
+    }, { passive: false });
+
+    window.addEventListener("resize", () => {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      if (player) {
+        player.x = Math.min(player.x, canvas.width - player.size);
+        player.y = Math.min(player.y, canvas.height - player.size);
+      }
+    });
+
+    controlsBtn.addEventListener("click", () => {
+      const c = document.getElementById("controlsText");
+      c.style.display = (c.style.display === "none" || c.style.display === "") ? "block" : "none";
+    });
+
+    startBtn.addEventListener("click", startGame);
+
+    // Inicialización cuando se carga la página
+    window.addEventListener("load", () => {
+      // Animar elementos del menú
+      const menuElements = document.querySelectorAll("#menu > *");
+      menuElements.forEach((el, i) => {
+        el.style.animation = `fadeIn 0.5s ease ${i * 0.1}s forwards`;
+        el.style.opacity = 0;
+      });
+    });
+  </script>
+</body>
+</html>
