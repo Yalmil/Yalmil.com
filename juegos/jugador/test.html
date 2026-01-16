@@ -8,6 +8,7 @@
 <title>Yalmil.com</title>
 
 <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1">
+<link rel="canonical" href="https://yalmil.pages.dev">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -20,6 +21,18 @@ body{
   overflow:hidden;
 }
 
+#menu{
+  padding:20px;
+}
+
+.level{
+  border:2px solid #c084fc;
+  padding:10px;
+  margin:10px 0;
+  cursor:pointer;
+  background:rgba(40,0,60,.25);
+}
+
 #hud{
   position:fixed;
   top:10px;
@@ -28,6 +41,7 @@ body{
 }
 
 #game{
+  display:none;
   position:fixed;
   inset:0;
 }
@@ -60,7 +74,34 @@ body{
 
 <body>
 
-<div id="hud">Score: <span id="score">0</span></div>
+<div id="menu">
+  <h2>Niveles</h2>
+
+  <div class="level"
+       data-music="texturas/music.m4a"
+       data-bpm="100"
+       data-name="Tutorial">
+    Tutorial
+  </div>
+
+  <div class="level"
+       data-music="music/normal.mp3"
+       data-bpm="140"
+       data-name="Normal">
+    Normal – BPM 140
+  </div>
+
+  <div class="level"
+       data-music="music/hard.mp3"
+       data-bpm="180"
+       data-name="Difícil">
+    Difícil – BPM 180
+  </div>
+</div>
+
+<div id="hud" style="display:none">
+  Score: <span id="score">0</span>
+</div>
 
 <div id="game">
   <div class="lane" data-key="a" style="left:0%">
@@ -78,13 +119,41 @@ body{
 </div>
 
 <script>
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+const hud = document.getElementById("hud");
 const lanes = document.querySelectorAll(".lane");
 const scoreEl = document.getElementById("score");
 
 let score = 0;
+let interval;
+let audio;
 
-// ritmo artificial (120 BPM)
-setInterval(spawnNote, 500);
+// START NIVEL
+document.querySelectorAll(".level").forEach(level=>{
+  level.onclick = ()=>{
+    startLevel(
+      level.dataset.music,
+      Number(level.dataset.bpm)
+    );
+  };
+});
+
+function startLevel(music, bpm){
+  menu.style.display="none";
+  game.style.display="block";
+  hud.style.display="block";
+  score = 0;
+  scoreEl.textContent = 0;
+
+  if(audio) audio.pause();
+  audio = new Audio(music);
+  audio.play();
+
+  const ms = 60000 / bpm;
+  clearInterval(interval);
+  interval = setInterval(spawnNote, ms);
+}
 
 function spawnNote(){
   const lane = lanes[Math.floor(Math.random()*4)];
@@ -93,12 +162,11 @@ function spawnNote(){
   note.style.top="-40px";
   lane.appendChild(note);
 
-  let y=-40;
+  let y = -40;
   function fall(){
-    y+=5;
-    note.style.top=y+"px";
+    y += 5;
+    note.style.top = y + "px";
 
-    // MISS
     if(y > innerHeight){
       note.remove();
       return;
