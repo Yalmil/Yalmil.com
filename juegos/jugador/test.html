@@ -5,74 +5,43 @@
 <!-- SEO -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Yalmil.com</title>
 
-<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1">
 <link rel="canonical" href="https://yalmil.pages.dev">
-
-<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
-<meta name="description" content="Juego estilo FNF con generación automática de notas.">
-
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
-<meta property="og:description" content="Juego estilo FNF con generación automática de notas.">
-<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
-<meta property="og:url" content="https://yalmil.pages.dev">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
-<meta name="twitter:description" content="Juego estilo FNF con generación automática de notas.">
-<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-*{box-sizing:border-box;margin:0}
+*{margin:0;box-sizing:border-box}
 body{
-  font-family:'Poppins',sans-serif;
-  min-height:100vh;
+  font-family:Poppins,sans-serif;
   background:linear-gradient(135deg,#0a0a0a,#1a001f);
   color:#e5ccff;
-  overflow:hidden;
 }
 
-#menu{
-  padding:20px;
-}
-
+#menu{padding:20px}
 .level{
   border:2px solid #c084fc;
   padding:10px;
-  margin-bottom:10px;
+  margin:10px 0;
   cursor:pointer;
-  background:rgba(40,0,60,.25);
-}
-
-.level:hover{
-  background:rgba(80,0,120,.35);
 }
 
 #game{
   display:none;
-  position:relative;
-  width:100vw;
-  height:100vh;
+  position:fixed;
+  inset:0;
 }
 
 .lane{
   position:absolute;
-  bottom:0;
   width:25%;
   height:100%;
-  border-left:1px solid #c084fc;
-  border-right:1px solid #c084fc;
+  border:1px solid #c084fc;
 }
 
 .note{
   position:absolute;
-  top:-40px;
   width:60%;
   height:30px;
   background:#c084fc;
@@ -85,22 +54,18 @@ body{
 <body>
 
 <div id="menu">
-  <h2>Niveles disponibles</h2>
+  <h2>Niveles</h2>
 
-  <!-- NIVELES -->
-  <div class="level" data-music="https://open.spotify.com/track/72YttnPRxyHe8zCG50jYhj?si=0e354e81628b4aef" data-difficulty="1">
-    Nombre: Tutoriajl<br>
-    Dificultad: Fácil
+  <div class="level" data-music="https://open.spotify.com/track/72YttnPRxyHe8zCG50jYhj?si=bb34e1407de44eb2" data-diff="1">
+    Tutorial – Fácil
   </div>
 
-  <div class="level" data-music="https://files.catbox.moe/j8z3o9.mp3" data-difficulty="2">
-    Nombre: Battle Beat<br>
-    Dificultad: Normal
+  <div class="level" data-music="https://files.catbox.moe/j8z3o9.mp3" data-diff="2">
+    Normal
   </div>
 
-  <div class="level" data-music="https://files.catbox.moe/9v6r0y.mp3" data-difficulty="3">
-    Nombre: Chaos Mode<br>
-    Dificultad: Difícil
+  <div class="level" data-music="https://files.catbox.moe/9v6r0y.mp3" data-diff="3">
+    Difícil
   </div>
 </div>
 
@@ -114,77 +79,69 @@ body{
 <script>
 const menu = document.getElementById("menu");
 const game = document.getElementById("game");
+const lanes = document.querySelectorAll(".lane");
 
-let audioCtx, analyser, dataArray;
+let audioCtx, analyser, data;
 let lastBeat = 0;
 
-document.querySelectorAll(".level").forEach(level=>{
-  level.onclick = ()=>{
-    startGame(level.dataset.music, Number(level.dataset.difficulty));
-  };
+document.querySelectorAll(".level").forEach(lvl=>{
+  lvl.onclick = ()=>start(lvl.dataset.music, +lvl.dataset.diff);
 });
 
-function startGame(musicLink, difficulty){
+async function start(src, diff){
   menu.style.display="none";
   game.style.display="block";
 
   audioCtx = new AudioContext();
-  const audio = new Audio(musicLink);
-  audio.crossOrigin="anonymous";
+  await audioCtx.resume();
+
+  const audio = new Audio(src);
+  audio.crossOrigin = "anonymous";
 
   const source = audioCtx.createMediaElementSource(audio);
   analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 256;
+  analyser.fftSize = 512;
 
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
+  data = new Uint8Array(analyser.frequencyBinCount);
 
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
+  audio.onplay = ()=>requestAnimationFrame(()=>detect(diff));
   audio.play();
-  requestAnimationFrame(()=>analyzeBeat(difficulty));
 }
 
-function analyzeBeat(difficulty){
-  analyser.getByteFrequencyData(dataArray);
+function detect(diff){
+  analyser.getByteFrequencyData(data);
 
-  let energy = 0;
-  for(let i=0;i<dataArray.length;i++){
-    energy += dataArray[i];
-  }
+  let bass = 0;
+  for(let i=0;i<15;i++) bass += data[i];
 
   const now = performance.now();
-  const threshold = 12000 - difficulty*2000;
+  const threshold = 200 + diff * 80;
+  const cooldown = 600 - diff * 150;
 
-  if(energy > threshold && now - lastBeat > 250){
-    spawnNote();
+  if(bass > threshold && now - lastBeat > cooldown){
+    spawn();
     lastBeat = now;
   }
 
-  requestAnimationFrame(()=>analyzeBeat(difficulty));
+  requestAnimationFrame(()=>detect(diff));
 }
 
-function spawnNote(){
-  const lane = Math.floor(Math.random()*4);
+function spawn(){
+  const lane = lanes[Math.floor(Math.random()*4)];
   const note = document.createElement("div");
-  note.className="note";
-  note.style.left="20%";
-  note.style.top="-40px";
+  note.className = "note";
+  note.style.top = "-30px";
+  lane.appendChild(note);
 
-  const laneDiv = document.querySelectorAll(".lane")[lane];
-  laneDiv.appendChild(note);
-
-  let y = -40;
-  const speed = 4;
-
+  let y = -30;
   function fall(){
-    y += speed;
+    y += 5;
     note.style.top = y+"px";
-    if(y < window.innerHeight){
-      requestAnimationFrame(fall);
-    }else{
-      note.remove();
-    }
+    if(y < innerHeight) requestAnimationFrame(fall);
+    else note.remove();
   }
   fall();
 }
