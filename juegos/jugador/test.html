@@ -2,16 +2,29 @@
 <html lang="es">
 <head>
 
+<!-- SEO -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test FNF</title>
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{margin:0;box-sizing:border-box}
+
 body{
-  margin:0;
-  background:#0a0a0a;
-  color:#c084fc;
-  font-family:sans-serif;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
+  overflow:hidden;
+}
+
+#hud{
+  position:fixed;
+  top:10px;
+  left:10px;
+  font-size:18px;
 }
 
 #game{
@@ -24,6 +37,14 @@ body{
   width:25%;
   height:100%;
   border:1px solid #c084fc;
+}
+
+.hit{
+  position:absolute;
+  bottom:120px;
+  width:100%;
+  height:6px;
+  background:#c084fc;
 }
 
 .note{
@@ -39,46 +60,76 @@ body{
 
 <body>
 
-<button id="start">INICIAR</button>
+<div id="hud">Score: <span id="score">0</span></div>
 
-<div id="game" style="display:none">
-  <div class="lane" style="left:0%"></div>
-  <div class="lane" style="left:25%"></div>
-  <div class="lane" style="left:50%"></div>
-  <div class="lane" style="left:75%"></div>
+<div id="game">
+  <div class="lane" data-key="a" style="left:0%">
+    <div class="hit"></div>
+  </div>
+  <div class="lane" data-key="s" style="left:25%">
+    <div class="hit"></div>
+  </div>
+  <div class="lane" data-key="w" style="left:50%">
+    <div class="hit"></div>
+  </div>
+  <div class="lane" data-key="d" style="left:75%">
+    <div class="hit"></div>
+  </div>
 </div>
 
 <script>
-const btn = document.getElementById("start");
-const game = document.getElementById("game");
 const lanes = document.querySelectorAll(".lane");
+const scoreEl = document.getElementById("score");
 
-let beatInterval;
+let score = 0;
 
-btn.onclick = ()=>{
-  btn.remove();
-  game.style.display="block";
-
-  // ritmo artificial (120 BPM)
-  beatInterval = setInterval(spawnNote, 500);
-};
+// ritmo artificial (120 BPM)
+setInterval(spawnNote, 500);
 
 function spawnNote(){
   const lane = lanes[Math.floor(Math.random()*4)];
   const note = document.createElement("div");
   note.className="note";
-  note.style.top="-30px";
+  note.style.top="-40px";
   lane.appendChild(note);
 
-  let y=-30;
+  let y=-40;
   function fall(){
     y+=5;
     note.style.top=y+"px";
-    if(y<innerHeight) requestAnimationFrame(fall);
-    else note.remove();
+
+    // MISS
+    if(y > innerHeight){
+      note.remove();
+      return;
+    }
+    requestAnimationFrame(fall);
   }
   fall();
 }
+
+// CONTROLES WASD
+document.addEventListener("keydown", e=>{
+  const key = e.key.toLowerCase();
+
+  lanes.forEach(lane=>{
+    if(lane.dataset.key === key){
+      const hitY = lane.querySelector(".hit").getBoundingClientRect().top;
+      const notes = [...lane.querySelectorAll(".note")];
+
+      notes.forEach(note=>{
+        const noteY = note.getBoundingClientRect().top;
+        const diff = Math.abs(noteY - hitY);
+
+        if(diff < 40){
+          note.remove();
+          score += 100;
+          scoreEl.textContent = score;
+        }
+      });
+    }
+  });
+});
 </script>
 
 </body>
