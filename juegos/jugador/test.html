@@ -2,33 +2,19 @@
 <html lang="es">
 <head>
 
-<!-- SEO -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yalmil.com</title>
-
-<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1">
-<link rel="canonical" href="https://yalmil.pages.dev">
+<title>Test FNF</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-*{margin:0;box-sizing:border-box}
 body{
-  font-family:Poppins,sans-serif;
-  background:linear-gradient(135deg,#0a0a0a,#1a001f);
-  color:#e5ccff;
-}
-
-#menu{padding:20px}
-.level{
-  border:2px solid #c084fc;
-  padding:10px;
-  margin:10px 0;
-  cursor:pointer;
+  margin:0;
+  background:#0a0a0a;
+  color:#c084fc;
+  font-family:sans-serif;
 }
 
 #game{
-  display:none;
   position:fixed;
   inset:0;
 }
@@ -53,23 +39,9 @@ body{
 
 <body>
 
-<div id="menu">
-  <h2>Niveles</h2>
+<button id="start">INICIAR</button>
 
-  <div class="level" data-music="https://open.spotify.com/track/72YttnPRxyHe8zCG50jYhj?si=bb34e1407de44eb2" data-diff="1">
-    Tutorial – Fácil
-  </div>
-
-  <div class="level" data-music="https://files.catbox.moe/j8z3o9.mp3" data-diff="2">
-    Normal
-  </div>
-
-  <div class="level" data-music="https://files.catbox.moe/9v6r0y.mp3" data-diff="3">
-    Difícil
-  </div>
-</div>
-
-<div id="game">
+<div id="game" style="display:none">
   <div class="lane" style="left:0%"></div>
   <div class="lane" style="left:25%"></div>
   <div class="lane" style="left:50%"></div>
@@ -77,70 +49,32 @@ body{
 </div>
 
 <script>
-const menu = document.getElementById("menu");
+const btn = document.getElementById("start");
 const game = document.getElementById("game");
 const lanes = document.querySelectorAll(".lane");
 
-let audioCtx, analyser, data;
-let lastBeat = 0;
+let beatInterval;
 
-document.querySelectorAll(".level").forEach(lvl=>{
-  lvl.onclick = ()=>start(lvl.dataset.music, +lvl.dataset.diff);
-});
-
-async function start(src, diff){
-  menu.style.display="none";
+btn.onclick = ()=>{
+  btn.remove();
   game.style.display="block";
 
-  audioCtx = new AudioContext();
-  await audioCtx.resume();
+  // ritmo artificial (120 BPM)
+  beatInterval = setInterval(spawnNote, 500);
+};
 
-  const audio = new Audio(src);
-  audio.crossOrigin = "anonymous";
-
-  const source = audioCtx.createMediaElementSource(audio);
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 512;
-
-  data = new Uint8Array(analyser.frequencyBinCount);
-
-  source.connect(analyser);
-  analyser.connect(audioCtx.destination);
-
-  audio.onplay = ()=>requestAnimationFrame(()=>detect(diff));
-  audio.play();
-}
-
-function detect(diff){
-  analyser.getByteFrequencyData(data);
-
-  let bass = 0;
-  for(let i=0;i<15;i++) bass += data[i];
-
-  const now = performance.now();
-  const threshold = 200 + diff * 80;
-  const cooldown = 600 - diff * 150;
-
-  if(bass > threshold && now - lastBeat > cooldown){
-    spawn();
-    lastBeat = now;
-  }
-
-  requestAnimationFrame(()=>detect(diff));
-}
-
-function spawn(){
+function spawnNote(){
   const lane = lanes[Math.floor(Math.random()*4)];
   const note = document.createElement("div");
-  note.className = "note";
-  note.style.top = "-30px";
+  note.className="note";
+  note.style.top="-30px";
   lane.appendChild(note);
 
-  let y = -30;
+  let y=-30;
   function fall(){
-    y += 5;
-    note.style.top = y+"px";
-    if(y < innerHeight) requestAnimationFrame(fall);
+    y+=5;
+    note.style.top=y+"px";
+    if(y<innerHeight) requestAnimationFrame(fall);
     else note.remove();
   }
   fall();
