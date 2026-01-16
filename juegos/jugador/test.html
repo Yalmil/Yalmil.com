@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Juego estilo FNF con generación automática de notas.">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Juego estilo FNF con generación automática de notas.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="twitter:description" content="Juego estilo FNF con generación automática de notas.">
+<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:'Poppins',sans-serif;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0a0a0a,#1a001f);
+  color:#e5ccff;
+  overflow:hidden;
+}
+
+#menu{
+  padding:20px;
+}
+
+.level{
+  border:2px solid #c084fc;
+  padding:10px;
+  margin-bottom:10px;
+  cursor:pointer;
+  background:rgba(40,0,60,.25);
+}
+
+.level:hover{
+  background:rgba(80,0,120,.35);
+}
+
+#game{
+  display:none;
+  position:relative;
+  width:100vw;
+  height:100vh;
+}
+
+.lane{
+  position:absolute;
+  bottom:0;
+  width:25%;
+  height:100%;
+  border-left:1px solid #c084fc;
+  border-right:1px solid #c084fc;
+}
+
+.note{
+  position:absolute;
+  top:-40px;
+  width:60%;
+  height:30px;
+  background:#c084fc;
+  left:20%;
+  border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="menu">
+  <h2>Niveles disponibles</h2>
+
+  <!-- NIVELES -->
+  <div class="level" data-music="https://files.catbox.moe/0x6x3k.mp3" data-difficulty="1">
+    Nombre: Tutorial<br>
+    Dificultad: Fácil
+  </div>
+
+  <div class="level" data-music="https://files.catbox.moe/j8z3o9.mp3" data-difficulty="2">
+    Nombre: Battle Beat<br>
+    Dificultad: Normal
+  </div>
+
+  <div class="level" data-music="https://files.catbox.moe/9v6r0y.mp3" data-difficulty="3">
+    Nombre: Chaos Mode<br>
+    Dificultad: Difícil
+  </div>
+</div>
+
+<div id="game">
+  <div class="lane" style="left:0%"></div>
+  <div class="lane" style="left:25%"></div>
+  <div class="lane" style="left:50%"></div>
+  <div class="lane" style="left:75%"></div>
+</div>
+
+<script>
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+
+let audioCtx, analyser, dataArray;
+let lastBeat = 0;
+
+document.querySelectorAll(".level").forEach(level=>{
+  level.onclick = ()=>{
+    startGame(level.dataset.music, Number(level.dataset.difficulty));
+  };
+});
+
+function startGame(musicLink, difficulty){
+  menu.style.display="none";
+  game.style.display="block";
+
+  audioCtx = new AudioContext();
+  const audio = new Audio(musicLink);
+  audio.crossOrigin="anonymous";
+
+  const source = audioCtx.createMediaElementSource(audio);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  audio.play();
+  requestAnimationFrame(()=>analyzeBeat(difficulty));
+}
+
+function analyzeBeat(difficulty){
+  analyser.getByteFrequencyData(dataArray);
+
+  let energy = 0;
+  for(let i=0;i<dataArray.length;i++){
+    energy += dataArray[i];
+  }
+
+  const now = performance.now();
+  const threshold = 12000 - difficulty*2000;
+
+  if(energy > threshold && now - lastBeat > 250){
+    spawnNote();
+    lastBeat = now;
+  }
+
+  requestAnimationFrame(()=>analyzeBeat(difficulty));
+}
+
+function spawnNote(){
+  const lane = Math.floor(Math.random()*4);
+  const note = document.createElement("div");
+  note.className="note";
+  note.style.left="20%";
+  note.style.top="-40px";
+
+  const laneDiv = document.querySelectorAll(".lane")[lane];
+  laneDiv.appendChild(note);
+
+  let y = -40;
+  const speed = 4;
+
+  function fall(){
+    y += speed;
+    note.style.top = y+"px";
+    if(y < window.innerHeight){
+      requestAnimationFrame(fall);
+    }else{
+      note.remove();
+    }
+  }
+  fall();
+}
+</script>
+
+</body>
+</html>
