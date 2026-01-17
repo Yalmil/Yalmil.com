@@ -1,60 +1,423 @@
-window.uploadImages = async () => {
-      if (!currentUser || selectedFiles.length === 0) return;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería de Imágenes - Yalmil.com</title>
+  
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Galería de imágenes personal con Firebase. Sube y comparte tus fotos de forma segura." />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
 
-      const progressDiv = document.getElementById('uploadProgress');
-      const progressBar = document.getElementById('progressBar');
-      const progressText = document.getElementById('progressText');
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: 0.4s;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #0a0a0a, #1a001f);
+        color: #e5ccff;
+      }
       
-      progressDiv.style.display = 'block';
-      uploadBtn.disabled = true;
+      header, footer {
+        background: #15001f;
+        color: #c084fc;
+      }
+      
+      header {
+        border-bottom: 2px solid #c084fc;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      
+      header h1 {
+        color: #c084fc;
+      }
+      
+      main h2 {
+        color: #c084fc;
+      }
+      
+      .upload-section {
+        background: rgba(40, 0, 60, 0.25);
+        border: 2px solid #c084fc;
+        color: #e5ccff;
+      }
+      
+      .image-card {
+        background: rgba(40, 0, 60, 0.4);
+        border: 2px solid #c084fc;
+      }
+      
+      button {
+        background: #c084fc;
+        color: #0a0a0a;
+      }
+      
+      button:hover {
+        background: #a855f7;
+      }
+      
+      input[type="file"] {
+        background: rgba(40, 0, 60, 0.3);
+        border: 2px solid #c084fc;
+        color: #e5ccff;
+      }
+    }
+    
+    @media (prefers-color-scheme: light) {
+      body {
+        background: linear-gradient(135deg, #330a00, #662000);
+        color: #ffd8a6;
+      }
+      
+      header, footer {
+        background: #4d1a00;
+        color: #ff8c00;
+      }
+      
+      header {
+        border-bottom: 2px solid #ff8c00;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      
+      header h1 {
+        color: #ff8c00;
+      }
+      
+      main h2 {
+        color: #ff8c00;
+      }
+      
+      .upload-section {
+        background: rgba(60, 20, 0, 0.2);
+        border: 2px solid #ff8c00;
+        color: #ffd8a6;
+      }
+      
+      .image-card {
+        background: rgba(60, 20, 0, 0.3);
+        border: 2px solid #ff8c00;
+      }
+      
+      button {
+        background: #ff8c00;
+        color: #330a00;
+      }
+      
+      button:hover {
+        background: #ff9f1a;
+      }
+      
+      input[type="file"] {
+        background: rgba(60, 20, 0, 0.2);
+        border: 2px solid #ff8c00;
+        color: #ffd8a6;
+      }
+    }
+    
+    main {
+      flex: 1;
+      padding: 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .user-info {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .upload-section {
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+    
+    input[type="file"] {
+      padding: 0.75rem;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    
+    button {
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .logout-btn {
+      opacity: 0.8;
+    }
+    
+    .logout-btn:hover {
+      opacity: 1;
+    }
+    
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .image-card {
+      border-radius: 12px;
+      padding: 1rem;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .image-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .image-info {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+    
+    .image-url {
+      word-break: break-all;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+    }
+    
+    footer {
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .api-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+    
+    .code-block {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🖼️ Galería de Imágenes</h1>
+  </header>
+
+  <main id="mainContent">
+    <div class="loading">Verificando autenticación...</div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Yalmil.com - Galería Personal</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630",
+      measurementId: "G-M5CBRMJ9BN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadGallery();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    function loadGallery() {
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = `
+        <div class="user-info upload-section">
+          <div>
+            <strong>Usuario:</strong> ${currentUser.email}
+            <br>
+            <small>UID: ${currentUser.uid}</small>
+          </div>
+          <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div class="upload-section">
+          <h2>📤 Subir Nueva Imagen</h2>
+          <input type="file" id="fileInput" accept="image/*">
+          <button onclick="uploadImage()">Subir Imagen</button>
+          <div id="uploadStatus"></div>
+        </div>
+
+        <div class="api-section upload-section">
+          <h2>🔌 Uso de API</h2>
+          <p>Tus imágenes se guardan en: <code>images/${currentUser.uid}/</code></p>
+          <p>URL base de Firebase Storage:</p>
+          <div class="code-block">https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/images%2F${currentUser.uid}%2F{nombre-imagen}?alt=media</div>
+          <p style="margin-top: 1rem;">Ejemplo de uso en tu aplicación:</p>
+          <div class="code-block">
+// Obtener todas las imágenes del usuario
+const storage = getStorage();
+const listRef = ref(storage, 'images/${currentUser.uid}');
+const images = await listAll(listRef);
+          </div>
+        </div>
+
+        <h2>📸 Mis Imágenes</h2>
+        <div id="gallery" class="gallery"></div>
+      `;
+
+      loadImages();
+    }
+
+    async function loadImages() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '<div class="loading">Cargando imágenes...</div>';
 
       try {
-        let completed = 0;
-        const total = selectedFiles.length;
+        const imagesRef = ref(storage, `images/${currentUser.uid}`);
+        const imagesList = await listAll(imagesRef);
 
-        for (const file of selectedFiles) {
-          const timestamp = Date.now();
-          const fileName = `${timestamp}_${file.name}`;
-          const storageRef = ref(storage, `images/${currentUser.uid}/${fileName}`);
-          
-          const uploadTask = uploadBytesResumable(storageRef, file);
-
-          await new Promise((resolve, reject) => {
-            uploadTask.on('state_changed',
-              (snapshot) => {
-                const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                const totalProgress = ((completed + fileProgress) / total) * 100;
-                progressBar.style.width = totalProgress + '%';
-                progressText.textContent = Math.round(totalProgress) + '%';
-              },
-              (error) => {
-                console.error('Error subiendo archivo:', error);
-                alert('Error al subir: ' + error.message);
-                reject(error);
-              },
-              async () => {
-                completed++;
-                console.log(`Archivo ${completed}/${total} subido exitosamente`);
-                resolve();
-              }
-            );
-          });
+        if (imagesList.items.length === 0) {
+          gallery.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay imágenes aún. ¡Sube tu primera imagen!</p>';
+          return;
         }
 
-        selectedFiles = [];
-        preview.innerHTML = '';
-        fileInput.value = '';
-        uploadBtn.style.display = 'none';
-        uploadBtn.disabled = false;
-        progressDiv.style.display = 'none';
-        progressBar.style.width = '0%';
-        
-        alert('¡Imágenes subidas exitosamente!');
-        loadUserImages();
+        gallery.innerHTML = '';
+
+        for (const imageRef of imagesList.items) {
+          const url = await getDownloadURL(imageRef);
+          const imageCard = document.createElement('div');
+          imageCard.className = 'image-card';
+          imageCard.innerHTML = `
+            <img src="${url}" alt="${imageRef.name}">
+            <div class="image-info">
+              <strong>${imageRef.name}</strong>
+            </div>
+            <div class="image-url">
+              <strong>URL:</strong><br>
+              <a href="${url}" target="_blank" style="color: inherit; word-break: break-all;">${url}</a>
+            </div>
+          `;
+          gallery.appendChild(imageCard);
+        }
       } catch (error) {
-        console.error('Error en uploadImages:', error);
-        uploadBtn.disabled = false;
-        progressDiv.style.display = 'none';
-        alert('Error al subir imágenes. Verifica la consola para más detalles.');
+        console.error('Error al cargar imágenes:', error);
+        gallery.innerHTML = '<p style="text-align: center; color: red;">Error al cargar las imágenes</p>';
+      }
+    }
+
+    window.uploadImage = async function() {
+      const fileInput = document.getElementById('fileInput');
+      const uploadStatus = document.getElementById('uploadStatus');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        uploadStatus.innerHTML = '<p style="color: red;">Por favor selecciona una imagen</p>';
+        return;
+      }
+
+      uploadStatus.innerHTML = '<p>Subiendo imagen...</p>';
+
+      try {
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${file.name}`;
+        const imageRef = ref(storage, `images/${currentUser.uid}/${fileName}`);
+        
+        await uploadBytes(imageRef, file);
+        const url = await getDownloadURL(imageRef);
+
+        uploadStatus.innerHTML = '<p style="color: #4ade80;">✅ Imagen subida exitosamente</p>';
+        fileInput.value = '';
+        
+        setTimeout(() => {
+          loadImages();
+          uploadStatus.innerHTML = '';
+        }, 2000);
+      } catch (error) {
+        console.error('Error al subir imagen:', error);
+        uploadStatus.innerHTML = '<p style="color: red;">❌ Error al subir la imagen</p>';
       }
     };
+
+    window.logout = async function() {
+      try {
+        await signOut(auth);
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    };
+  </script>
+</body>
+</html>
