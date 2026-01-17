@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subir Imágenes - Yalmil.com</title>
+  
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <meta property="og:title" content="Yalmil.com" />
+  <meta property="og:description" content="Plataforma de almacenamiento y gestión de imágenes con Firebase Storage" />
+  <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png?ex=68937197&is=68922017&hm=1fa6f462304b2b8cf8a0875053730f988d725d114fbf2648fcb87ee1b67b6a76&" />
+  <meta property="og:url" content="https://yalmil.github.io/Yalmil.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: .4s;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    header {
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 2px solid;
+    }
+    
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .user-info {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+    }
+    
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeIn 0.6s ease;
+    }
+    
+    .container {
+      display: grid;
+      gap: 2rem;
+    }
+    
+    .upload-section, .api-section, .gallery-section {
+      padding: 2rem;
+      border-radius: 12px;
+      border: 2px solid;
+      animation: fadeIn 0.8s ease;
+    }
+    
+    h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .upload-area {
+      border: 3px dashed;
+      border-radius: 8px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 1rem 0;
+    }
+    
+    .upload-area:hover {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+    
+    .upload-area.dragover {
+      opacity: 0.7;
+      transform: scale(1.05);
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white;
+    }
+    
+    .btn-logout {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    
+    .preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .preview-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 1;
+    }
+    
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .preview-item .remove {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .code-block {
+      background: rgba(0,0,0,0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+    
+    .image-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .image-card {
+      border: 2px solid;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .image-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .image-url {
+      font-size: 0.8rem;
+      word-break: break-all;
+      margin: 0.5rem 0;
+      opacity: 0.8;
+    }
+    
+    .copy-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+    }
+    
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #6366f1);
+      transition: width 0.3s;
+    }
+    
+    footer {
+      padding: 1rem;
+      text-align: center;
+      border-top: 2px solid;
+      margin-top: auto;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #0a0a0a, #1a001f);
+        color: #e5ccff;
+      }
+      
+      header, footer {
+        background: #15001f;
+        color: #c084fc;
+        border-color: #c084fc;
+      }
+      
+      header h1, h2 {
+        color: #c084fc;
+      }
+      
+      .upload-section, .api-section, .gallery-section, .image-card {
+        background: rgba(40, 0, 60, 0.25);
+        border-color: #c084fc;
+        color: #e5ccff;
+      }
+      
+      .upload-area {
+        border-color: #c084fc;
+      }
+    }
+    
+    @media (prefers-color-scheme: light) {
+      body {
+        background: linear-gradient(135deg, #330a00, #662000);
+        color: #ffd8a6;
+      }
+      
+      header, footer {
+        background: #4d1a00;
+        color: #ff8c00;
+        border-color: #ff8c00;
+      }
+      
+      header h1, h2 {
+        color: #ff8c00;
+      }
+      
+      .upload-section, .api-section, .gallery-section, .image-card {
+        background: rgba(60, 20, 0, 0.2);
+        border-color: #ff8c00;
+        color: #ffd8a6;
+      }
+      
+      .upload-area {
+        border-color: #ff8c00;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📸 Gestión de Imágenes</h1>
+    <div class="user-info">
+      <span id="userEmail">Cargando...</span>
+      <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="upload-section">
+        <h2>Subir Imágenes</h2>
+        <div class="upload-area" id="uploadArea">
+          <p>📁 Arrastra imágenes aquí o haz clic para seleccionar</p>
+          <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+        <div class="preview" id="preview"></div>
+        <div id="uploadProgress" style="display:none;">
+          <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <p id="progressText">0%</p>
+        </div>
+        <button class="btn btn-primary" onclick="uploadImages()" id="uploadBtn" style="display:none;">Subir Imágenes</button>
+      </div>
+
+      <div class="api-section">
+        <h2>📖 Documentación API</h2>
+        <p>Usa la siguiente URL para acceder a tus imágenes:</p>
+        <div class="code-block">
+          https://firebasestorage.googleapis.com/v0/b/databaseloginweb.firebasestorage.app/o/images%2F{UID}%2F{NOMBRE_IMAGEN}?alt=media
+        </div>
+        <p><strong>Ejemplo de uso en HTML:</strong></p>
+        <div class="code-block">
+          &lt;img src="https://firebasestorage.googleapis.com/v0/b/databaseloginweb.firebasestorage.app/o/images%2F{UID}%2Fmifoto.jpg?alt=media" alt="Mi Foto"&gt;
+        </div>
+        <p><strong>Tu UID:</strong> <span id="apiUID">Cargando...</span></p>
+      </div>
+
+      <div class="gallery-section">
+        <h2>🖼️ Mis Imágenes</h2>
+        <div class="image-list" id="imageList">
+          <div class="loading">Cargando galería...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Yalmil.com - Gestión de Imágenes con Firebase</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZoRcoeC3MFMPYJWgl4dmNjq-U51dKD5o",
+      authDomain: "databaseloginweb.firebaseapp.com",
+      databaseURL: "https://databaseloginweb-default-rtdb.firebaseio.com",
+      projectId: "databaseloginweb",
+      storageBucket: "databaseloginweb.firebasestorage.app",
+      messagingSenderId: "121538864529",
+      appId: "1:121538864529:web:e92aaeaa4ba52618162630",
+      measurementId: "G-M5CBRMJ9BN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+    
+    let currentUser = null;
+    let selectedFiles = [];
+
+    // Verificar autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('apiUID').textContent = user.uid;
+        loadUserImages();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Configurar área de carga
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    uploadArea.onclick = () => fileInput.click();
+
+    uploadArea.ondragover = (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    };
+
+    uploadArea.ondragleave = () => {
+      uploadArea.classList.remove('dragover');
+    };
+
+    uploadArea.ondrop = (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    };
+
+    fileInput.onchange = (e) => {
+      handleFiles(e.target.files);
+    };
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      displayPreview();
+      uploadBtn.style.display = selectedFiles.length > 0 ? 'inline-block' : 'none';
+    }
+
+    function displayPreview() {
+      preview.innerHTML = '';
+      selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'preview-item';
+          div.innerHTML = `
+            <img src="${e.target.result}" alt="Preview">
+            <button class="remove" onclick="removeFile(${index})">×</button>
+          `;
+          preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.removeFile = (index) => {
+      selectedFiles.splice(index, 1);
+      displayPreview();
+      uploadBtn.style.display = selectedFiles.length > 0 ? 'inline-block' : 'none';
+    };
+
+    window.uploadImages = async () => {
+      if (!currentUser || selectedFiles.length === 0) return;
+
+      const progressDiv = document.getElementById('uploadProgress');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      
+      progressDiv.style.display = 'block';
+      uploadBtn.disabled = true;
+
+      let completed = 0;
+      const total = selectedFiles.length;
+
+      for (const file of selectedFiles) {
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${file.name}`;
+        const storageRef = ref(storage, `images/${currentUser.uid}/${fileName}`);
+        
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              const progress = ((completed / total) + (snapshot.bytesTransferred / snapshot.totalBytes) / total) * 100;
+              progressBar.style.width = progress + '%';
+              progressText.textContent = Math.round(progress) + '%';
+            },
+            (error) => {
+              console.error('Error:', error);
+              reject(error);
+            },
+            () => {
+              completed++;
+              resolve();
+            }
+          );
+        });
+      }
+
+      selectedFiles = [];
+      preview.innerHTML = '';
+      fileInput.value = '';
+      uploadBtn.style.display = 'none';
+      uploadBtn.disabled = false;
+      progressDiv.style.display = 'none';
+      progressBar.style.width = '0%';
+      
+      alert('¡Imágenes subidas exitosamente!');
+      loadUserImages();
+    };
+
+    async function loadUserImages() {
+      if (!currentUser) return;
+
+      const imageList = document.getElementById('imageList');
+      imageList.innerHTML = '<div class="loading">Cargando galería...</div>';
+
+      const listRef = ref(storage, `images/${currentUser.uid}`);
+      
+      try {
+        const result = await listAll(listRef);
+        
+        if (result.items.length === 0) {
+          imageList.innerHTML = '<p style="text-align:center;padding:2rem;">No has subido imágenes aún</p>';
+          return;
+        }
+
+        imageList.innerHTML = '';
+        
+        for (const item of result.items) {
+          const url = await getDownloadURL(item);
+          const card = document.createElement('div');
+          card.className = 'image-card';
+          card.innerHTML = `
+            <img src="${url}" alt="${item.name}">
+            <p style="font-size:0.9rem;font-weight:600;">${item.name}</p>
+            <div class="image-url">${url}</div>
+            <button class="btn btn-primary copy-btn" onclick="copyToClipboard('${url}')">Copiar URL</button>
+            <button class="btn btn-logout copy-btn" onclick="deleteImage('${item.fullPath}')">Eliminar</button>
+          `;
+          imageList.appendChild(card);
+        }
+      } catch (error) {
+        console.error('Error cargando imágenes:', error);
+        imageList.innerHTML = '<p style="text-align:center;padding:2rem;">Error al cargar imágenes</p>';
+      }
+    }
+
+    window.copyToClipboard = (text) => {
+      navigator.clipboard.writeText(text);
+      alert('URL copiada al portapapeles');
+    };
+
+    window.deleteImage = async (path) => {
+      if (!confirm('¿Estás seguro de eliminar esta imagen?')) return;
+      
+      const imageRef = ref(storage, path);
+      try {
+        await deleteObject(imageRef);
+        alert('Imagen eliminada');
+        loadUserImages();
+      } catch (error) {
+        console.error('Error eliminando imagen:', error);
+        alert('Error al eliminar la imagen');
+      }
+    };
+
+    window.logout = async () => {
+      try {
+        await signOut(auth);
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    };
+  </script>
+</body>
+</html>
