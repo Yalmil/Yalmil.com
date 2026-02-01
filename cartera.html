@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cartera | Lunas</title>
+  <title>Cartera | Lunas 🌙</title>
 
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <meta property="og:title" content="Yalmil.com" />
   <meta property="og:description" content="Cartera de Lunas del usuario" />
   <meta property="og:image" content="https://cdn.discordapp.com/attachments/1355008732576088204/1402309070014124102/Screenshot_20250804-221210.png" />
@@ -13,138 +15,655 @@
   <meta property="og:type" content="website" />
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    *{ box-sizing:border-box; margin:0 }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-    body{
-      font-family:'Poppins',sans-serif;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      min-height:100vh;
-      padding:20px;
-      animation:fade .6s ease-out;
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #5b21b6;
+      --primary-light: #8b5cf6;
+      --secondary: #c4b5fd;
+      --background: #0f0a1a;
+      --surface: #1e1836;
+      --surface-light: #2d2749;
+      --text: #f5f3ff;
+      --text-secondary: #c4b5fd;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #4c1d95;
+      --shadow: rgba(124, 58, 237, 0.3);
+      --moon-glow: #fbbf24;
     }
 
-    @keyframes fade { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
-
-    @media(prefers-color-scheme:dark){
-      body{background:linear-gradient(135deg,#0a0a0a,#1a001f);color:#e5ccff}
-      .card, .shop-item{background:rgba(40,0,60,.25);border:2px solid #c084fc}
-      h2{color:#c084fc}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    @media(prefers-color-scheme:light){
-      body{background:linear-gradient(135deg,#330a00,#662000);color:#ffd8a6}
-      .card, .shop-item{background:rgba(60,20,0,.2);border:2px solid #ff8c00}
-      h2{color:#ff8c00}
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    .card{
-      padding:2rem;
-      width:90%;
-      max-width:380px;
-      border-radius:20px;
-      text-align:center;
-      backdrop-filter:blur(8px);
-      margin-bottom:20px;
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+      z-index: -1;
     }
 
-    .lunas{
-      font-size:2.6rem;
-      font-weight:700;
-      margin-top:1rem;
-      text-shadow:0 0 10px currentColor;
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
 
-    button{
-      margin-top:1rem;
-      padding:10px 14px;
-      border-radius:10px;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    /* Tarjeta de cartera */
+    .wallet-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 25px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      animation: cardFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .wallet-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
+    }
+
+    .wallet-card h2 {
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .wallet-info {
+      margin: 1.5rem 0;
+    }
+
+    .moon-icon {
+      font-size: 4rem;
+      color: var(--moon-glow);
+      filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.5));
+      margin-bottom: 1rem;
+      animation: moonPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes moonPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .lunas {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--moon-glow);
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
+      margin: 1rem 0;
+    }
+
+    .exchange-rate {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      background: var(--surface-light);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    /* Botones */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px var(--shadow);
+      min-width: 180px;
+      justify-content: center;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px var(--shadow);
+    }
+
+    .action-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .logout-btn {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .logout-btn:hover {
+      background: var(--surface);
+      border-color: var(--danger);
     }
 
     /* Tienda */
-    .shop{
-      width:100%;
-      max-width:450px;
+    .shop-container {
+      width: 100%;
+      max-width: 800px;
+      margin-top: 2rem;
     }
 
-    .shop h2{
-      text-align:center;
-      margin-bottom:10px;
+    .shop-header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
 
-    .shop-item{
-      padding:15px;
-      border-radius:18px;
-      margin-bottom:15px;
-      backdrop-filter:blur(6px);
+    .shop-header h2 {
+      font-size: 2.2rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
     }
 
-    .shop-item-title{
-      font-size:1.2rem;
-      font-weight:600;
-      margin-bottom:5px;
+    .shop-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
     }
 
-    .shop-item button{
-      margin-top:10px;
-      width:100%;
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
     }
 
+    .shop-item {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-item:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 30px var(--shadow);
+    }
+
+    .shop-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .shop-item:hover::before {
+      opacity: 1;
+    }
+
+    .shop-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .item-icon {
+      font-size: 2.5rem;
+      color: var(--warning);
+      margin-bottom: 1rem;
+    }
+
+    .item-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .item-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .item-price {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: var(--surface-light);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .price-amount {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--moon-glow);
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+
+    .price-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .buy-btn {
+      background: linear-gradient(135deg, var(--success), #34d399);
+      color: white;
+      border: none;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .buy-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    }
+
+    .buy-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--surface-light);
+      color: var(--text-secondary);
+    }
+
+    .dollar-equivalent {
+      text-align: center;
+      margin-top: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    /* Modal de confirmación */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 10, 26, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: 25px;
+      padding: 3rem;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      border: 2px solid var(--border);
+      animation: modalIn 0.5s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-icon {
+      font-size: 4rem;
+      color: var(--warning);
+      margin-bottom: 1.5rem;
+      animation: modalIcon 1s ease;
+    }
+
+    @keyframes modalIcon {
+      0% { transform: scale(0) rotate(-180deg); }
+      70% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .modal-title {
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .modal-text {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .confirm-btn {
+      background: linear-gradient(135deg, var(--success), #34d399);
+      flex: 1;
+    }
+
+    .cancel-btn {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 2px solid var(--border);
+      flex: 1;
+    }
+
+    .cancel-btn:hover {
+      background: var(--surface);
+      border-color: var(--danger);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .shop-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .wallet-card {
+        padding: 2rem;
+      }
+      
+      .lunas {
+        font-size: 2.8rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .action-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .shop-item {
+        padding: 1.5rem;
+      }
+      
+      .item-title {
+        font-size: 1.3rem;
+      }
+      
+      .price-amount {
+        font-size: 1.5rem;
+      }
+      
+      .modal-content {
+        padding: 2rem;
+      }
+      
+      .modal-buttons {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="card">
-    <h2>Tu cartera</h2>
-    <p>Lunas actuales</p>
-    <div class="lunas" id="lunas">...</div>
-
-    <button id="logoutBtn">Cerrar sesión</button>
+  <!-- Modal de confirmación -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-content">
+      <div class="modal-icon">🌙</div>
+      <h2 class="modal-title" id="modalTitle">Confirmar Canje</h2>
+      <p class="modal-text" id="modalText"></p>
+      <div class="modal-buttons">
+        <button class="action-btn confirm-btn" id="confirmBuy">
+          <i class="fas fa-check"></i> Confirmar
+        </button>
+        <button class="action-btn cancel-btn" onclick="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="shop">
-    <h2>Tienda / Canjear lunas</h2>
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <i class="fas fa-wallet"></i>
+      Cartera de Lunas
+      <i class="fas fa-moon"></i>
+    </h1>
+    <p class="subtitle">Gestiona tus lunas y canjéalas por increíbles recompensas</p>
+  </div>
 
-      <div class="shop-item" data-price="800">
-      <div class="shop-item-title">100 Robux</div>
-      <p>Precio: 800 lunas</p>
-      <button class="buy-btn">Canjear</button>
-    </div>
-
-      <div class="shop-item" data-price="1200">
-      <div class="shop-item-title">Discord nitro (mes)</div>
-      <p>Precio: 1200 lunas</p>
-      <button class="buy-btn">Canjear</button>
-    </div>
-
+  <!-- Tarjeta de cartera -->
+  <div class="wallet-card">
+    <h2><i class="fas fa-coins"></i> Tu Cartera</h2>
     
-    <div class="shop-item" data-price="3500">
-    <div class="shop-item-title">Juego de 10 dólares (steam)</div>
-    <p>Precio: 3500 lunas</p>
-    <button class="buy-btn">Canjear</button>
+    <div class="wallet-info">
+      <div class="moon-icon">🌙</div>
+      <div class="lunas" id="lunas">0</div>
+      <div class="exchange-rate">
+      </div>
     </div>
 
-        <div class="shop-item" data-price="3500">
-    <div class="shop-item-title">Juego de 10 dólares (playstore/appstore)</div>
-    <p>Precio: 3500 lunas</p>
-    <button class="buy-btn">Canjear</button>
-        </div>
-
-        <div class="shop-item" data-price="1200">
-    <div class="shop-item-title">Google gamepass (Android)</div>
-    <p>Precio: 1200</p>
-    <button class="buy-btn">Canjear</button>
-        </div>
-
+    <div class="button-group">
+      <button class="action-btn" onclick="window.location.href='https://discord.gg/bt9UDPZKgn'">
+        <i class="fas fa-gamepad"></i> Jugar para Ganar
+      </button>
+      <button class="action-btn logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
   </div>
 
+  <!-- Tienda -->
+  <div class="shop-container">
+    <div class="shop-header">
+      <h2><i class="fas fa-store"></i> Tienda de Recompensas</h2>
+      <p class="shop-subtitle">Canjea tus lunas por estas increíbles recompensas. ¡Trabaja duro y gana más!</p>
+    </div>
+
+    <div class="shop-grid">
+      <!-- 100 Robux = $1 USD = 25 lunas, pero 100 Robux cuesta $1.25 USD = 31.25 lunas (redondeamos a 30) -->
+      <div class="shop-item">
+        <div class="item-icon">🟢</div>
+        <div class="item-title">100 Robux</div>
+        <p class="item-description">Moneda virtual de Roblox para personalizar tu avatar y comprar accesorios.</p>
+        <div class="item-price">
+          <span class="price-amount">1200</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Aprox. $1.20 USD)</div>
+        <button class="buy-btn" data-price="30" data-name="100 Robux">
+          <i class="fas fa-shopping-cart"></i> Canjear por 1200 lunas
+        </button>
+      </div>
+
+      <!-- Discord Nitro Basic = $2.99 USD = 74.75 lunas (redondeamos a 75) -->
+      <div class="shop-item">
+        <div class="item-icon">💎</div>
+        <div class="item-title">Discord Nitro Basic (1 mes)</div>
+        <p class="item-description">Mejora tu experiencia en Discord con emojis personalizados y más.</p>
+        <div class="item-price">
+          <span class="price-amount">2000</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Aprox. $3 USD)</div>
+        <button class="buy-btn" data-price="75" data-name="Discord Nitro Basic (1 mes)">
+          <i class="fas fa-shopping-cart"></i> Canjear por 2000 lunas
+        </button>
+      </div>
+
+      <!-- Juego de Steam $10 = 250 lunas -->
+      <div class="shop-item">
+        <div class="item-icon">🎮</div>
+        <div class="item-title">Juego de Steam ($10 USD)</div>
+        <p class="item-description">Elige cualquier juego de Steam con valor de hasta $10 USD.</p>
+        <div class="item-price">
+          <span class="price-amount">2500</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Exactamente $10 USD)</div>
+        <button class="buy-btn" data-price="250" data-name="Juego de Steam ($10 USD)">
+          <i class="fas fa-shopping-cart"></i> Canjear por 2500 lunas
+        </button>
+      </div>
+
+      <!-- Juego de PlayStore/AppStore $10 = 250 lunas (outdate) -->
+      <div class="shop-item">
+        <div class="item-icon">📱</div>
+        <div class="item-title">Juego Móvil ($10 USD)</div>
+        <p class="item-description">Juego o app de tu elección en Play Store o App Store (hasta $10).</p>
+        <div class="item-price">
+          <span class="price-amount">2500</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Exactamente $10 USD)</div>
+        <button class="buy-btn" data-price="250" data-name="Juego Móvil ($10 USD)">
+          <i class="fas fa-shopping-cart"></i> Canjear por 2500 lunas
+        </button>
+      </div>
+
+      <!-- Google Play Pass = $4.99 USD = 124.75 lunas (redondeamos a 125) -->
+      <div class="shop-item">
+        <div class="item-icon">🎯</div>
+        <div class="item-title">Google Play Pass (1 mes)</div>
+        <p class="item-description">Acceso ilimitado a cientos de juegos y apps premium en Android.</p>
+        <div class="item-price">
+          <span class="price-amount">1250</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Aprox. $5 USD)</div>
+        <button class="buy-btn" data-price="125" data-name="Google Play Pass (1 mes)">
+          <i class="fas fa-shopping-cart"></i> Canjear por 1250 lunas
+        </button>
+      </div>
+
+      <!-- Nitro Mensual = $9.99 USD = 249.75 lunas (redondeamos a 250) -->
+      <div class="shop-item">
+        <div class="item-icon">✨</div>
+        <div class="item-title">Discord Nitro Completo (1 mes)</div>
+        <p class="item-description">La experiencia completa de Discord con todos los beneficios premium.</p>
+        <div class="item-price">
+          <span class="price-amount">2750</span>
+          <span class="price-label">lunas</span>
+        </div>
+        <div class="dollar-equivalent">(Aprox. $10 USD)</div>
+        <button class="buy-btn" data-price="250" data-name="Discord Nitro Completo (1 mes)">
+          <i class="fas fa-shopping-cart"></i> Canjear por 2750 lunas
+        </button>
+      </div>
+    </div>
+  </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -167,10 +686,70 @@
 
   const lunasBox = document.getElementById("lunas");
   const logoutBtn = document.getElementById("logoutBtn");
+  const buyButtons = document.querySelectorAll(".buy-btn");
+  const confirmModal = document.getElementById("confirmModal");
+  const confirmBuyBtn = document.getElementById("confirmBuy");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalText = document.getElementById("modalText");
 
   let userUID = null;
   let lunasActuales = 0;
+  let currentPurchase = null;
 
+  let ultimasLunas = null;
+let intervaloChequeo = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+
+  userUID = user.uid;
+
+  const lunasRef = ref(db, `users/${userUID}/lunas`);
+  const lastLunasRef = ref(db, `users/${userUID}/lastLunas`);
+
+  // Inicializar valores si no existen
+  const [lunasSnap, lastSnap] = await Promise.all([
+    get(lunasRef),
+    get(lastLunasRef)
+  ]);
+
+  if (!lunasSnap.exists()) await set(lunasRef, 0);
+  if (!lastSnap.exists()) await set(lastLunasRef, lunasSnap.val() || 0);
+
+  // Escuchar lunas en tiempo real
+  onValue(lunasRef, (snap) => {
+    lunasActuales = snap.val() || 0;
+    lunasBox.textContent = lunasActuales;
+    updateBuyButtons();
+  });
+
+  if (intervaloChequeo) clearInterval(intervaloChequeo);
+
+  intervaloChequeo = setInterval(async () => {
+    const [lunasNowSnap, lastNowSnap] = await Promise.all([
+      get(lunasRef),
+      get(lastLunasRef)
+    ]);
+
+    const lunasNow = lunasNowSnap.val() || 0;
+    const lastLunas = lastNowSnap.val() || 0;
+
+    const diferencia = Math.abs(lunasNow - lastLunas);
+
+    if (diferencia > 350) {
+      // Reset por cambio sospechoso
+      await set(lunasRef, 0);
+      await set(lastLunasRef, 0);
+      console.warn("Reset de lunas por cambio mayor a 350");
+    } else {
+      // Guardar como último valor válido
+      await set(lastLunasRef, lunasNow);
+    }
+  }, 1000);
+});
+
+
+  // Estado de autenticación
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "login.html";
@@ -180,44 +759,147 @@
     userUID = user.uid;
     const lunaRef = ref(db, "users/" + userUID + "/lunas");
 
-    // 1. Revisa si existe el nodo (NO lo sobreescribe si ya existe)
+    // Verificar si existe el nodo de lunas
     const snap = await get(lunaRef);
 
     if (!snap.exists()) {
-      // Primera vez -> crear nodo
+      // Primera vez: crear nodo con 0 lunas
       await set(lunaRef, 0);
       lunasActuales = 0;
       lunasBox.textContent = 0;
     }
 
-    // 2. Sincronizar siempre
+    // Sincronizar en tiempo real
     onValue(lunaRef, (s) => {
-      lunasActuales = s.val();
+      lunasActuales = s.val() || 0;
       lunasBox.textContent = lunasActuales;
+      updateBuyButtons();
     });
   });
 
+  // Cerrar sesión
   logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     window.location.href = "login.html";
   });
 
-  // Comprar
-  const botones = document.querySelectorAll(".buy-btn");
-
-  botones.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const item = btn.parentElement;
-      const precio = parseInt(item.dataset.price);
-
-      if (lunasActuales >= precio) {
-        const nuevaCantidad = lunasActuales - precio;
-        set(ref(db, "users/" + userUID + "/lunas"), nuevaCantidad);
-        window.location.href = "https://discord.com/users/1282532222305308682";
+  // Actualizar estado de botones de compra
+  function updateBuyButtons() {
+    buyButtons.forEach(btn => {
+      const price = parseInt(btn.dataset.price);
+      if (lunasActuales >= price) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-shopping-cart"></i> Canjear por ${price} lunas`;
       } else {
-        alert("No tienes suficientes lunas!");
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-lock"></i> Necesitas ${price} lunas`;
       }
     });
+  }
+
+  // Configurar botones de compra
+  buyButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const price = parseInt(btn.dataset.price);
+      const itemName = btn.dataset.name;
+      
+      if (lunasActuales < price) {
+        showModal(
+          "Lunas Insuficientes",
+          `No tienes suficientes lunas para canjear "${itemName}".<br>Necesitas ${price} lunas y tienes ${lunasActuales}.`
+        );
+        return;
+      }
+
+      currentPurchase = { price, itemName };
+      showModal(
+        "Confirmar Canje",
+        `¿Estás seguro de canjear <strong>${price} lunas</strong> por:<br><strong>"${itemName}"</strong>?<br><br>Tus lunas después de la compra: ${lunasActuales} → ${lunasActuales - price}`
+      );
+    });
+  });
+
+  // Mostrar modal
+  function showModal(title, text) {
+    modalTitle.textContent = title;
+    modalText.innerHTML = text;
+    confirmModal.classList.add("show");
+  }
+
+  // Cerrar modal
+  window.closeModal = function() {
+    confirmModal.classList.remove("show");
+    currentPurchase = null;
+  };
+
+  // Confirmar compra
+  confirmBuyBtn.addEventListener("click", async () => {
+    if (!currentPurchase || !userUID) {
+      closeModal();
+      return;
+    }
+
+    const { price, itemName } = currentPurchase;
+    
+    if (lunasActuales >= price) {
+      const nuevaCantidad = lunasActuales - price;
+      
+      try {
+        await set(ref(db, "users/" + userUID + "/lunas"), nuevaCantidad);
+        
+        // Redirigir a Discord para contactar
+        window.open("https://discord.com/users/1282532222305308682", "_blank");
+        
+        // Mostrar mensaje de éxito
+        showModal(
+          "¡Compra Exitosa!",
+          `Has canjeado <strong>${price} lunas</strong> por:<br><strong>"${itemName}"</strong><br><br>Por favor, contacta a través de Discord para recibir tu recompensa.`
+        );
+        
+        // Registrar la compra en historial
+        const purchaseRef = ref(db, `users/${userUID}/purchases/${Date.now()}`);
+        await set(purchaseRef, {
+          item: itemName,
+          price: price,
+          date: new Date().toISOString(),
+          lunasBefore: lunasActuales,
+          lunasAfter: nuevaCantidad
+        });
+        
+      } catch (error) {
+        console.error("Error al procesar la compra:", error);
+        showModal(
+          "Error",
+          "Hubo un problema al procesar tu compra. Por favor, intenta nuevamente."
+        );
+      }
+    } else {
+      showModal(
+        "Lunas Insuficientes",
+        `Lo sentimos, ya no tienes suficientes lunas para esta compra.`
+      );
+    }
+    
+    currentPurchase = null;
+  });
+
+  // Cerrar modal con Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+
+  // Cerrar modal al hacer clic fuera
+  confirmModal.addEventListener('click', (e) => {
+    if (e.target === confirmModal) {
+      closeModal();
+    }
+  });
+
+  // Inicializar
+  document.addEventListener('DOMContentLoaded', () => {
+    updateBuyButtons();
   });
 </script>
 
