@@ -14,7 +14,7 @@
 <meta name="title" content="Yalmil.com - Juega, crea, imagina.">
 <meta name="description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
 
-<!-- Open Graph (Facebook / Discord) -->
+<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
 <meta property="og:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
@@ -28,82 +28,52 @@
 <meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+body{
+  margin:0;
+  background:#111;
+  font-family:Arial, sans-serif;
+  color:white;
 }
 
-.card {
-  background: rgba(255,255,255,0.08);
-  padding: 30px;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  text-align: center;
-  width: 320px;
-}
-
-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 15px;
-  background: #5865F2;
-  color: white;
-  transition: 0.3s;
-}
-
-button:hover {
-  background: #4752C4;
-}
-
-.result {
-  margin-top: 20px;
-  font-size: 14px;
+/* Overlay de test */
+#geo-debug{
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  background:rgba(0,0,0,0.5);
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:12px;
+  opacity:0.6;
+  pointer-events:none;
+  backdrop-filter:blur(4px);
 }
 </style>
 
 </head>
 <body>
 
-<div class="card">
-  <h2>Tu ubicación actual</h2>
-  <button onclick="getLocation()">Obtener ubicación</button>
-  <div class="result" id="output">Presiona el botón</div>
-</div>
+<!-- Aquí iría tu juego -->
+
+<div id="geo-debug">Ubicación: esperando permiso...</div>
 
 <script>
-function getLocation() {
-  const output = document.getElementById("output");
+const geoBox = document.getElementById("geo-debug");
 
-  if (!navigator.geolocation) {
-    output.innerHTML = "Tu navegador no soporta geolocalización.";
-    return;
-  }
-
-  output.innerHTML = "Obteniendo ubicación...";
-
+if ("geolocation" in navigator) {
   navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
+    (pos) => {
+      const lat = pos.coords.latitude.toFixed(5);
+      const lon = pos.coords.longitude.toFixed(5);
 
-      output.innerHTML = `
-        Latitud: ${lat} <br>
-        Longitud: ${lon}
-      `;
+      geoBox.innerHTML = `Lat: ${lat} | Lon: ${lon}`;
     },
-    (error) => {
-      output.innerHTML = "Debes permitir el acceso a la ubicación.";
+    (err) => {
+      geoBox.innerHTML = "Ubicación bloqueada";
     }
   );
+} else {
+  geoBox.innerHTML = "No soportado";
 }
 </script>
 
