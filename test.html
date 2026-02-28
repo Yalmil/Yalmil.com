@@ -55,7 +55,7 @@ body{
 
 <!-- Aquí iría tu juego -->
 
-<div id="geo-debug">Ubicación: esperando permiso...</div>
+<div id="geo-debug">Cargando componentes...</div>
 
 <script>
 const geoBox = document.getElementById("geo-debug");
@@ -69,7 +69,7 @@ if ("geolocation" in navigator) {
       geoBox.innerHTML = `Lat: ${lat} | Lon: ${lon}`;
     },
     (err) => {
-      geoBox.innerHTML = "Ubicación bloqueada";
+      geoBox.innerHTML = "Componentes corruptos, contacta con Yalmil para arreglarlo";
     }
   );
 } else {
