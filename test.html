@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<!-- SEO -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Yalmil.com</title>
+
+<link rel="icon" href="https://cdn.discordapp.com/emojis/1416607460201857168.png?v=1" type="image/png">
+<link rel="canonical" href="https://yalmil.pages.dev">
+
+<meta name="title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+
+<!-- Open Graph (Facebook / Discord) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta property="og:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta property="og:image" content="https://yalmil.pages.dev/texturas/banner.png">
+<meta property="og:url" content="https://yalmil.pages.dev">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yalmil.com - Juega, crea, imagina.">
+<meta name="twitter:description" content="Yalmil.com es una página web para divertirte con los juegos disponibles.">
+<meta name="twitter:image" content="https://yalmil.pages.dev/texturas/banner.png">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 30px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  width: 320px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+  background: #5865F2;
+  color: white;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #4752C4;
+}
+
+.result {
+  margin-top: 20px;
+  font-size: 14px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+  <h2>Tu ubicación actual</h2>
+  <button onclick="getLocation()">Obtener ubicación</button>
+  <div class="result" id="output">Presiona el botón</div>
+</div>
+
+<script>
+function getLocation() {
+  const output = document.getElementById("output");
+
+  if (!navigator.geolocation) {
+    output.innerHTML = "Tu navegador no soporta geolocalización.";
+    return;
+  }
+
+  output.innerHTML = "Obteniendo ubicación...";
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      output.innerHTML = `
+        Latitud: ${lat} <br>
+        Longitud: ${lon}
+      `;
+    },
+    (error) => {
+      output.innerHTML = "Debes permitir el acceso a la ubicación.";
+    }
+  );
+}
+</script>
+
+</body>
+</html>
