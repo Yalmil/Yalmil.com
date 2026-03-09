@@ -2,7 +2,7 @@
  Bienvenido a Yalmil.com 1.5!
 </h1>
 <h3>
-  Yalmil.com es una plataforma originalmente diseñada para jugar juegos web que se añadían mensualmente. Actualmente se está desarrollando la versión 1.6 la cuál te permitira crear jeugos y publicarlos.
+  Yalmil.com es una plataforma originalmente diseñada para jugar juegos web que se añadían mensualmente. Actualmente se está desarrollando la versión 1.6 la cuál te permitira crear juegos y publicarlos.
 </h3>
 <br>
 
