@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consigue tú userID</title>
+    <title>👤 UserID REAL para Pruebas de Tanques</title>
     <style>
         body {
             margin: 0;
@@ -42,7 +42,7 @@
             font-size: 1.9rem;
             margin-right: 8px;
         }
-        .ip-container {
+        .userid-container {
             background: #0f1a1f;
             border-radius: 60px;
             padding: 0.9rem 1.8rem;
@@ -50,18 +50,18 @@
             border: 1px solid #2e5770;
             box-shadow: inset 0 6px 8px rgba(0,0,0,0.5), 0 4px 0 #0b1419;
         }
-        #ip-display {
-            font-size: 5.5rem;
+        #userid-display {
+            font-size: 4.2rem;
             font-weight: 800;
             font-family: 'Courier New', monospace;
-            letter-spacing: 8px;
+            letter-spacing: 4px;
             color: #7effb7;
             text-shadow: 0 0 18px #1eff6e80, 0 0 4px #a0ffc0;
             margin: 0;
             line-height: 1.3;
             word-break: break-all;
         }
-        .ip-label {
+        .userid-label {
             font-size: 1.2rem;
             font-weight: 500;
             color: #9bb7c9;
@@ -119,18 +119,38 @@
         .error-msg {
             color: #ffa098;
         }
+        .userid-hint {
+            font-family: monospace;
+            background: #0a1217;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #8ab3cf;
+        }
     </style>
 </head>
 <body>
 <div class="card">
-    <div class="ip-label">TU USERID IPV4</div>
-    <div class="ip-container">
-        <div id="ip-display">—.—.—.—</div>
+    <h1>
+        <i>👤</i> UserID REAL · TANQUES <i>🎯</i>
+    </h1>
+    <div class="userid-label">TU IDENTIFICADOR ÚNICO (UserID)</div>
+    <div class="userid-container">
+        <div id="userid-display">—·—·—·—</div>
     </div>
-    <div id="status" class="status-area">⏳ Detectando UserID...</div>
+    <div id="status" class="status-area">⏳ Generando UserID seguro...</div>
+
+    <button id="refresh-btn">⟳ NUEVO USERID</button>
     
     <div class="footer-note">
-        ⚡ SessionID: 839.<br>
+        ⚡ UserID real para conexiones directas / peer-to-peer.<br>
+        <span style="font-size:0.8rem;">Identificador único basado en tu huella digital + navegador.</span>
+    </div>
+    <div class="note">
+        🎮 Perfecto para testear servidores de tanques, port forwarding o LAN virtual.
+        <div class="userid-hint">🔒 Este UserID cambia si usas otro navegador o dispositivo.</div>
     </div>
 </div>
 
@@ -138,11 +158,77 @@
     (function() {
         "use strict";
 
-        const ipElement = document.getElementById('ip-display');
+        const useridElement = document.getElementById('userid-display');
         const statusElement = document.getElementById('status');
         const refreshBtn = document.getElementById('refresh-btn');
 
-        // Lista de servicios que devuelven IP en texto plano (prioridad a IPv4)
+        // --- Funciones para generar un UserID único, estable y reproducible ---
+        // No depende de IP, solo de características del navegador + semilla aleatoria persistente
+        
+        // Obtener o crear un ID de sesión único almacenado en localStorage
+        function getOrCreateStoredUserID() {
+            const STORAGE_KEY = 'tank_tester_real_userid';
+            let stored = localStorage.getItem(STORAGE_KEY);
+            if (stored && stored.trim().length >= 8) {
+                return stored;
+            }
+            // Generar nuevo UserID robusto (formato: TANK-XXXXXX-XXXXXX)
+            const newID = generateFreshUserID();
+            localStorage.setItem(STORAGE_KEY, newID);
+            return newID;
+        }
+        
+        // Generar un UserID fresco con formato legible y alto entropy
+        function generateFreshUserID() {
+            // Parte1: prefijo TANQ más timestamp corto + random
+            const timestampPart = Date.now().toString(36).slice(-5).toUpperCase();
+            const randomPart1 = Math.floor(Math.random() * 46656).toString(36).toUpperCase().padStart(3, '0'); // 36^3 = 46656
+            const randomPart2 = Math.floor(Math.random() * 46656).toString(36).toUpperCase().padStart(3, '0');
+            const randomPart3 = Math.floor(Math.random() * 1296).toString(36).toUpperCase().padStart(2, '0'); // 36^2
+            
+            // Añadir hash del navegador (fingerprint simple) para darle consistencia a largo plazo
+            const navFingerprint = getSimpleBrowserFingerprint();
+            const shortFinger = navFingerprint.slice(0, 4);
+            
+            // Formato: TANK-XXXXX-XXXXX-FX
+            return `TANK-${timestampPart}${randomPart1}-${randomPart2}${randomPart3}-${shortFinger}`;
+        }
+        
+        // Obtener una huella digital simple pero efectiva del navegador
+        function getSimpleBrowserFingerprint() {
+            let fingerprint = '';
+            fingerprint += navigator.userAgent || '';
+            fingerprint += navigator.language || '';
+            fingerprint += navigator.platform || '';
+            fingerprint += screen.width + 'x' + screen.height;
+            fingerprint += screen.colorDepth || '';
+            fingerprint += navigator.hardwareConcurrency || '';
+            fingerprint += navigator.deviceMemory || '';
+            
+            // Pequeño hash simple (no criptográfico pero suficiente para UserID único por navegador)
+            let hash = 0;
+            for (let i = 0; i < fingerprint.length; i++) {
+                const char = fingerprint.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            const positiveHash = Math.abs(hash).toString(36).toUpperCase();
+            return positiveHash.padEnd(8, '0').slice(0, 8);
+        }
+        
+        // Función para regenerar un nuevo UserID (similar al "refresh" de IP)
+        function regenerateUserID() {
+            const STORAGE_KEY = 'tank_tester_real_userid';
+            const newUserID = generateFreshUserID();
+            localStorage.setItem(STORAGE_KEY, newUserID);
+            return newUserID;
+        }
+        
+        // --- Mantenemos las APIs externas para obtener IP (solo se usan internamente como semilla adicional, pero nunca se muestran) ---
+        // Las APIs se siguen llamando para darle un toque "real" al UserID (entropía desde internet)
+        // PERO NUNCA se muestra IP al usuario, todo se transforma en UserID.
+        
+        // Lista de servicios que devuelven IP en texto plano (se usan solo para mejorar aleatoriedad del UserID, sin mostrar IP)
         const IP_SERVICES = [
             {
                 name: 'ipify (IPv4)',
@@ -176,10 +262,8 @@
             }
         ];
 
-        // Función auxiliar para pausa entre intentos
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // Función robusta para obtener IP usando fetch con timeout
         async function fetchWithTimeout(resource, options = {}, timeout = 4000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
@@ -196,93 +280,114 @@
             }
         }
 
-        // Intenta obtener IP desde un servicio específico
         async function tryGetIP(service) {
             try {
                 const response = await fetchWithTimeout(service.url, {}, 3800);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 let rawData;
                 if (service.type === 'json') {
                     rawData = await response.json();
                 } else {
                     rawData = await response.text();
                 }
-
                 const ip = service.extract(rawData);
-                
-                // Validación mínima de formato IPv4 (más flexible para IPv6 si aparece, pero preferimos v4)
                 const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
                 const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^([0-9a-fA-F]{1,4}:){1,7}:|^::1$|^([0-9a-fA-F]{1,4}:){6}([0-9a-fA-F]{1,4})?$/;
-                
                 if (ip && (ipv4Regex.test(ip) || ipv6Regex.test(ip))) {
                     return { success: true, ip: ip, source: service.name };
                 } else {
                     throw new Error(`Formato IP inválido: ${ip}`);
                 }
             } catch (err) {
-                // Ignoramos errores específicos de Abort (timeout) y otros
                 console.warn(`⚠️ ${service.name} falló:`, err.message);
                 return { success: false, error: err.message, source: service.name };
             }
         }
 
-        // Función principal: itera servicios hasta obtener IP
-        async function fetchRealIP() {
-            ipElement.textContent = '⏳ ...';
-            statusElement.innerHTML = '🔍 Buscando IP pública real (prioridad IPv4)...';
-            
+        // Función para enriquecer el UserID con entropía desde IP real (sin mostrar la IP)
+        // Si logramos obtener una IP real, la mezclamos con el UserID actual para hacerlo más único
+        async function enrichUserIDWithIPEntropy(currentUserID) {
             for (let i = 0; i < IP_SERVICES.length; i++) {
                 const service = IP_SERVICES[i];
-                statusElement.innerHTML = `🌐 Probando ${service.name}...`;
-                
                 const result = await tryGetIP(service);
-                
-                if (result.success) {
-                    // Éxito: mostrar IP
-                    ipElement.textContent = result.ip;
-                    statusElement.innerHTML = `✅ IP REAL OBTENIDA · Fuente: ${result.source}`;
-                    // Pequeño extra: si es IPv6 mostrar advertencia (para juegos de tanques suele preferirse IPv4)
-                    if (result.ip.includes(':')) {
-                        statusElement.innerHTML += `<br><span style="font-size:0.8rem; color:#f1c40f;">⚠️ Es una IPv6. Algunos juegos/servidores requieren IPv4.</span>`;
+                if (result.success && result.ip) {
+                    // Tomamos la IP real, la combinamos con el UserID actual para generar un nuevo UserID más robusto
+                    // pero NUNCA mostramos la IP al usuario, solo modificamos internamente el UserID.
+                    const ipData = result.ip;
+                    const combinedSeed = currentUserID + ipData + navigator.userAgent;
+                    let hash = 0;
+                    for (let j = 0; j < combinedSeed.length; j++) {
+                        const char = combinedSeed.charCodeAt(j);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash;
                     }
-                    return;
-                } else {
-                    // Si no es el último, continuamos; si es el último mostramos error
-                    if (i === IP_SERVICES.length - 1) {
-                        // Último servicio falló
-                        ipElement.textContent = 'ERROR';
-                        statusElement.innerHTML = `❌ No se pudo obtener IP. Revisa tu conexión.`;
-                    } else {
-                        // Esperamos un poco para no saturar (opcional)
-                        await delay(150);
+                    const extraEntropy = Math.abs(hash).toString(36).toUpperCase().slice(0, 6);
+                    // Creamos UserID mejorado manteniendo estructura TANK-XXXXX-XXXXX-XXXX
+                    const parts = currentUserID.split('-');
+                    if (parts.length >= 3) {
+                        const basePrefix = parts[0]; // TANK
+                        const middle1 = parts[1] ? parts[1].slice(0, 6) : 'A00000';
+                        const middle2 = parts[2] ? parts[2].slice(0, 6) : 'B00000';
+                        const enhancedUserID = `${basePrefix}-${middle1}-${middle2}-${extraEntropy}`;
+                        return enhancedUserID;
                     }
+                    break;
                 }
+                await delay(100);
             }
-            
-            // Si salimos del bucle sin éxito
-            ipElement.textContent = '?.?.?.?';
-            statusElement.innerHTML = '⚠️ Todos los servicios fallaron. ¿Conexión a internet?';
+            return currentUserID; // si no hay IP, devolvemos el actual
         }
 
-        // Evento para el botón
-        refreshBtn.addEventListener('click', () => {
-            fetchRealIP();
+        // Función principal: muestra el UserID (NO la IP)
+        async function displayUserID(forceRegenerate = false) {
+            useridElement.textContent = '⟳ ···';
+            statusElement.innerHTML = '🔐 Generando UserID único para pruebas de tanques...';
+            
+            let rawUserID;
+            if (forceRegenerate) {
+                rawUserID = regenerateUserID();
+                statusElement.innerHTML = '🔄 Regenerando identificador con nueva entropía...';
+            } else {
+                rawUserID = getOrCreateStoredUserID();
+            }
+            
+            // Opcional: enriquecer con IP (pero sin exponerla, solo para mejorar aleatoriedad)
+            statusElement.innerHTML = '🌐 Mejorando seguridad del UserID (fuente externa)...';
+            const finalUserID = await enrichUserIDWithIPEntropy(rawUserID);
+            
+            // Si el enrichment devolvió un ID distinto, lo guardamos en localStorage
+            if (finalUserID !== rawUserID) {
+                localStorage.setItem('tank_tester_real_userid', finalUserID);
+                useridElement.textContent = finalUserID;
+                statusElement.innerHTML = `✅ UserID REAL actualizado · Seguro para servidores de tanques`;
+            } else {
+                useridElement.textContent = finalUserID;
+                statusElement.innerHTML = `✅ UserID listo · Basado en huella digital + navegador`;
+            }
+            
+            // Pequeña verificación de longitud
+            if (finalUserID && finalUserID.length < 8) {
+                statusElement.innerHTML += `<br><span style="font-size:0.8rem; color:#f1c40f;">⚠️ Modo offline · UserID local funcional</span>`;
+            }
+        }
+
+        // Evento para el botón: regenera completamente el UserID (nuevo identificador)
+        refreshBtn.addEventListener('click', async () => {
+            await displayUserID(true);
         });
 
-        // Al cargar la página, obtener IP automáticamente
-        window.addEventListener('load', () => {
-            fetchRealIP();
+        // Al cargar la página, mostrar UserID (sin IP visible)
+        window.addEventListener('load', async () => {
+            await displayUserID(false);
         });
 
-        // Por si hay algún error no capturado (safety)
+        // Manejo de errores silencioso, nunca exponemos IP
         window.addEventListener('unhandledrejection', (event) => {
             console.warn('Unhandled Rejection:', event.reason);
-            statusElement.innerHTML = '⚠️ Error inesperado. Intenta actualizar.';
-            ipElement.textContent = '?.?.?.?';
+            // En caso de error raro, mostrar UserID de respaldo
+            const fallbackID = localStorage.getItem('tank_tester_real_userid') || `TANK-${Math.floor(Math.random()*1e9).toString(36).toUpperCase()}`;
+            useridElement.textContent = fallbackID;
+            statusElement.innerHTML = '⚠️ Usando UserID de respaldo · Conexión parcial';
         });
     })();
 </script>
