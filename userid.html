@@ -6,7 +6,8 @@
 
     <style>
         body {
-            color: black
+            background-color: black;
+            font-family: Arial, sans-serif;
         }
         h1 {
             color: white
@@ -18,10 +19,10 @@
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
-                document.body.innerText = 'Tu IP: ' + data.ip;
+                document.body.innerHTML = '<h1>Tu UserID: ' + data.ip + '</h1>';
             })
             .catch(() => {
-                document.body.innerText = 'Tu IP: No se pudo obtener';
+                document.body.innerHTML = '<h1>Tu UserID: No se pudo obtener</h1>';
             });
     </script>
 </body>
