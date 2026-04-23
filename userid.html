@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu IP REAL (Local) - Test Tanques</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1a2a1f 0%, #0d1f0b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace;
+            color: #c3e6b0;
+        }
+        .card {
+            background: #1e3a1a;
+            border: 4px solid #5a7a4a;
+            border-radius: 24px;
+            padding: 30px 40px;
+            box-shadow: 0 20px 0 #0a1307, 0 0 30px #6f9e5f55;
+            text-align: center;
+            max-width: 500px;
+            backdrop-filter: blur(2px);
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #e2ffc7;
+            text-shadow: 4px 4px 0 #1b3b13;
+            border-bottom: 2px dashed #7da064;
+            padding-bottom: 15px;
+        }
+        .ip-box {
+            background: #0c180a;
+            border-radius: 50px;
+            padding: 20px 30px;
+            margin: 30px 0 20px;
+            border: 2px solid #8bb87b;
+            box-shadow: inset 0 0 15px #00000066, 0 5px 0 #2c4a21;
+        }
+        #ipDisplay {
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: #f0ffe0;
+            word-break: break-all;
+            text-shadow: 0 0 15px #a5d68e;
+            font-family: 'Courier New', monospace;
+        }
+        .badge {
+            background: #2a5520;
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            border: 1px solid #b1da9c;
+            color: #d2f0c0;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #5f874c;
+            border: none;
+            border-bottom: 6px solid #2c4a21;
+            color: #102007;
+            font-weight: bold;
+            font-size: 1.4rem;
+            padding: 14px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: 0.08s linear;
+            box-shadow: 0 4px 10px #00000055;
+            margin-top: 15px;
+            width: 100%;
+        }
+        button:hover {
+            background: #7aa668;
+            border-bottom-width: 4px;
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px #00000077;
+        }
+        button:active {
+            transform: translateY(6px);
+            border-bottom-width: 2px;
+            background: #4b6d3e;
+        }
+        .small-note {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #95b186;
+            background: #14220e80;
+            padding: 10px;
+            border-radius: 30px;
+        }
+        .tank-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(2px 6px 0 #1f3319);
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="tank-icon">🪖⛽🎯</div>
+    <h1>IP REAL</h1>
+    <div class="badge">🔥 RED LOCAL / LAN 🔥</div>
+    <div class="ip-box">
+        <span id="ipDisplay">[ Detectando... ]</span>
+    </div>
+    <button id="refreshBtn">⟳ ACTUALIZAR IP</button>
+    <div class="small-note">
+        ⚡ Esta es tu IP <strong>privada / real</strong> (no pública).<br>
+        La obtienes mediante WebRTC – útil para LAN, servidores de tanques o pruebas locales.
+    </div>
+    <div style="margin-top: 10px; opacity:0.8; font-size:0.8rem;">
+        🎮 Modo Prueba Blindada
+    </div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const ipElement = document.getElementById('ipDisplay');
+        const refreshButton = document.getElementById('refreshBtn');
+
+        // Función principal para obtener la IP local mediante RTCPeerConnection
+        function getLocalIP() {
+            return new Promise((resolve, reject) => {
+                // Configuración mínima para forzar la recolección de candidatos ICE
+                const pc = new RTCPeerConnection({
+                    iceServers: []  // sin STUN/TURN, así obtenemos IP local pura
+                });
+
+                // Timeout por si tarda demasiado (raro en LAN)
+                const timeoutId = setTimeout(() => {
+                    pc.close();
+                    reject(new Error('Tiempo de espera agotado. ¿Estás en una red sin conexión local?'));
+                }, 4000);
+
+                // Evento que se dispara cuando se encuentra un candidato ICE
+                pc.onicecandidate = (iceEvent) => {
+                    if (iceEvent.candidate) {
+                        const candidate = iceEvent.candidate.candidate;
+                        // Buscar direcciones IPv4 / IPv6 en el SDP del candidato
+                        const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9:]+:+[a-f0-9:]+)/i;
+                        const match = candidate.match(ipRegex);
+                        
+                        if (match && match[1]) {
+                            const ip = match[1];
+                            // Filtramos direcciones que NO son loopback (aunque 127.x también podría ser "real", 
+                            // preferimos una IP de red local tipo 192.168, 10., 172.16-31, o fd..)
+                            // Excluimos mDNS (.local) que a veces aparece como IP falsa.
+                            if (!candidate.includes('.local') && !candidate.includes('127.0.0.1') && !ip.startsWith('::1')) {
+                                // Si encontramos una IPv4 privada o IPv6 local válida
+                                clearTimeout(timeoutId);
+                                pc.close();
+                                resolve(ip);
+                            }
+                        }
+                    } else {
+                        // Fin de candidatos (ICE gathering completado sin candidato útil)
+                        // A veces el último evento tiene candidate === null
+                        if (!pc.connectionState || pc.connectionState === 'closed') return;
+                        // Si no hemos resuelto todavía, intentamos buscar en la descripción local
+                        // (por si acaso no se disparó ningún candidato válido)
+                        pc.close();
+                        clearTimeout(timeoutId);
+                        // Intentar extraer de la SDP local (fallback)
+                        pc.createDataChannel('');  // necesario para generar SDP
+                        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                        // pero en realidad esto ya no se ejecuta bien si ya cerramos... mejor recargar.
+                        reject(new Error('No se encontró IP local. Asegúrate de no tener WebRTC bloqueado.'));
+                    }
+                };
+
+                // Crear un canal de datos para iniciar la negociación ICE
+                pc.createDataChannel('ipGetter');
+                
+                pc.createOffer()
+                    .then(offer => pc.setLocalDescription(offer))
+                    .catch(err => {
+                        clearTimeout(timeoutId);
+                        pc.close();
+                        reject(err);
+                    });
+            });
+        }
+
+        // Función para actualizar el display con animación
+        async function refreshIPDisplay() {
+            ipElement.style.opacity = '0.5';
+            ipElement.textContent = '🔍 ESCANEANDO...';
+            
+            try {
+                const ip = await getLocalIP();
+                // Formatear visualmente la IP
+                ipElement.style.opacity = '1';
+                ipElement.textContent = ip;
+                
+                // Pequeño detalle: si es IPv6 larga, reducimos tamaño de fuente dinámicamente
+                if (ip.includes(':')) {
+                    ipElement.style.fontSize = '2.5rem';
+                } else {
+                    ipElement.style.fontSize = '3.5rem';
+                }
+                
+                // Agregar un mini efecto de "parpadeo" de radar
+                const box = document.querySelector('.ip-box');
+                box.style.transition = 'box-shadow 0.2s';
+                box.style.boxShadow = 'inset 0 0 15px #00000066, 0 5px 0 #2c4a21, 0 0 25px #b1ff8e';
+                setTimeout(() => box.style.boxShadow = 'inset 0 0 15px #00000066, 0 5px 0 #2c4a21', 200);
+                
+            } catch (error) {
+                console.warn('Error obteniendo IP local:', error);
+                ipElement.style.opacity = '1';
+                ipElement.textContent = '❌ NO DETECTADA';
+                ipElement.style.fontSize = '2.2rem';
+                
+                // Mostrar mensaje alternativo con sugerencia
+                const note = document.querySelector('.small-note');
+                note.innerHTML = `⚠️ No se pudo obtener IP local.<br> 
+                                  Asegúrate de no estar en modo incógnito con WebRTC bloqueado,<br>
+                                  o prueba en otro navegador (Chrome/Edge/Firefox).<br>
+                                  <span style="color:#ffb07c;">(Para el juego de tanques, necesitas IP real de LAN)</span>`;
+            }
+        }
+
+        // Iniciar detección al cargar
+        window.addEventListener('load', () => {
+            refreshIPDisplay();
+        });
+
+        // Botón de refresco
+        refreshButton.addEventListener('click', () => {
+            refreshIPDisplay();
+        });
+
+        // Si el navegador no soporta RTCPeerConnection
+        if (typeof RTCPeerConnection === 'undefined') {
+            ipElement.textContent = '⛔ WebRTC no soportado';
+            document.querySelector('.small-note').innerHTML = 'Tu navegador no permite obtener IP local. Usa Chrome/Firefox/Edge actualizado.';
+            refreshButton.disabled = true;
+        }
+
+        // Opcional: Detectar si se usa VPN/proxy (aunque la IP local sigue siendo la de la máquina)
+    })();
+</script>
+</body>
+</html>
