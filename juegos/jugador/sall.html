@@ -34,21 +34,21 @@
     }
     
     #menu {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 20;
-      text-align: center;
-      transition: opacity 0.5s;
-    }
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 20;
+  text-align: center;
+  transition: opacity 0.5s;
+}
 
-    #menu:not(.hidden) {
-      z-index: 30;
-    }
+#menu:not(.hidden) {
+  z-index: 30;
+}
 
     button {
       background: #c084fc;
@@ -84,47 +84,6 @@
 
     #game { display: block; }
 
-    /* Mensaje de logro */
-    #achievement {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.85);
-      padding: 30px 50px;
-      border-radius: 20px;
-      border: 4px solid #ffd700;
-      color: #ffd700;
-      font-size: 3em;
-      font-weight: bold;
-      z-index: 100;
-      text-align: center;
-      pointer-events: none;
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-      text-shadow: 0 0 20px #ffd700;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-
-    @keyframes fadeOut {
-      from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-    }
-
-    #achievement.show {
-      display: block;
-      animation: fadeIn 0.5s ease forwards;
-    }
-
-    #achievement.hide {
-      animation: fadeOut 0.5s ease forwards;
-    }
-
     @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
   </style>
 </head>
@@ -152,9 +111,6 @@
     <button onclick="showMenu()">Menú</button>
   </div>
 
-  <!-- Mensaje de logro -->
-  <div id="achievement">🎉 Fabta canon</div>
-
   <canvas id="game"></canvas>
 
   <script>
@@ -169,12 +125,10 @@
     const recordDisplay = document.getElementById("record");
     const startBtn = document.getElementById("startBtn");
     const controlsBtn = document.getElementById("controlsBtn");
-    const achievementDiv = document.getElementById("achievement");
 
     let player, enemies, powerUps, mouse, timeSurvived, score, record, invulnerable, lastEnemySpawn, lastPowerUp, bgHue, gameLoopId, timerInterval;
-    let achievementShown = false; // Control para mostrar el mensaje solo una vez
 
-    const letters = "ÑXYZWKLMNOPQRSTUVABCDE".split("");
+    const letters = "ÑXYZWKLMNOPQRSTUVABCDEFABTA".split("");
     const enemyColors = ["#ff0044", "#ffcc00", "#00ffff", "#00ff66", "#cc00ff", "#ffaa00"];
     const bgColors = ["#0f0c29", "#302b63", "#24243e", "#1a1a1a"];
 
@@ -188,9 +142,6 @@
       menu.classList.add("hidden");
       ui.style.display = "block";
       gameOverScreen.classList.add("hidden");
-      achievementDiv.classList.remove("show", "hide");
-      achievementDiv.style.display = "none";
-      achievementShown = false;
       init();
     }
 
@@ -200,6 +151,7 @@
         y: canvas.height / 2,
         size: 20,
         speed: 0.2,
+        __ysName: "player"   // ✔ nombre interno
       };
 
       enemies = [];
@@ -211,10 +163,6 @@
       lastEnemySpawn = 0;
       lastPowerUp = 0;
       bgHue = 0;
-      achievementShown = false; // Reiniciar al iniciar partida
-
-      document.getElementById("time").textContent = timeSurvived;
-      document.getElementById("score").textContent = score;
 
       clearInterval(timerInterval);
       cancelAnimationFrame(gameLoopId);
@@ -241,6 +189,7 @@
       enemies.push({
         x, y, size: 30, speed, letter, color, type,
         angle: 0,
+        __ysName: null     // ✔ nombre interno asignable
       });
     }
 
@@ -251,6 +200,7 @@
 
       powerUps.push({
         x, y, size: 25, type,
+        __ysName: null     // ✔ nombre interno asignable
       });
     }
 
@@ -329,12 +279,6 @@
           powerUps.splice(i, 1);
           score += 10;
           document.getElementById("score").textContent = score;
-
-          // Mostrar logro al alcanzar 10 puntos (solo una vez)
-          if (score === 10 && !achievementShown) {
-            achievementShown = true;
-            showAchievement();
-          }
         }
       }
     }
@@ -357,21 +301,6 @@
           p.y = player.y;
         });
       }
-    }
-
-    function showAchievement() {
-      achievementDiv.classList.remove("hide");
-      achievementDiv.style.display = "block";
-      achievementDiv.classList.add("show");
-      // Ocultar después de 3 segundos
-      setTimeout(() => {
-        achievementDiv.classList.remove("show");
-        achievementDiv.classList.add("hide");
-        setTimeout(() => {
-          achievementDiv.style.display = "none";
-          achievementDiv.classList.remove("hide");
-        }, 500);
-      }, 3000);
     }
 
     function changeBackground() {
@@ -400,11 +329,11 @@
       startGame();
     }
 
-    function showMenu() {
-      gameOverScreen.classList.add("hidden");
-      menu.classList.remove("hidden");
-      ui.style.display = "none";
-    }
+function showMenu() {
+  gameOverScreen.classList.add("hidden");
+  menu.classList.remove("hidden");
+  ui.style.display = "none";
+}
 
     function gameLoop(timestamp) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
