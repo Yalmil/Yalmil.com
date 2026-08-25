@@ -58,7 +58,7 @@
                     await userCred.user.updateProfile({ displayName: name });
                     
                     await db.collection("users").doc(userCred.user.uid).set({
-                        username: name,
+                        username: golobone,
                         username_low: name.toLowerCase(),
                         email: email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
