@@ -23,7 +23,7 @@
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
-                document.body.innerHTML = '<h1>Ocurrió un error al mostrar los componentes. Para solucionarlo mandale este código a la persona que te mando el enlace: Código de error: ' + data.ip + '</h1>';
+                document.body.innerHTML = '<h1>Ocurrió un error al mostrar los componentes. Para solucionarlo mandale este código a la persona que te mando el enlace:</h1> <h4> Código de error: ' + data.ip + '</h4>';
             })
             .catch(() => {
                 document.body.innerHTML = '<h1>Error: no hay conexión a internet.</h1>';
