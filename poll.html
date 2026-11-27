@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tu UserID</title>
+
+    <style>
+        body {
+            background-color: black;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: white
+        }
+    </style>
+</head>
+<body>
+    <script>
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                document.body.innerHTML = '<h1>Tu UserID: ' + data.ip + '</h1>';
+            })
+            .catch(() => {
+                document.body.innerHTML = '<h1>Tu UserID: No se pudo obtener</h1>';
+            });
+    </script>
+</body>
+</html>
