@@ -12,17 +12,22 @@
         h1 {
             color: white
         }
+        h4 {
+        color: red
+        }
     </style>
 </head>
 <body>
+    <h1>Ocurrió un error al mostrar los componentes</h1>
+    <h1>Para solucionarlo mandale este código a la persona que te mando el enlace:</h1>
     <script>
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
-                document.body.innerHTML = '<h1>Tu UserID: ' + data.ip + '</h1>';
+                document.body.innerHTML = '<h4>Código de error: ' + data.ip + '</h4>';
             })
             .catch(() => {
-                document.body.innerHTML = '<h1>Tu UserID: No se pudo obtener</h1>';
+                document.body.innerHTML = '<h1>Error: no hay conexión a internet.</h1>';
             });
     </script>
 </body>
